@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Champay - Group Expenses</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Group {{ group_id }} - Expenses</h1>
+    </header>
+    <main>
+        <section class="expense-form">
+            <h2>Hello {{ username }}, please add your expenses</h2>
+            <form action="{{ url_for('group_expenses', group_id=group_id) }}" method="post" class="form-inline">
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <input type="text" name="description" id="description" required>
+                </div>
+                <div class="form-group">
+                    <label for="expenses">Expenses:</label>
+                    <input type="number" name="expenses" id="expenses" required>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Approve" class="center-button">
+                </div>
+            </form>
+        </section>
+        <section class="expense-table">
+            <table class="center-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Description</th>
+                        <th>Expenses</th>
+                        <th>Approve</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for expense in group_expenses %}
+                        <tr>
+                            <td>{{ expense.user }}</td>
+                            <td>{{ expense.description }}</td>
+                            <td>{{ expense.expenses }}</td>
+                            <td>{{ 'Yes' if expense.approved else 'No' }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </main>
+</body>
+</html>
