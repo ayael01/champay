@@ -1,5 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
+from werkzeug.security import check_password_hash
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate  # Import Flask-Migrate
+
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Replace with your own secret key
@@ -8,11 +11,13 @@ app.secret_key = 'your_secret_key'  # Replace with your own secret key
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://aya_el01:ccaa00@localhost/champay_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)  # Initialize Flask-Migrate after db
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
     password = db.Column(db.String(128))
+    email = db.Column(db.String(120), index=True, unique=True)
 
 class Group(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -33,19 +38,20 @@ class Expense(db.Model):
 
 @app.route("/", methods=["GET", "POST"])
 def homepage():
+    session.pop('_flashes', None)  # Ensure old flashes are removed
     if request.method == "POST":
         email = request.form["email"]
         password = request.form["password"]
-
-        # Validate and process the login credentials here
-        if email == "ayael01@gmail.com" and password == "123456":
-            session["username"] = "Eli"  # Set the username in the session
-            session["message"] = {"category": "success", "text": "Login successful!"}
+        user = User.query.filter_by(email=email).first()
+        if user and check_password_hash(user.password, password):
+            session["username"] = user.username
+            session["email"] = user.email
+            flash("Login successful!", "success")
             return redirect(url_for("dashboard"))
         else:
-            session["message"] = {"category": "error", "text": "Invalid email or password."}
-
+            flash("Unknown user or incorrect password.", "error")
     return render_template("homepage.html")
+
 
 @app.route("/dashboard")
 def dashboard():
@@ -82,6 +88,12 @@ def group_expenses(group_id):
     ]
 
     return render_template("group_expenses.html", group_id=group_id, group_expenses=group_expenses, username=username)
+
+
+@app.after_request
+def add_header(response):
+    response.cache_control.no_store = True
+    return response
 
 
 if __name__ == "__main__":

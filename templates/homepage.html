@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Champay</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     <header>
@@ -21,6 +21,17 @@
         </section>
         <section>
             <h2>Login</h2>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        {% if category == 'error' %}
+                            <p class="alert">{{ message }}</p>
+                        {% elif category == 'success' %}
+                            <p class="success">{{ message }}</p>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
             <form action="/" method="post" id="login-form">
                 <label for="email">Email:</label>
                 <input type="email" name="email" id="email" required>

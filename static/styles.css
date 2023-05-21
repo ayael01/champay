@@ -195,5 +195,24 @@ input[type="submit"]:hover {
     color: black;
 }
 
+.error-message {
+    color: red;
+    text-align: center;
+}
+
+.alert {
+    color: red;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.success {
+    color: green;
+    text-align: center;
+    margin-top: 20px;
+}
+
+
+
 
 
