@@ -55,14 +55,19 @@ def homepage():
     return render_template("homepage.html")
 
 
-@app.route("/dashboard")
+@app.route("/dashboard", methods=["GET", "POST"])
 def dashboard():
     message = session.pop("message", None)
 
     # Fetch all groups from the database
     groups = Group.query.all()
 
+    if request.method == "POST":
+        selected_group_id = int(request.form["group"])
+        return redirect(url_for("group_expenses", group_id=selected_group_id))
+
     return render_template("dashboard.html", message=message, groups=groups)
+
 
 
 @app.route("/group_expenses/<int:group_id>", methods=["GET", "POST"])

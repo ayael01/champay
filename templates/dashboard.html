@@ -3,30 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Champay Dashboard</title>
+    <title>Champay - Dashboard</title>
     <link rel="stylesheet" href="/static/styles.css">
-    <script>
-        function updateFormAction() {
-            var group_id = document.getElementById("group_id").value;
-            var form = document.getElementById("group_form");
-            form.action = group_id;
-        }
-    </script>
 </head>
 <body>
     <header>
-        <h1 class="center-title">Champay Dashboard</h1>
+        <h1>Dashboard</h1>
     </header>
-    <main class="dashboard-main">
-        <section class="group-selection-section">
-            <h2 class="center-title">Choose Event Expenses</h2>
-            <form id="group_form" method="get" class="group-form">
-                <select name="group_id" id="group_id" onchange="updateFormAction()" class="group-dropdown">
-                    {% for group in groups %}
-                    <option value="{{ url_for('group_expenses', group_id=group.id) }}">{{ group.name }}</option>
-                    {% endfor %}
-                </select>
-                <input type="submit" class="go-button" value="Go">
+    <main>
+        {% with message=message %}
+            {% include 'flash_messages.html' %}
+        {% endwith %}
+        <section class="group-form">
+            <h2>Select a Group</h2>
+            <form action="{{ url_for('dashboard') }}" method="post">
+                <div class="form-group">
+                    <label for="group">Group:</label>
+                    <select name="group" id="group">
+                        {% for group in groups %}
+                            <option value="{{ group.id }}">{{ group.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Go" class="center-button">
+                </div>
             </form>
         </section>
     </main>
