@@ -69,14 +69,25 @@ def group_expenses(group_id):
     user = User.query.filter_by(username=username).first()
 
     if request.method == "POST":
-        # Get the description, and expenses from the submitted form
         description = request.form["description"]
         expenses = request.form["expenses"]
 
-        # Validate and process the expenses here
-        # ...
+        # Check if the user already has expenses for the given group
+        expense = Expense.query.filter_by(user_id=user.id, group_id=group_id).first()
 
-        return redirect(url_for("group_expenses", group_id=group_id, username=username))
+        if expense:
+            # Update the existing expense
+            expense.description = description
+            expense.amount = expenses
+        else:
+            # Create a new expense
+            expense = Expense(description=description, amount=expenses, user_id=user.id, group_id=group_id)
+            db.session.add(expense)
+
+        db.session.commit()
+
+        flash("Expenses updated successfully!", "success")
+        return redirect(url_for("group_expenses", group_id=group_id))
 
     group_expenses = Expense.query.filter_by(group_id=group_id).all()
     group_expenses_list = []
@@ -89,6 +100,7 @@ def group_expenses(group_id):
                                     "approved": expense.approved})
 
     return render_template("group_expenses.html", group_id=group_id, group_expenses=group_expenses_list, username=username)
+
 
 
 
