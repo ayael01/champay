@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from werkzeug.security import check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate  # Import Flask-Migrate
+from datetime import datetime
 
 
 app = Flask(__name__)
@@ -35,6 +36,7 @@ class Expense(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     group_id = db.Column(db.Integer, db.ForeignKey('group.id'))
     approved = db.Column(db.Boolean, default=False)
+    last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 @app.route("/", methods=["GET", "POST"])
 def homepage():
@@ -84,6 +86,8 @@ def group_expenses(group_id):
             expense = Expense(description=description, amount=expenses, user_id=user.id, group_id=group_id)
             db.session.add(expense)
 
+        expense.last_updated = datetime.utcnow()  # Set the current time as the last updated time
+
         db.session.commit()
 
         flash("Expenses updated successfully!", "success")
@@ -97,9 +101,10 @@ def group_expenses(group_id):
         group_expenses_list.append({"user": expense_owner.username, 
                                     "description": expense.description, 
                                     "expenses": expense.amount, 
-                                    "approved": expense.approved})
+                                    "last_updated": expense.last_updated})
 
     return render_template("group_expenses.html", group_id=group_id, group_expenses=group_expenses_list, username=username)
+
 
 
 

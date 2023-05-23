@@ -34,7 +34,7 @@
                         <th>User</th>
                         <th>Description</th>
                         <th>Expenses</th>
-                        <th>Approve</th>
+                        <th>Last Updated</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -43,7 +43,11 @@
                             <td>{{ expense.user }}</td>
                             <td>{{ expense.description }}</td>
                             <td>{{ expense.expenses }}</td>
-                            <td>{{ 'Yes' if expense.approved else 'No' }}</td>
+                            <td>
+                                {% if expense.last_updated %}
+                                    {{ expense.last_updated.strftime("%Y-%m-%d %H:%M:%S") }}
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>
