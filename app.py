@@ -40,7 +40,7 @@ class Expense(db.Model):
 
 @app.route("/", methods=["GET", "POST"])
 def homepage():
-    session.pop('_flashes', None)  # Ensure old flashes are removed
+    session.pop('_flashes', None)  # Clear flashed messages
     if request.method == "POST":
         email = request.form["email"]
         password = request.form["password"]
@@ -48,11 +48,11 @@ def homepage():
         if user and check_password_hash(user.password, password):
             session["username"] = user.username
             session["email"] = user.email
-            flash("Login successful!", "success")
             return redirect(url_for("dashboard"))
         else:
             flash("Unknown user or incorrect password.", "error")
     return render_template("homepage.html")
+
 
 
 @app.route("/dashboard", methods=["GET", "POST"])
