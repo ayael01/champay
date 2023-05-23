@@ -15,18 +15,18 @@
             <h2>Hello {{ username }}, please add your expenses</h2>
             <form action="{{ url_for('group_expenses', group_id=group.id) }}" method="post" class="form-inline">
                 <div class="form-group">
-                    <label for="description">Description:</label>
-                    <input type="text" name="description" id="description" required>
+                    <label for="expenses">How much:</label>
+                    <input type="number" name="expenses" id="expenses" required>
                 </div>
                 <div class="form-group">
-                    <label for="expenses">Expenses:</label>
-                    <input type="number" name="expenses" id="expenses" required>
+                    <label for="description">For what:</label>
+                    <input type="text" name="description" id="description" required>
                 </div>
                 <div class="form-group">
                     <input type="submit" value="Approve" class="center-button">
                 </div>
             </form>
-        </section>
+        </section>        
         <section class="expense-table">
             <table class="center-table">
                 <thead>

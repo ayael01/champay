@@ -8,17 +8,17 @@
 </head>
 <body>
     <header>
-        <h1>Dashboard</h1>
+        <h1>Champay Event Selection</h1>
     </header>
     <main>
         {% with message=message %}
             {% include 'flash_messages.html' %}
         {% endwith %}
         <section class="group-form">
-            <h2>Select a Group</h2>
+            <h2>Select an event to report expenses</h2>
             <form action="{{ url_for('dashboard') }}" method="post">
                 <div class="form-group">
-                    <label for="group">Group:</label>
+                    <label for="group">Events:</label>
                     <select name="group" id="group">
                         {% for group in groups %}
                             <option value="{{ group.id }}">{{ group.name }}</option>
