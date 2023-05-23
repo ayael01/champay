@@ -67,26 +67,26 @@ def dashboard():
 
 @app.route("/group_expenses/<int:group_id>", methods=["GET", "POST"])
 def group_expenses(group_id):
-    username = session.get('username', 'Unknown')  # If 'username' doesn't exist in the session, 'Unknown' will be used
+    username = session.get('username', 'Unknown')
     user = User.query.filter_by(username=username).first()
+
+    # Retrieve the group information by ID
+    group = Group.query.get(group_id)
 
     if request.method == "POST":
         description = request.form["description"]
         expenses = request.form["expenses"]
 
-        # Check if the user already has expenses for the given group
         expense = Expense.query.filter_by(user_id=user.id, group_id=group_id).first()
 
         if expense:
-            # Update the existing expense
             expense.description = description
             expense.amount = expenses
         else:
-            # Create a new expense
             expense = Expense(description=description, amount=expenses, user_id=user.id, group_id=group_id)
             db.session.add(expense)
 
-        expense.last_updated = datetime.utcnow()  # Set the current time as the last updated time
+        expense.last_updated = datetime.utcnow()
 
         db.session.commit()
 
@@ -103,11 +103,7 @@ def group_expenses(group_id):
                                     "expenses": expense.amount, 
                                     "last_updated": expense.last_updated})
 
-    return render_template("group_expenses.html", group_id=group_id, group_expenses=group_expenses_list, username=username)
-
-
-
-
+    return render_template("group_expenses.html", group=group, group_expenses=group_expenses_list, username=username)
 
 @app.after_request
 def add_header(response):

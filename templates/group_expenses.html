@@ -8,12 +8,12 @@
 </head>
 <body>
     <header>
-        <h1>Group {{ group_id }} - Expenses</h1>
+        <h1>{{ group.name }} - Expenses</h1>
     </header>
     <main>
         <section class="expense-form">
             <h2>Hello {{ username }}, please add your expenses</h2>
-            <form action="{{ url_for('group_expenses', group_id=group_id) }}" method="post" class="form-inline">
+            <form action="{{ url_for('group_expenses', group_id=group.id) }}" method="post" class="form-inline">
                 <div class="form-group">
                     <label for="description">Description:</label>
                     <input type="text" name="description" id="description" required>
