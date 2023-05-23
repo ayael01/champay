@@ -56,13 +56,9 @@ def homepage():
 @app.route("/dashboard")
 def dashboard():
     message = session.pop("message", None)
-    
-    # Dummy data
-    groups = [
-        {'id': 1, 'name': "Group 1"},
-        {'id': 2, 'name': "Group 2"},
-        {'id': 3, 'name': "Group 3"},
-    ]
+
+    # Fetch all groups from the database
+    groups = Group.query.all()
 
     return render_template("dashboard.html", message=message, groups=groups)
 
