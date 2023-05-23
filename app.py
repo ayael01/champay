@@ -66,6 +66,8 @@ def dashboard():
 @app.route("/group_expenses/<int:group_id>", methods=["GET", "POST"])
 def group_expenses(group_id):
     username = session.get('username', 'Unknown')  # If 'username' doesn't exist in the session, 'Unknown' will be used
+    user = User.query.filter_by(username=username).first()
+
     if request.method == "POST":
         # Get the description, and expenses from the submitted form
         description = request.form["description"]
@@ -76,14 +78,18 @@ def group_expenses(group_id):
 
         return redirect(url_for("group_expenses", group_id=group_id, username=username))
 
-    # Dummy data
-    group_expenses = [
-        {"user": "User 1", "description": "Food", "expenses": 20.00, "approved": False},
-        {"user": "User 2", "description": "Drinks", "expenses": 30.00, "approved": False},
-        {"user": "User 3", "description": "Snacks", "expenses": 10.00, "approved": False},
-    ]
+    group_expenses = Expense.query.filter_by(group_id=group_id).all()
+    group_expenses_list = []
 
-    return render_template("group_expenses.html", group_id=group_id, group_expenses=group_expenses, username=username)
+    for expense in group_expenses:
+        expense_owner = User.query.filter_by(id=expense.user_id).first()
+        group_expenses_list.append({"user": expense_owner.username, 
+                                    "description": expense.description, 
+                                    "expenses": expense.amount, 
+                                    "approved": expense.approved})
+
+    return render_template("group_expenses.html", group_id=group_id, group_expenses=group_expenses_list, username=username)
+
 
 
 @app.after_request

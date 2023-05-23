@@ -7,8 +7,8 @@ hashed_password = generate_password_hash('123456', method='sha256')
 
 with app.app_context():   # Create an application context
     # Create a new user
-    new_user = User(username='Eli', email='ayael01@gmail.com', password=hashed_password)
+    new_user = User(username='Michael', email='michael@gmail.com', password=hashed_password)
     db.session.add(new_user)
     db.session.commit()
 
-print("User added successfully!")
+print("User Michael added successfully!")
