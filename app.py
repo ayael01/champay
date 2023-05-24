@@ -70,39 +70,52 @@ def dashboard():
 
 @app.route("/group_expenses/<int:group_id>", methods=["GET", "POST"])
 def group_expenses(group_id):
-
     username = session.get('username', 'Unknown')
     user = User.query.filter_by(username=username).first()
-
-    # Retrieve the group information by ID
     group = Group.query.get(group_id)
 
     if request.method == "POST":
         description = request.form["description"]
         expenses = request.form["expenses"]
+
+        # Check if the user already has an expense in the group
         expense = Expense.query.filter_by(user_id=user.id, group_id=group_id).first()
+
         if expense:
+            # If an expense exists, update its description and amount
             expense.description = description
             expense.amount = expenses
         else:
-            expense = Expense(description=description, amount=expenses, user_id=user.id, group_id=group_id)
+            # If no expense exists, create a new one
+            expense = Expense(
+                description=description,
+                amount=expenses,
+                user_id=user.id,
+                group_id=group_id
+            )
             db.session.add(expense)
+
         expense.last_updated = datetime.utcnow()
         db.session.commit()
+
         flash("Expenses updated successfully!", "success")
         return redirect(url_for("group_expenses", group_id=group_id))
-    
+
     group_expenses = Expense.query.filter_by(group_id=group_id).all()
     group_expenses_list = []
 
     for expense in group_expenses:
         expense_owner = User.query.filter_by(id=expense.user_id).first()
-        group_expenses_list.append({"user": expense_owner.username, 
-                                    "description": expense.description, 
-                                    "expenses": expense.amount, 
-                                    "last_updated": expense.last_updated})
-        
+        group_expenses_list.append({
+            "user": expense_owner.username,
+            "description": expense.description,
+            "expenses": expense.amount,
+            "last_updated": expense.last_updated
+        })
+
     return render_template("group_expenses.html", group=group, group_expenses=group_expenses_list, username=username)
+
+
 
 @app.route("/group_report/<int:group_id>")
 def group_report(group_id):

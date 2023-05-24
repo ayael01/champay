@@ -3,7 +3,7 @@ from app import GroupMember
 
 with app.app_context():
     # Create group members
-    group_member1 = GroupMember(user_id=2, group_id=2)
+    group_member1 = GroupMember(user_id=4, group_id=2)
     
     # Add group members to the session
     db.session.add(group_member1)
