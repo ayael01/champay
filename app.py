@@ -158,11 +158,12 @@ def generate_group_report(group, group_expenses):
 
     for expense in group_expenses:
         expense_owner = User.query.filter_by(id=expense.user_id).first()
+        formatted_last_updated = expense.last_updated.strftime('%Y-%m-%d %H:%M')
         group_expenses_list.append({
             "user": expense_owner,
             "description": expense.description,
             "amount": expense.amount,  # Include amount directly
-            "last_updated": expense.last_updated
+            "last_updated": formatted_last_updated
         })
 
 

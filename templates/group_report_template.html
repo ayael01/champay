@@ -24,7 +24,7 @@
             <tr>
                 <td>{{ expense.user.username }}</td>
                 <td>{{ expense.description }}</td>
-                <td>{{ expense.amount }}</td>
+                <td>{{ expense.amount|int }} NIS</td>
                 <td>{{ expense.last_updated }}</td>
             </tr>
             {% endfor %}
@@ -32,13 +32,13 @@
     </table>
 
     <h2>Summary</h2>
-    <p>Total Expenses: {{ total_expenses }}</p>
-    <p>Share per member: {{ share }}</p>
+    <p>Total Expenses: {{ total_expenses|int }} NIS</p>
+    <p>Share per member: {{ share|int }} NIS</p>
 
     <h2>Transfers</h2>
     <ul>
         {% for debtor, creditor, amount in transfers %}
-        <li>{{ debtor }} should transfer {{ amount }} to {{ creditor }}</li>
+        <li>{{ debtor }} should transfer {{ amount|int }} NIS to {{ creditor }}</li>
         {% endfor %}
     </ul>
 </body>
