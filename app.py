@@ -192,6 +192,10 @@ def calculate_transfers(group_expenses, share):
         debtor = min(balances, key=balances.get)
         creditor = max(balances, key=balances.get)
         amount = min(abs(balances[debtor]), balances[creditor])
+        
+        if amount == 0:
+            break  # Skip transfers with transfer amount of 0.0
+
         balances[debtor] += amount
         balances[creditor] -= amount
 
@@ -201,6 +205,7 @@ def calculate_transfers(group_expenses, share):
         transfers.append((debtor, creditor, amount))
 
     return transfers
+
 
 
 
