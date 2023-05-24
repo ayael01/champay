@@ -1,18 +1,15 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from werkzeug.security import check_password_hash
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate  # Import Flask-Migrate
+from flask_migrate import Migrate
 from datetime import datetime
 
-
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Replace with your own secret key
-
-# Add these lines
+app.secret_key = 'your_secret_key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://aya_el01:ccaa00@localhost/champay_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-migrate = Migrate(app, db)  # Initialize Flask-Migrate after db
+migrate = Migrate(app, db)
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -38,9 +35,12 @@ class Expense(db.Model):
     approved = db.Column(db.Boolean, default=False)
     last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+
 @app.route("/", methods=["GET", "POST"])
 def homepage():
-    session.pop('_flashes', None)  # Clear flashed messages
+
+    session.pop('_flashes', None)   # Clear flashed messages
+
     if request.method == "POST":
         email = request.form["email"]
         password = request.form["password"]
@@ -51,12 +51,12 @@ def homepage():
             return redirect(url_for("dashboard"))
         else:
             flash("Unknown user or incorrect password.", "error")
+
     return render_template("homepage.html")
-
-
 
 @app.route("/dashboard", methods=["GET", "POST"])
 def dashboard():
+
     message = session.pop("message", None)
 
     # Fetch all groups from the database
@@ -65,13 +65,12 @@ def dashboard():
     if request.method == "POST":
         selected_group_id = int(request.form["group"])
         return redirect(url_for("group_expenses", group_id=selected_group_id))
-
+    
     return render_template("dashboard.html", message=message, groups=groups)
-
-
 
 @app.route("/group_expenses/<int:group_id>", methods=["GET", "POST"])
 def group_expenses(group_id):
+
     username = session.get('username', 'Unknown')
     user = User.query.filter_by(username=username).first()
 
@@ -81,23 +80,18 @@ def group_expenses(group_id):
     if request.method == "POST":
         description = request.form["description"]
         expenses = request.form["expenses"]
-
         expense = Expense.query.filter_by(user_id=user.id, group_id=group_id).first()
-
         if expense:
             expense.description = description
             expense.amount = expenses
         else:
             expense = Expense(description=description, amount=expenses, user_id=user.id, group_id=group_id)
             db.session.add(expense)
-
         expense.last_updated = datetime.utcnow()
-
         db.session.commit()
-
         flash("Expenses updated successfully!", "success")
         return redirect(url_for("group_expenses", group_id=group_id))
-
+    
     group_expenses = Expense.query.filter_by(group_id=group_id).all()
     group_expenses_list = []
 
@@ -107,16 +101,23 @@ def group_expenses(group_id):
                                     "description": expense.description, 
                                     "expenses": expense.amount, 
                                     "last_updated": expense.last_updated})
-
+        
     return render_template("group_expenses.html", group=group, group_expenses=group_expenses_list, username=username)
+
+@app.route("/group_report/<int:group_id>")
+def group_report(group_id):
+    # Generate the group report
+    report = "This is a sample group report."
+
+    return render_template("group_report.html", group_id=group_id, report=report)
+
 
 @app.after_request
 def add_header(response):
     response.cache_control.no_store = True
     return response
 
-
 if __name__ == "__main__":
     with app.app_context():
-        db.create_all()  # Create database tables
+        db.create_all() # Create database tables
     app.run(debug=True)

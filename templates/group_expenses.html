@@ -9,6 +9,7 @@
 <body>
     <header>
         <h1>{{ group.name }} expenses</h1>
+        <a href="{{ url_for('group_report', group_id=group.id) }}" class="report-button">Generate Report</a>
     </header>
     <main>
         <section class="expense-form">
