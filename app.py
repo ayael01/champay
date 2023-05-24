@@ -3,6 +3,7 @@ from werkzeug.security import check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from datetime import datetime
+from flask import render_template_string
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -34,6 +35,8 @@ class Expense(db.Model):
     group_id = db.Column(db.Integer, db.ForeignKey('group.id'))
     approved = db.Column(db.Boolean, default=False)
     last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    user = db.relationship('User', backref='expenses')
+
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -137,7 +140,8 @@ def group_report(group_id):
     # Generate the report
     report = generate_group_report(group, group_expenses)
 
-    return render_template("group_report.html", group_id=group_id, report=report)
+    return report
+
 
 def generate_group_report(group, group_expenses):
     # Retrieve the group members
@@ -150,24 +154,27 @@ def generate_group_report(group, group_expenses):
     total_expenses = sum(expense.amount for expense in group_expenses)
     share = total_expenses / num_members
 
-    report = f"Group: {group.name}\n\n"
-    report += "Expenses:\n"
+    group_expenses_list = []
 
     for expense in group_expenses:
-        user = User.query.get(expense.user_id)
-        report += f"- {user.username}: {expense.amount}\n"
+        expense_owner = User.query.filter_by(id=expense.user_id).first()
+        group_expenses_list.append({
+            "user": expense_owner.username,
+            "description": expense.description,
+            "expenses": expense.amount,
+            "last_updated": expense.last_updated
+        })
 
-    report += f"\nTotal Expenses: {total_expenses}\n"
-    report += f"Share per member: {share}\n\n"
+    report_data = {
+        'group_name': group.name,
+        'group_expenses': group_expenses_list,
+        'total_expenses': total_expenses,
+        'share': share,
+        'transfers': calculate_transfers(group_expenses, share)
+    }
 
-    # Calculate the transfers and append to the report
-    transfers = calculate_transfers(group_expenses, share)
-    report += "Transfers:\n"
+    return render_template('group_report_template.html', **report_data)
 
-    for debtor, creditor, amount in transfers:
-        report += f"- {debtor} should transfer {amount} to {creditor}\n"
-
-    return report
 
 
 def calculate_transfers(group_expenses, share):
