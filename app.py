@@ -98,6 +98,15 @@ def group_expenses(group_id):
         expense.last_updated = datetime.utcnow()
         db.session.commit()
 
+        # Check if the user is already a member of the group
+        group_member = GroupMember.query.filter_by(user_id=user.id, group_id=group_id).first()
+
+        if not group_member:
+            # If the user is not a member, create a new group member object
+            group_member = GroupMember(user_id=user.id, group_id=group_id)
+            db.session.add(group_member)
+            db.session.commit()
+
         flash("Expenses updated successfully!", "success")
         return redirect(url_for("group_expenses", group_id=group_id))
 
