@@ -159,7 +159,7 @@ def generate_group_report(group, group_expenses):
     for expense in group_expenses:
         expense_owner = User.query.filter_by(id=expense.user_id).first()
         group_expenses_list.append({
-            "user": expense_owner.username,
+            "user": expense_owner,
             "description": expense.description,
             "expenses": expense.amount,
             "last_updated": expense.last_updated
