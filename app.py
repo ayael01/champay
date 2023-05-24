@@ -106,10 +106,73 @@ def group_expenses(group_id):
 
 @app.route("/group_report/<int:group_id>")
 def group_report(group_id):
-    # Generate the group report
-    report = "This is a sample group report."
+    # Retrieve the group information by ID
+    group = Group.query.get(group_id)
+
+    # Fetch the group expenses from the database
+    group_expenses = Expense.query.filter_by(group_id=group_id).all()
+
+    # Generate the report
+    report = generate_group_report(group, group_expenses)
 
     return render_template("group_report.html", group_id=group_id, report=report)
+
+def generate_group_report(group, group_expenses):
+    # Retrieve the group members
+    group_members = GroupMember.query.filter_by(group_id=group.id).all()
+    num_members = len(group_members)
+
+    if num_members == 0:
+        return "No members in the group."
+
+    total_expenses = sum(expense.amount for expense in group_expenses)
+    share = total_expenses / num_members
+
+    report = f"Group: {group.name}\n\n"
+    report += "Expenses:\n"
+
+    for expense in group_expenses:
+        user = User.query.get(expense.user_id)
+        report += f"- {user.username}: {expense.amount}\n"
+
+    report += f"\nTotal Expenses: {total_expenses}\n"
+    report += f"Share per member: {share}\n\n"
+
+    # Calculate the transfers and append to the report
+    transfers = calculate_transfers(group_expenses, share)
+    report += "Transfers:\n"
+
+    for debtor, creditor, amount in transfers:
+        report += f"- {debtor} should transfer {amount} to {creditor}\n"
+
+    return report
+
+
+def calculate_transfers(group_expenses, share):
+    balances = {}
+
+    for expense in group_expenses:
+        user = User.query.get(expense.user_id)
+        if user.username not in balances:
+            balances[user.username] = 0
+        balances[user.username] += expense.amount - share
+
+    transfers = []
+
+    while len(balances) > 1:
+        debtor = min(balances, key=balances.get)
+        creditor = max(balances, key=balances.get)
+        amount = min(abs(balances[debtor]), balances[creditor])
+        balances[debtor] += amount
+        balances[creditor] -= amount
+
+        if balances[creditor] == 0:
+            del balances[creditor]
+
+        transfers.append((debtor, creditor, amount))
+
+    return transfers
+
 
 
 @app.after_request
