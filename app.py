@@ -161,9 +161,11 @@ def generate_group_report(group, group_expenses):
         group_expenses_list.append({
             "user": expense_owner,
             "description": expense.description,
-            "expenses": expense.amount,
+            "amount": expense.amount,  # Include amount directly
             "last_updated": expense.last_updated
         })
+
+
 
     report_data = {
         'group_name': group.name,
