@@ -1,33 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Champay - Group Expenses</title>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
+
 <body>
     <header>
         <h1>{{ group.name }} expenses</h1>
-        <a href="{{ url_for('group_report', group_id=group.id) }}" class="report-button">Generate Report</a>
+        <div class="top-right">
+            <a href="{{ url_for('group_report', group_id=group.id) }}" class="report-button">Generate Report</a>
+        </div>
     </header>
     <main>
         <section class="expense-form">
-            <h2>Hello {{ username }}, please add your expenses</h2>
-            <form action="{{ url_for('group_expenses', group_id=group.id) }}" method="post" class="form-inline">
-                <div class="form-group">
-                    <label for="expenses">How much:</label>
-                    <input type="number" name="expenses" id="expenses" required>
-                </div>
-                <div class="form-group">
-                    <label for="description">For what:</label>
-                    <input type="text" name="description" id="description" required>
-                </div>
-                <div class="form-group">
-                    <input type="submit" value="Approve" class="center-button">
-                </div>
-            </form>
-        </section>        
+            <div class="expense-form-left">
+                <h2>Hello {{ username }}, please add your expenses</h2>
+                <form action="{{ url_for('group_expenses', group_id=group.id) }}" method="post" class="form-inline">
+                    <div class="form-group">
+                        <label for="expenses">How much:</label>
+                        <input type="number" name="expenses" id="expenses" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">For what:</label>
+                        <input type="text" name="description" id="description" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" value="Approve" class="center-button">
+                    </div>
+                </form>
+            </div>
+        </section>
         <section class="expense-table">
             <table class="center-table">
                 <thead>
@@ -40,20 +46,21 @@
                 </thead>
                 <tbody>
                     {% for expense in group_expenses %}
-                        <tr>
-                            <td>{{ expense.user }}</td>
-                            <td>{{ expense.description }}</td>
-                            <td>{{ expense.expenses }}</td>
-                            <td>
-                                {% if expense.last_updated %}
-                                    {{ expense.last_updated.strftime("%Y-%m-%d %H:%M:%S") }}
-                                {% endif %}
-                            </td>
-                        </tr>
+                    <tr>
+                        <td>{{ expense.user }}</td>
+                        <td>{{ expense.description }}</td>
+                        <td>{{ expense.expenses }}</td>
+                        <td>
+                            {% if expense.last_updated %}
+                            {{ expense.last_updated.strftime("%Y-%m-%d %H:%M:%S") }}
+                            {% endif %}
+                        </td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </section>
     </main>
 </body>
+
 </html>
