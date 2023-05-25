@@ -272,14 +272,35 @@ input[type="submit"]:hover {
 }
 
 .report-button {
-    background-color: #FF0000;
-    color: #FFFFFF;
-    padding: 10px 20px;
+    background-color: #76d61c;
+    color: #ac2525;
+    padding: 5px 10px;
     border: none;
     border-radius: 5px;
     text-decoration: none;
-    font-weight: bold;
 }
 
-
+.user-expenses {
+    display: flex;
+    align-items: center;
+  }
+  
+  .user-expenses p {
+    color: #ff0000; /* Change the color to red */
+    margin-right: 10px; /* Add some spacing between the title and the link */
+    font-weight: bold;
+    text-decoration: none;
+  }
+  
+  .generate-report-link {
+    color: #ff0000; /* Change the color to red */
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  .generate-report-link:hover {
+    text-decoration: underline;
+  }
+  
+  
 

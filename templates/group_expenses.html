@@ -10,9 +10,8 @@
 
 <body>
     <header>
-        <h1>{{ group.name }} expenses</h1>
-        <div class="top-right">
-            <a href="{{ url_for('group_report', group_id=group.id) }}" class="report-button">Generate Report</a>
+        <div>
+            <h1>{{ group.name }} expenses</h1>
         </div>
     </header>
     <main>
@@ -34,6 +33,10 @@
                 </form>
             </div>
         </section>
+        <div class="user-expenses">
+            <p>List of user expenses</p>
+            <a class="generate-report-link" href="{{ url_for('group_report', group_id=group.id) }}">Generate Report</a>
+        </div>                
         <section class="expense-table">
             <table class="center-table">
                 <thead>
