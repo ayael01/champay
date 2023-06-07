@@ -10,7 +10,10 @@
     <header>
         <h1>Champay Event Selection</h1>
         {% if username %}
-            <div class="user-info">{{ username[0] }}</div>
+            <div class="user-info" onclick="toggleDropdown()">{{ username[0] }}</div>
+            <div id="dropdown" class="dropdown-content">
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </div>
         {% endif %}
     </header>
     <main>
@@ -34,5 +37,20 @@
             </form>
         </section>
     </main>
+    <script>
+        function toggleDropdown() {
+            const dropdown = document.getElementById("dropdown");
+            dropdown.classList.toggle("show");
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.matches(".user-info")) {
+                const dropdown = document.getElementById("dropdown");
+                if (dropdown.classList.contains("show")) {
+                    dropdown.classList.remove("show");
+                }
+            }
+        };
+    </script>
 </body>
 </html>
