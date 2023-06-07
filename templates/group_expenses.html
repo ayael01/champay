@@ -12,6 +12,9 @@
     <header>
         <div>
             <h1>{{ group.name }} expenses</h1>
+            {% if username %}
+                <div class="user-info">{{ username[0] }}</div>
+            {% endif %}
         </div>
     </header>
     <main>

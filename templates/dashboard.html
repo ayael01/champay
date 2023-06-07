@@ -9,6 +9,9 @@
 <body>
     <header>
         <h1>Champay Event Selection</h1>
+        {% if username %}
+            <div class="user-info">{{ username[0] }}</div>
+        {% endif %}
     </header>
     <main>
         {% with message=message %}
