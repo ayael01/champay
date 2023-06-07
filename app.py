@@ -4,6 +4,10 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from datetime import datetime
 from flask import render_template_string
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Column, Boolean
+
+
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -17,6 +21,8 @@ class User(db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     password = db.Column(db.String(128))
     email = db.Column(db.String(120), index=True, unique=True)
+    is_logged_in = db.Column(db.Boolean, default=False)
+
 
 class Group(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -51,16 +57,43 @@ def homepage():
         if user and check_password_hash(user.password, password):
             session["username"] = user.username
             session["email"] = user.email
+
+            # Update the user's login status in the database
+            user.is_logged_in = True
+            db.session.commit()
+
             return redirect(url_for("dashboard"))
         else:
             flash("Unknown user or incorrect password.", "error")
 
     return render_template("homepage.html")
 
+@app.route("/logout")
+def logout():
+    # Retrieve the currently logged-in user
+    username = session.get("username")
+    user = User.query.filter_by(username=username).first()
+
+    if user:
+        # Update the user's login status in the database
+        user.is_logged_in = False
+        db.session.commit()
+
+    # Clear the session data
+    session.clear()
+
+    # Redirect the user to the homepage or any other desired page
+    return redirect(url_for("homepage"))
+
+
 @app.route("/dashboard", methods=["GET", "POST"])
 def dashboard():
 
     message = session.pop("message", None)
+
+    # Retrieve the currently logged-in user
+    username = session.get("username")
+    user = User.query.filter_by(username=username).first()
 
     # Fetch all groups from the database
     groups = Group.query.all()
