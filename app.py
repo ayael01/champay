@@ -47,7 +47,6 @@ class Expense(db.Model):
 
 @app.route("/", methods=["GET", "POST"])
 def homepage():
-
     session.pop('_flashes', None)   # Clear flashed messages
 
     if request.method == "POST":
@@ -66,7 +65,8 @@ def homepage():
         else:
             flash("Unknown user or incorrect password.", "error")
 
-    return render_template("homepage.html")
+    return render_template("homepage.html", username=session.get("username"))
+
 
 @app.route("/logout")
 def logout():
@@ -102,7 +102,7 @@ def dashboard():
         selected_group_id = int(request.form["group"])
         return redirect(url_for("group_expenses", group_id=selected_group_id))
     
-    return render_template("dashboard.html", message=message, groups=groups)
+    return render_template("dashboard.html", message=message, groups=groups, username=username)
 
 @app.route("/group_expenses/<int:group_id>", methods=["GET", "POST"])
 def group_expenses(group_id):
