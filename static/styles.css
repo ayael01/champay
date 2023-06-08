@@ -318,7 +318,14 @@ input[type="submit"]:hover {
     font-size: 16px;
     border: 2px solid white;
     box-sizing: border-box;
+    cursor: pointer;
+    transition: background-color 0.3s;
 }
+
+.user-info:hover {
+    background-color: #a9bdaa;
+}
+
 
 .dropdown-content {
     display: none;
