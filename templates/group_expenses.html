@@ -10,14 +10,19 @@
 
 <body>
     <header>
-        <div>
-            <h1>{{ group.name }} expenses</h1>
-            {% if username %}
-                <div class="user-info" onclick="toggleDropdown()">{{ username[0] }}</div>
-                <div id="dropdown" class="dropdown-content">
-                    <a href="{{ url_for('logout') }}">Logout</a>
+        <div class="header-content">
+            <div class="user-info-container">
+                {% if username %}
+                    <div class="user-info" onclick="toggleDropdown()">{{ username[0] }}</div>
+                    <div id="dropdown" class="dropdown-content">
+                        <a href="{{ url_for('logout') }}">Logout</a>
+                    </div>
+                {% endif %}
+                <div class="home-button">
+                    <a href="{{ url_for('dashboard') }}">Home</a>
                 </div>
-            {% endif %}
+            </div>
+            <h1>{{ group.name }} expenses</h1>
         </div>
     </header>
     <main>

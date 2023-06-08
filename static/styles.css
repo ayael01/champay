@@ -354,5 +354,55 @@ input[type="submit"]:hover {
     display: block;
 }
 
-  
+.show {
+    display: block;
+}
+
+.home-button {
+    margin-top: 10px;
+}
+
+.home-button a {
+    color: #f1f1f1;
+    text-decoration: none;
+}
+
+.home-button a:hover {
+    text-decoration: underline;
+}
+
+/* Rest of the CSS styles */
+
+.header-content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-info-container {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+}
+
+.user-info {
+    margin-right: 10px;
+}
+
+.home-button {
+    margin-right: 5px; /* Adjusted property */
+    margin-left: -110px; /* Adjusted property */
+}
+
+h1 {
+    margin: 0;
+    text-align: center;
+}
+
+
+
+
+
+
 
