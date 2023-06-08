@@ -13,7 +13,7 @@
         <div>
             <h1>{{ group.name }} expenses</h1>
             {% if username %}
-                <div class="user-info" onclick="toggleDropdown()">{{ username[0] }}</div>
+                <div class="user-info" onclick="toggleDropdown()" onmouseover="changeCursor()" onmouseout="restoreCursor()">{{ username[0] }}</div>
                 <div id="dropdown" class="dropdown-content">
                     <a href="{{ url_for('logout') }}">Logout</a>
                 </div>
@@ -84,6 +84,18 @@
                 }
             }
         };
+
+        function changeCursor() {
+            const userInfo = document.querySelector(".user-info");
+            userInfo.style.cursor = "pointer";
+            userInfo.style.backgroundColor = "#4CAF50";
+        }
+
+        function restoreCursor() {
+            const userInfo = document.querySelector(".user-info");
+            userInfo.style.cursor = "auto";
+            userInfo.style.backgroundColor = "";
+        }
     </script>
 </body>
 
