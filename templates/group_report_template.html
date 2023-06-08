@@ -45,5 +45,8 @@
     {% else %}
         <p>No transfers required.</p>
     {% endif %}
+
+    <a href="{{ url_for('group_expenses', group_id=group_id) }}">Go back to Group Expenses</a>
+
 </body>
 </html>

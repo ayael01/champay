@@ -199,17 +199,18 @@ def generate_group_report(group, group_expenses):
             "last_updated": formatted_last_updated
         })
 
-
-
     report_data = {
         'group_name': group.name,
         'group_expenses': group_expenses_list,
         'total_expenses': total_expenses,
         'share': share,
-        'transfers': calculate_transfers(group_expenses, share)
+        'transfers': calculate_transfers(group_expenses, share),
+        'group_id': group.id  # Pass group_id to the template
     }
 
     return render_template('group_report_template.html', **report_data)
+
+
 
 
 
