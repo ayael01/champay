@@ -52,7 +52,6 @@
         <!-- Add the popup structure -->
         <div id="popup" class="popup">
             <div class="popup-content">
-                <span class="close" onclick="hidePopup()">&times;</span>
                 <p class="popup-message">Cannot generate report. Not all users have updated their expenses.</p>
                 <button class="popup-button" onclick="hidePopup()">OK</button>
             </div>
@@ -116,7 +115,7 @@
 
         function showPopup() {
             const popup = document.getElementById("popup");
-            popup.style.display = "block";
+            popup.style.display = "flex";
         }
 
         function hidePopup() {
