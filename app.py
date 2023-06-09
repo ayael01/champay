@@ -139,11 +139,11 @@ def group_expenses(group_id):
 
         if all_expenses_updated:
             # If all expenses are updated, redirect to the report page
-            flash("Expenses updated successfully!", "success")
+            # flash("Expenses updated successfully!", "success")
             return redirect(url_for("group_expenses", group_id=group_id))
 
 
-        flash("Expenses updated successfully!", "success")
+        # flash("Expenses updated successfully!", "success")
         return redirect(url_for("group_expenses", group_id=group_id))
 
     group_expenses = Expense.query.filter_by(group_id=group_id).all()
