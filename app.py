@@ -139,7 +139,9 @@ def group_expenses(group_id):
 
         if all_expenses_updated:
             # If all expenses are updated, redirect to the report page
-            return redirect(url_for("group_report", group_id=group_id))
+            flash("Expenses updated successfully!", "success")
+            return redirect(url_for("group_expenses", group_id=group_id))
+
 
         flash("Expenses updated successfully!", "success")
         return redirect(url_for("group_expenses", group_id=group_id))
