@@ -371,8 +371,6 @@ input[type="submit"]:hover {
     text-decoration: underline;
 }
 
-/* Rest of the CSS styles */
-
 .header-content {
     display: flex;
     flex-direction: row;
@@ -400,6 +398,10 @@ h1 {
     text-align: center;
 }
 
+.not-updated {
+    color: red;
+  }
+  
 
 
 

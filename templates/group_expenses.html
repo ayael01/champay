@@ -61,12 +61,14 @@
                 <tbody>
                     {% for expense in group_expenses %}
                     <tr>
-                        <td>{{ expense.user }}</td>
-                        <td>{{ expense.description }}</td>
-                        <td>{{ expense.expenses }}</td>
-                        <td>
+                        <td {% if expense.last_updated is none %}class="not-updated"{% endif %}>{{ expense.user }}</td>
+                        <td {% if expense.last_updated is none %}class="not-updated"{% endif %}>{{ expense.description }}</td>
+                        <td {% if expense.last_updated is none %}class="not-updated"{% endif %}>{{ expense.expenses }}</td>
+                        <td {% if expense.last_updated is none %}class="not-updated"{% endif %}>
                             {% if expense.last_updated %}
-                            {{ expense.last_updated.strftime("%Y-%m-%d %H:%M:%S") }}
+                                {{ expense.last_updated.strftime("%Y-%m-%d %H:%M:%S") }}
+                            {% else %}
+                                Not updated yet
                             {% endif %}
                         </td>
                     </tr>
