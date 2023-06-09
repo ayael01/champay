@@ -113,9 +113,19 @@
             userInfo.style.backgroundColor = "";
         }
 
+        // Add a variable to track the expenses status
+        let allExpensesUpdated = {% if all_expenses_updated %}true{% else %}false{% endif %};
+
+        // Update the showPopup function
         function showPopup() {
-            const popup = document.getElementById("popup");
-            popup.style.display = "flex";
+            if (allExpensesUpdated) {
+                // If all expenses are updated, proceed with generating the report
+                window.location.href = "{{ url_for('group_report', group_id=group.id) }}";
+            } else {
+                // If not all expenses are updated, show the popup
+                const popup = document.getElementById("popup");
+                popup.style.display = "flex";
+            }
         }
 
         function hidePopup() {

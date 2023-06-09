@@ -134,14 +134,12 @@ def group_expenses(group_id):
         expense.last_updated = datetime.utcnow()
         db.session.commit()
 
-        # Check if the user is already a member of the group
-        group_member = GroupMember.query.filter_by(user_id=user.id, group_id=group_id).first()
+        # Check if all expenses are updated for the group
+        all_expenses_updated = are_all_expenses_updated(group_id)
 
-        if not group_member:
-            # If the user is not a member, create a new group member object
-            group_member = GroupMember(user_id=user.id, group_id=group_id)
-            db.session.add(group_member)
-            db.session.commit()
+        if all_expenses_updated:
+            # If all expenses are updated, redirect to the report page
+            return redirect(url_for("group_report", group_id=group_id))
 
         flash("Expenses updated successfully!", "success")
         return redirect(url_for("group_expenses", group_id=group_id))
@@ -158,7 +156,21 @@ def group_expenses(group_id):
             "last_updated": expense.last_updated
         })
 
-    return render_template("group_expenses.html", group=group, group_expenses=group_expenses_list, username=username)
+    # Check if all expenses are updated for the group
+    all_expenses_updated = are_all_expenses_updated(group_id)
+
+    return render_template("group_expenses.html", group=group, group_expenses=group_expenses_list, username=username, all_expenses_updated=all_expenses_updated)
+
+
+def are_all_expenses_updated(group_id):
+    # Count the number of group members
+    num_members = GroupMember.query.filter_by(group_id=group_id).count()
+
+    # Count the number of expenses updated by group members
+    num_expenses_updated = Expense.query.filter_by(group_id=group_id).filter(Expense.last_updated != None).count()
+
+    # Return whether all expenses are updated or not
+    return num_expenses_updated == num_members
 
 
 
