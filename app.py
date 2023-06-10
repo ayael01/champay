@@ -6,7 +6,7 @@ from datetime import datetime
 from flask import render_template_string
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Boolean
-
+from flask import abort
 
 
 app = Flask(__name__)
@@ -95,6 +95,10 @@ def dashboard():
     username = session.get("username")
     user = User.query.filter_by(username=username).first()
 
+    # Check if the user is found
+    if not user:
+        return redirect(url_for("homepage"))  # Redirect to login page
+
     # Fetch the groups that the user is a member of
     group_memberships = GroupMember.query.filter_by(user_id=user.id).all()
     group_ids = [gm.group_id for gm in group_memberships]
@@ -110,7 +114,22 @@ def dashboard():
 @app.route("/group_expenses/<int:group_id>", methods=["GET", "POST"])
 def group_expenses(group_id):
     username = session.get('username', 'Unknown')
+
+    # Check if the user is logged in
+    if not username:
+        abort(401)  # Unauthorized
+
     user = User.query.filter_by(username=username).first()
+
+    # Check if the user is found
+    if not user:
+        abort(401)  # Unauthorized
+
+    # Check if the user is a member of the group
+    group_membership = GroupMember.query.filter_by(user_id=user.id, group_id=group_id).first()
+    if not group_membership:
+        abort(403)  # Forbidden
+
     group = Group.query.get(group_id)
 
     if request.method == "POST":
