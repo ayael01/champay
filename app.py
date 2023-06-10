@@ -200,6 +200,23 @@ def are_all_expenses_updated(group_id):
 
 @app.route("/group_report/<int:group_id>")
 def group_report(group_id):
+
+    username = session.get('username', 'Unknown')
+
+    # Check if the user is logged in
+    if not username:
+        abort(401)  # Unauthorized
+
+    user = User.query.filter_by(username=username).first()
+
+    # Check if the user is found
+    if not user:
+        abort(401)  # Unauthorized
+
+    # Check if the user is a member of the group
+    group_membership = GroupMember.query.filter_by(user_id=user.id, group_id=group_id).first()
+    if not group_membership:
+        abort(403)  # Forbidden
     # Retrieve the group information by ID
     group = Group.query.get(group_id)
 
