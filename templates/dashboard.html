@@ -22,21 +22,28 @@
             {% include 'flash_messages.html' %}
         {% endwith %}
         <section class="group-form">
-            <h2>Select an event to report expenses</h2>
-            <form action="{{ url_for('dashboard') }}" method="post">
-                <div class="form-group">
-                    <label for="group">Events:</label>
-                    <select name="group" id="group">
-                        {% for group in groups %}
-                            <option value="{{ group.id }}">{{ group.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-group">
-                    <input type="submit" value="Go" class="center-button">
-                </div>
-            </form>
+            {% if groups %}
+                <h2>Select an event to report expenses</h2>
+                <form action="{{ url_for('dashboard') }}" method="post">
+                    <div class="form-group">
+                        <label for="group">Events:</label>
+                        <select name="group" id="group">
+                            {% for group in groups %}
+                                <option value="{{ group.id }}">{{ group.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" value="Go" class="center-button">
+                    </div>
+                </form>
+            {% else %}
+                <p class="error-message">You are not a member of any groups.</p>
+                <p class="error-message">Please contact the administrator to join a group.</p>
+            {% endif %}
         </section>
+        
+        
     </main>
     <script>
         function toggleDropdown() {
