@@ -22,6 +22,7 @@ class User(db.Model):
     password = db.Column(db.String(128))
     email = db.Column(db.String(120), index=True, unique=True)
     is_logged_in = db.Column(db.Boolean, default=False)
+    group_memberships = db.relationship("GroupMember", backref="user")
 
 
 class Group(db.Model):
@@ -88,21 +89,23 @@ def logout():
 
 @app.route("/dashboard", methods=["GET", "POST"])
 def dashboard():
-
     message = session.pop("message", None)
 
     # Retrieve the currently logged-in user
     username = session.get("username")
     user = User.query.filter_by(username=username).first()
 
-    # Fetch all groups from the database
-    groups = Group.query.all()
+    # Fetch the groups that the user is a member of
+    group_memberships = GroupMember.query.filter_by(user_id=user.id).all()
+    group_ids = [gm.group_id for gm in group_memberships]
+    groups = Group.query.filter(Group.id.in_(group_ids)).all()
 
     if request.method == "POST":
         selected_group_id = int(request.form["group"])
         return redirect(url_for("group_expenses", group_id=selected_group_id))
-    
+
     return render_template("dashboard.html", message=message, groups=groups, username=username)
+
 
 @app.route("/group_expenses/<int:group_id>", methods=["GET", "POST"])
 def group_expenses(group_id):
