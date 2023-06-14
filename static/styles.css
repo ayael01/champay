@@ -358,18 +358,30 @@ input[type="submit"]:hover {
     display: block;
 }
 
+.menu-panel {
+    background-color: #f4f4f4;
+    padding: 0.3rem; /* Adjust the padding value to your preference */
+    text-align: center;
+    display: flex;
+    justify-content: flex-start; /* Change from flex-end to flex-start */
+}
+
 .home-button {
     margin-top: 10px;
+    margin-right: auto; /* Change from margin-left to margin-right */
 }
 
 .home-button a {
     color: #f1f1f1;
     text-decoration: none;
+    padding: 0 10px; /* Add this line for spacing */
 }
 
 .home-button a:hover {
     text-decoration: underline;
 }
+
+
 
 .header-content {
     display: flex;
@@ -389,8 +401,8 @@ input[type="submit"]:hover {
 }
 
 .home-button {
-    margin-right: 5px; /* Adjusted property */
-    margin-left: -110px; /* Adjusted property */
+    margin-right: 0px; /* Adjusted property */
+    margin-left: 0px; /* Adjusted property */
 }
 
 h1 {
@@ -454,6 +466,23 @@ h1 {
     margin: 0;
     padding: 5px 0;
 }
+
+.menu-panel {
+    background-color: #f4f4f4;
+    padding: 0.3rem;
+    text-align: center;
+}
+
+.menu-panel a {
+    color: #000;
+    text-decoration: none;
+    margin: 0 10px;
+}
+
+.menu-panel a:hover {
+    text-decoration: underline;
+}
+
 
 
 

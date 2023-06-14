@@ -12,19 +12,22 @@
     <header>
         <div class="header-content">
             <div class="user-info-container">
-                {% if username %}
-                    <div class="user-info" onclick="toggleDropdown()">{{ username[0] }}</div>
-                    <div id="dropdown" class="dropdown-content">
-                        <a href="{{ url_for('logout') }}">Logout</a>
-                    </div>
-                {% endif %}
-                <div class="home-button">
-                    <a href="{{ url_for('dashboard') }}">Home</a>
+                <div class="user-info" onclick="toggleDropdown()">{{ username[0] }}</div>
+                <div id="dropdown" class="dropdown-content">
+                    <a href="{{ url_for('logout') }}">Logout</a>
                 </div>
             </div>
             <h1>{{ group.name }} expenses</h1>
         </div>
     </header>
+
+    <div class="menu-panel">
+        <div class="home-button">
+            <a href="{{ url_for('dashboard') }}">Home</a>
+        </div>
+        <!-- Add other menu links here -->
+    </div>
+
     <main>
         <section class="expense-form">
             <div class="expense-form-left">
@@ -48,7 +51,7 @@
             <p>List of user expenses</p>
             <a class="generate-report-link" href="#" onclick="showPopup()">Generate Report</a>
         </div>
-        
+
         <!-- Add the popup structure -->
         <div id="popup" class="popup">
             <div class="popup-content">
@@ -56,7 +59,7 @@
                 <button class="popup-button" onclick="hidePopup()">OK</button>
             </div>
         </div>
-                    
+
         <section class="expense-table">
             <table class="center-table">
                 <thead>
@@ -92,7 +95,7 @@
             dropdown.classList.toggle("show");
         }
 
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             if (!event.target.matches(".user-info")) {
                 const dropdown = document.getElementById("dropdown");
                 if (dropdown.classList.contains("show")) {
@@ -127,8 +130,6 @@
                 popup.style.display = "flex";
             }
         }
-
-
 
         function hidePopup() {
             const popup = document.getElementById("popup");
