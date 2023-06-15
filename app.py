@@ -8,6 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Boolean
 from flask import abort
 import os
+from sqlalchemy.exc import SQLAlchemyError
 
 
 app = Flask(__name__)
@@ -160,15 +161,20 @@ def group_expenses(group_id):
             db.session.add(expense)
 
         expense.last_updated = datetime.utcnow()
-        db.session.commit()
 
-        # Check if all expenses are updated for the group
-        all_expenses_updated = are_all_expenses_updated(group_id)
+        try:
+            db.session.commit()
+            all_expenses_updated = are_all_expenses_updated(group_id)
+            if all_expenses_updated:
+                # If all expenses are updated, redirect to the report page
+                return redirect(url_for("group_expenses", group_id=group_id))
+            else:
+                flash("Expenses updated successfully!", "success")
+        except SQLAlchemyError:
+            db.session.rollback()
+            flash("Failed to update expenses. Please try again.", "error")
 
-        if all_expenses_updated:
-            # If all expenses are updated, redirect to the report page
-            # flash("Expenses updated successfully!", "success")
-            return redirect(url_for("group_expenses", group_id=group_id))
+        return redirect(url_for("group_expenses", group_id=group_id))
 
 
         # flash("Expenses updated successfully!", "success")
