@@ -47,6 +47,19 @@
                 </form>
             </div>
         </section>
+        <div id="update-status" class="update-status">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="flash-message">
+                        <ul class="messages">
+                            {% for message in messages %}
+                                <li>{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            {% endwith %}
+        </div>
         <div class="user-expenses">
             <p>List of user expenses</p>
             <a class="generate-report-link" href="#" onclick="showPopup()">Generate Report</a>
