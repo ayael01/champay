@@ -98,12 +98,12 @@
                 <button class="popup-button" onclick="hidePopupFlash()">OK</button>
             </div>
         </div>
-       
+
         <script type="text/javascript">
             window.onload = function() {
-                {% with messages = get_flashed_messages() %}
+                {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}          
-                        document.getElementById('message_flash').innerText = "{{ messages[0] }}";
+                        document.getElementById('message_flash').innerText = "{{ messages[0][1] }}";
                         document.getElementById('popup_flash').style.display = "flex";
                     {% endif %}
                 {% endwith %}
