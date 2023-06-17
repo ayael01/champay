@@ -295,7 +295,7 @@ input[type="submit"]:hover {
   
   .generate-report-link {
     color: #ff0000; /* Change the color to red */
-    text-decoration: none;
+    text-decoration: underline;
     font-weight: bold;
   }
   
@@ -364,6 +364,16 @@ input[type="submit"]:hover {
     text-align: center;
     display: flex;
     justify-content: flex-start; /* Change from flex-end to flex-start */
+}
+
+.menu-panel a {
+    color: #2a702c;
+    text-decoration: none;
+    margin: 0 10px;
+}
+
+.menu-panel a:hover {
+    text-decoration: underline;
 }
 
 .home-button {
@@ -473,21 +483,10 @@ h1 {
     padding: 5px 0;
 }
 
-.menu-panel {
-    background-color: #f4f4f4;
-    padding: 0.3rem;
-    text-align: center;
+.back2events-link {
+    color: #45a049;
 }
 
-.menu-panel a {
-    color: #000;
-    text-decoration: none;
-    margin: 0 10px;
-}
-
-.menu-panel a:hover {
-    text-decoration: underline;
-}
 
 
 
