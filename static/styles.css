@@ -442,6 +442,12 @@ h1 {
     font-weight: bold;
 }
 
+.popup_flasf-success {
+    margin-bottom: 10px;
+    color: #4CAF50;
+    font-weight: bold;
+}
+
 .popup-button {
     padding: 8px 12px;
     background-color: #4CAF50;

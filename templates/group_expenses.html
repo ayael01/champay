@@ -47,19 +47,7 @@
                 </form>
             </div>
         </section>
-        <div id="update-status" class="update-status">
-            {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                    <div class="flash-message">
-                        <ul class="messages">
-                            {% for message in messages %}
-                                <li>{{ message }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                {% endif %}
-            {% endwith %}
-        </div>
+        
         <div class="user-expenses">
             <p>List of user expenses</p>
             <a class="generate-report-link" href="#" onclick="showPopup()">Generate Report</a>
@@ -101,6 +89,27 @@
                 </tbody>
             </table>
         </section>
+
+        
+
+        <div id="popup_flash" class="popup">
+            <div class="popup-content">
+                <p id="message_flash" class="popup_flasf-success"></p>
+                <button class="popup-button" onclick="hidePopupFlash()">OK</button>
+            </div>
+        </div>
+       
+        <script type="text/javascript">
+            window.onload = function() {
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}          
+                        document.getElementById('message_flash').innerText = "{{ messages[0] }}";
+                        document.getElementById('popup_flash').style.display = "flex";
+                    {% endif %}
+                {% endwith %}
+            };
+        </script>
+
     </main>
     <script>
         function toggleDropdown() {
@@ -146,6 +155,11 @@
 
         function hidePopup() {
             const popup = document.getElementById("popup");
+            popup.style.display = "none";
+        }
+
+        function hidePopupFlash() {
+            const popup = document.getElementById("popup_flash");
             popup.style.display = "none";
         }
 
