@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash
 from datetime import datetime
 import os
+from sqlalchemy import func, select
 
 
 app = Flask(__name__)
@@ -83,7 +84,36 @@ def create_group_expenses(app, group_name, user_ids):
             db.session.rollback()
             return f"Failed to create group expenses. Error: {str(e)}"
 
+def list_groups():
+    # List all groups
+    groups = Group.query.all()
+    print("Group IDs and their names:")
+    for group in groups:
+        print(f"{group.id}: {group.name}")
 
+def delete_group_expenses(app, group_id):
+    with app.app_context():
+        group = Group.query.filter_by(id=group_id).first()
+        if not group:
+            return f"Group id {group_id} does not exist."
+
+        try:
+            # Delete all expenses related to the group
+            Expense.query.filter_by(group_id=group_id).delete()
+
+            # Delete all memberships related to the group
+            GroupMember.query.filter_by(group_id=group_id).delete()
+
+            # Delete the group
+            db.session.delete(group)
+
+            db.session.commit()
+
+            return f"Successfully deleted group id {group_id}."
+
+        except Exception as e:
+            db.session.rollback()
+            return f"Failed to delete group id {group_id}. Error: {str(e)}"
 
 
 if __name__ == "__main__":
