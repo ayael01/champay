@@ -103,6 +103,7 @@
                 {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}          
                         document.getElementById('message_flash').innerText = "{{ messages[0][1] }}";
+                        document.getElementById('message_flash').className = "popup_flash-" + "{{ messages[0][0] }}";
                         document.getElementById('popup_flash').style.display = "flex";
                     {% endif %}
                 {% endwith %}

@@ -458,6 +458,15 @@ h1 {
     font-weight: bold;
 }
 
+.popup_flash-success {
+    color: green;
+}
+
+.popup_flash-error {
+    color: red;
+}
+
+
 .popup-button {
     padding: 8px 12px;
     background-color: #4CAF50;

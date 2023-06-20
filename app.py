@@ -141,7 +141,12 @@ def group_expenses(group_id):
 
     if request.method == "POST":
         description = request.form["description"]
-        expenses = request.form["expenses"]
+        expenses = float(request.form["expenses"])  # Make sure expenses are treated as numbers
+
+        # Block updates with expenses under zero
+        if expenses < 0:
+            flash("Expenses cannot be less than zero. Please enter a valid amount.", "error")
+            return redirect(url_for("group_expenses", group_id=group_id))
 
         # Check if the user already has an expense in the group
         expense = Expense.query.filter_by(user_id=user.id, group_id=group_id).first()
