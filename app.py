@@ -216,6 +216,12 @@ def are_all_expenses_updated(group_id):
 @app.route("/group_report/<int:group_id>")
 def group_report(group_id):
 
+    # Check if all expenses are updated for the group
+    all_expenses_updated = are_all_expenses_updated(group_id)
+    if not all_expenses_updated:
+        flash("Cannot generate report. Not all users have updated their expenses.", "error")
+        return redirect(url_for("group_expenses", group_id=group_id))
+
     username = session.get('username', 'Unknown')
 
     # Check if the user is logged in
@@ -232,6 +238,7 @@ def group_report(group_id):
     group_membership = GroupMember.query.filter_by(user_id=user.id, group_id=group_id).first()
     if not group_membership:
         abort(403)  # Forbidden
+
     # Retrieve the group information by ID
     group = Group.query.get(group_id)
 
@@ -242,6 +249,7 @@ def group_report(group_id):
     report = generate_group_report(group, group_expenses)
 
     return report
+
 
 
 def generate_group_report(group, group_expenses):
