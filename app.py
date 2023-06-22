@@ -344,6 +344,28 @@ def group_settings(group_id):
     # Retrieve the group information by ID
     group = Group.query.get(group_id)
 
+    if request.method == "POST":
+        weight = int(request.form["weight"])  # Make sure weight is treated as a number
+
+        # Block updates with weight less than one or more than ten
+        if weight < 1 or weight > 10:
+            flash("Weight should be between 1 and 10. Please enter a valid weight.", "error")
+            return redirect(url_for("group_settings", group_id=group_id))
+
+        # Update the user's weight
+        group_membership.weight = weight
+        group_membership.last_updated = datetime.utcnow()
+
+        try:
+            db.session.commit()
+            flash(f"Weight updated successfully! Your weight is now {weight}", "success")
+
+        except SQLAlchemyError:
+            db.session.rollback()
+            flash("Failed to update weight. Please try again.", "error")
+
+        return redirect(url_for("group_settings", group_id=group_id))
+
     # Retrieve group members and their weights
     group_members = GroupMember.query.filter_by(group_id=group_id).all()
     members = []
@@ -356,6 +378,7 @@ def group_settings(group_id):
         })
 
     return render_template('group_settings.html', group=group, members=members, username=username)
+
 
 
 
