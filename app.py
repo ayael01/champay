@@ -358,7 +358,7 @@ def group_settings(group_id):
 
         try:
             db.session.commit()
-            flash(f"Weight updated successfully! Your weight is now {weight}", "success")
+            flash(f"Weight updated successfully! Your weight in the expenses is {weight}", "success")
 
         except SQLAlchemyError:
             db.session.rollback()
