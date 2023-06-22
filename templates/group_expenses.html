@@ -24,8 +24,10 @@
     <div class="menu-panel">
         <div>
             <a href="{{ url_for('dashboard') }}" class="back2events-link">Back to events</a>
+            <a href="{{ url_for('group_settings', group_id=group.id) }}" class="back2events-link">Group Settings</a>
          </div>
     </div>
+
 
     <main>
         <section class="expense-form">

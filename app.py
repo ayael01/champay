@@ -40,6 +40,9 @@ class GroupMember(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     group_id = db.Column(db.Integer, db.ForeignKey('group.id'))
+    weight = db.Column(db.Integer, default=1.0) 
+    last_updated = db.Column(db.DateTime, default=None, onupdate=datetime.utcnow)
+
 
 class Expense(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -319,6 +322,40 @@ def calculate_transfers(group_expenses, share):
 
     return transfers
 
+
+@app.route('/group_settings/<int:group_id>', methods=['GET', 'POST'])
+def group_settings(group_id):
+    # Check if the user is logged in
+    username = session.get('username')
+    if not username:
+        abort(401)  # Unauthorized
+
+    user = User.query.filter_by(username=username).first()
+
+    # Check if the user is found
+    if not user:
+        abort(401)  # Unauthorized
+
+    # Check if the user is a member of the group
+    group_membership = GroupMember.query.filter_by(user_id=user.id, group_id=group_id).first()
+    if not group_membership:
+        abort(403)  # Forbidden
+
+    # Retrieve the group information by ID
+    group = Group.query.get(group_id)
+
+    # Retrieve group members and their weights
+    group_members = GroupMember.query.filter_by(group_id=group_id).all()
+    members = []
+    for member in group_members:
+        member_user = User.query.get(member.user_id)
+        members.append({
+            'username': member_user.username,
+            'weight': member.weight,
+            'last_updated': member.last_updated  # include last_updated information
+        })
+
+    return render_template('group_settings.html', group=group, members=members, username=username)
 
 
 

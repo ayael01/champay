@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Champay - Group Settings</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <div class="user-info-container">
+                <div class="user-info" onclick="toggleDropdown()">{{ username[0] }}</div>
+                <div id="dropdown" class="dropdown-content">
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                </div>
+            </div>
+            <h1>{{ group.name }} settings</h1>
+        </div>
+    </header>
+
+    <div class="menu-panel">
+        <div>
+            <a href="{{ url_for('dashboard') }}" class="back2events-link">Back to events</a>
+            <a href="{{ url_for('group_expenses', group_id=group.id) }}" class="back2events-link">Back to expenses</a>
+        </div>
+    </div>
+
+    <main>
+        <section class="weight-form">
+            <h2>Hi {{ username }}, please add your weight in this event expenses</h2>
+            <div class="weight-form-body">
+                <form action="{{ url_for('group_settings', group_id=group.id) }}" method="post">
+                    <div class="form-group">
+                        <label for="weight">My weight in this event expenses is:</label>
+                        <select name="weight" id="weight" class="weight-select" required>
+                            {% for i in range(1, 11) %}
+                            <option value="{{ i }}">{{ i }}</option>
+                            {% endfor %}
+                        </select>                        
+                        <input type="submit" value="Approve" class="center-button">
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <div class="user-expenses">
+            <p>Users weights in this event expenses</p>
+        </div>
+
+        <section class="weight-table">
+            <table class="center-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Weight</th>
+                        <th>Last Updated</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for member in members %}
+                    <tr>
+                        <td {% if member.last_updated is none %}class="not-updated"{% endif %}>{{ member.username }}</td>
+                        <td {% if member.last_updated is none %}class="not-updated"{% endif %}>{{ member.weight }}</td>
+                        <td {% if member.last_updated is none %}class="not-updated"{% endif %}>
+                            {% if member.last_updated %}
+                                {{ member.last_updated.strftime("%Y-%m-%d %H:%M:%S") }}
+                            {% else %}
+                                Not updated yet
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                
+            </table>
+        </section>
+
+    </main>
+    <script>
+        function toggleDropdown() {
+            const dropdown = document.getElementById("dropdown");
+            dropdown.classList.toggle("show");
+        }
+
+        window.onclick = function (event) {
+            if (!event.target.matches(".user-info")) {
+                const dropdown = document.getElementById("dropdown");
+                if (dropdown.classList.contains("show")) {
+                    dropdown.classList.remove("show");
+                }
+            }
+        };
+
+        function changeCursor() {
+            const userInfo = document.querySelector(".user-info");
+            userInfo.style.cursor = "pointer";
+            userInfo.style.backgroundColor = "#4CAF50";
+        }
+
+        function restoreCursor() {
+            const userInfo = document.querySelector(".user-info");
+            userInfo.style.cursor = "auto";
+            userInfo.style.backgroundColor = "";
+        }
+    </script>
+</body>
+
+</html>
