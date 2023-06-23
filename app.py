@@ -66,7 +66,7 @@ def homepage():
     session.pop('_flashes', None)   # Clear flashed messages
 
     if request.method == "POST":
-        email = request.form["email"]
+        email = request.form["email"].lower()
         password = request.form["password"]
         user = User.query.filter_by(email=email).first()
         if user and check_password_hash(user.password, password):
