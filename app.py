@@ -191,7 +191,7 @@ def group_expenses(group_id):
 
         return redirect(url_for("group_expenses", group_id=group_id))
 
-    group_expenses = Expense.query.filter_by(group_id=group_id).all()
+    group_expenses = Expense.query.filter_by(group_id=group_id).order_by(Expense.last_updated.desc()).all()
     group_expenses_list = []
 
     for expense in group_expenses:
@@ -251,7 +251,7 @@ def group_report(group_id):
     group = Group.query.get(group_id)
 
     # Fetch the group expenses from the database
-    group_expenses = Expense.query.filter_by(group_id=group_id).all()
+    group_expenses = Expense.query.filter_by(group_id=group_id).order_by(Expense.last_updated.desc()).all()
 
     # Generate the report
     # Fetch the group members from the database
@@ -449,7 +449,7 @@ def group_settings(group_id):
         return redirect(url_for("group_settings", group_id=group_id))
 
     # Retrieve group members and their weights
-    group_members = GroupMember.query.filter_by(group_id=group_id).all()
+    group_members = GroupMember.query.filter_by(group_id=group_id).order_by(GroupMember.last_updated.desc()).all()
     members = []
     for member in group_members:
         member_user = User.query.get(member.user_id)
