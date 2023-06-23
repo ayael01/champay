@@ -191,7 +191,13 @@ def group_expenses(group_id):
 
         return redirect(url_for("group_expenses", group_id=group_id))
 
-    group_expenses = Expense.query.filter_by(group_id=group_id).order_by(Expense.last_updated.desc()).all()
+    # Split the expenses into updated and not updated
+    updated_expenses = Expense.query.filter(Expense.group_id == group_id, Expense.last_updated.isnot(None)).order_by(Expense.last_updated.desc()).all()
+    not_updated_expenses = Expense.query.filter(Expense.group_id == group_id, Expense.last_updated.is_(None)).all()
+
+    # Append not updated expenses to the list of updated ones
+    group_expenses = updated_expenses + not_updated_expenses
+
     group_expenses_list = []
 
     for expense in group_expenses:
@@ -207,7 +213,6 @@ def group_expenses(group_id):
     all_expenses_updated = are_all_expenses_updated(group_id)
 
     return render_template("group_expenses.html", group=group, group_expenses=group_expenses_list, username=username, all_expenses_updated=all_expenses_updated)
-
 
 def are_all_expenses_updated(group_id):
     # Count the number of group members
