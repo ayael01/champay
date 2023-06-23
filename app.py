@@ -453,8 +453,15 @@ def group_settings(group_id):
 
         return redirect(url_for("group_settings", group_id=group_id))
 
-    # Retrieve group members and their weights
-    group_members = GroupMember.query.filter_by(group_id=group_id).order_by(GroupMember.last_updated.desc()).all()
+    # Retrieve group members who have updated their weights and sort by update time
+    updated_group_members = GroupMember.query.filter(GroupMember.last_updated.isnot(None), GroupMember.group_id==group_id).order_by(GroupMember.last_updated.desc()).all()
+    
+    # Retrieve group members who have not updated their weights
+    not_updated_group_members = GroupMember.query.filter(GroupMember.last_updated.is_(None), GroupMember.group_id==group_id).all()
+
+    # Combine both lists
+    group_members = updated_group_members + not_updated_group_members
+
     members = []
     for member in group_members:
         member_user = User.query.get(member.user_id)
