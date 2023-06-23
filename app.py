@@ -249,8 +249,17 @@ def group_report(group_id):
     group_expenses = Expense.query.filter_by(group_id=group_id).all()
 
     # Generate the report
-    #report = generate_group_report(group, group_expenses)
-    report = generate_group_report_by_weight(group, group_expenses)
+    # Fetch the group members from the database
+    group_members = GroupMember.query.filter_by(group_id=group_id).all()
+    
+    # Check if all members have the same weight
+    weights = [member.weight for member in group_members]
+    if len(set(weights)) == 1:  # The set operation will remove duplicate values
+        # All members have the same weight, so generate a regular report
+        report = generate_group_report(group, group_expenses)
+    else:
+        # Not all members have the same weight, so generate a weighted report
+        report = generate_group_report_by_weight(group, group_expenses)
 
     return report
 
