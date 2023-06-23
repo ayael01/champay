@@ -31,6 +31,8 @@ class GroupMember(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     group_id = db.Column(db.Integer, db.ForeignKey('group.id'))
+    weight = db.Column(db.Integer, default=1.0) 
+    last_updated = db.Column(db.DateTime, default=None, onupdate=datetime.utcnow)
 
 class Expense(db.Model):
     id = db.Column(db.Integer, primary_key=True)
