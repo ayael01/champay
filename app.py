@@ -249,7 +249,8 @@ def group_report(group_id):
     group_expenses = Expense.query.filter_by(group_id=group_id).all()
 
     # Generate the report
-    report = generate_group_report(group, group_expenses)
+    #report = generate_group_report(group, group_expenses)
+    report = generate_group_report_by_weight(group, group_expenses)
 
     return report
 
@@ -290,9 +291,6 @@ def generate_group_report(group, group_expenses):
     return render_template('group_report_template.html', **report_data)
 
 
-
-
-
 def calculate_transfers(group_expenses, share):
     balances = {}
 
@@ -321,6 +319,76 @@ def calculate_transfers(group_expenses, share):
         transfers.append((debtor, creditor, amount))
 
     return transfers
+
+
+def generate_group_report_by_weight(group, group_expenses):
+    # Retrieve the group members
+    group_members = GroupMember.query.filter_by(group_id=group.id).all()
+    total_weight = sum(member.weight for member in group_members)
+
+    if total_weight == 0:
+        return "No weights assigned in the group."
+
+    total_expenses = sum(expense.amount for expense in group_expenses)
+    weighted_share = total_expenses / total_weight
+
+    group_expenses_list = []
+
+    for expense in group_expenses:
+        expense_owner = User.query.filter_by(id=expense.user_id).first()
+        weight = GroupMember.query.filter_by(user_id=expense.user_id, group_id=group.id).first().weight  # Get weight
+        formatted_last_updated = expense.last_updated.strftime('%Y-%m-%d %H:%M')
+        group_expenses_list.append({
+            "user": expense_owner.username,
+            "description": expense.description,
+            "amount": expense.amount,
+            "weight": weight,  # Add weight to the dictionary
+            "last_updated": formatted_last_updated
+        })
+
+    report_data = {
+        'group_name': group.name,
+        'group_expenses': group_expenses_list,
+        'total_expenses': total_expenses,
+        'share': weighted_share,
+        'transfers': calculate_transfers_by_weight(group_expenses, weighted_share, group.id),
+        'group_id': group.id,  # Pass group_id to the template
+        'total_weight': total_weight  # Pass total_weight to the template
+    }
+
+    return render_template('group_report_template_by_weight.html', **report_data)
+
+
+def calculate_transfers_by_weight(group_expenses, weighted_share, group_id):
+    balances = {}
+
+    for expense in group_expenses:
+        user = User.query.get(expense.user_id)
+        weight = GroupMember.query.filter_by(user_id=user.id, group_id=group_id).first().weight
+        if user.username not in balances:
+            balances[user.username] = 0
+        balances[user.username] += expense.amount - (weighted_share * weight)
+
+    transfers = []
+
+    while len(balances) > 1:
+        debtor = min(balances, key=balances.get)
+        creditor = max(balances, key=balances.get)
+        amount = min(abs(balances[debtor]), balances[creditor])
+        
+        if amount == 0:
+            break  # Skip transfers with transfer amount of 0.0
+
+        balances[debtor] += amount
+        balances[creditor] -= amount
+
+        if balances[creditor] == 0:
+            del balances[creditor]
+
+        transfers.append((debtor, creditor, amount))
+
+    return transfers
+
 
 
 @app.route('/group_settings/<int:group_id>', methods=['GET', 'POST'])

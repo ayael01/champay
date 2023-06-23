@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Group Report by Weight - {{ group_name }}</title>
+    <style>
+        /* Add your custom CSS styles here */
+    </style>
+</head>
+<body>
+    <h1>{{ group_name }} Report (Weighted)</h1>
+
+    <h2>Expenses</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Description</th>
+                <th>Expenses</th>
+                <th>Weight</th>
+                <th>Last Updated</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for expense in group_expenses %}
+            <tr>
+                <td>{{ expense.user }}</td>
+                <td>{{ expense.description }}</td>
+                <td>{{ expense.amount|int }} NIS</td>
+                <td>{{ expense.weight }}</td>
+                <td>{{ expense.last_updated }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        
+    </table>
+
+    <h2>Summary</h2>
+    <p>Total Expenses: {{ total_expenses|int }} NIS</p>
+    <p>Total Weight: {{ total_weight }}</p>
+
+    <h2>Transfers</h2>
+    {% if transfers %}
+        <ul>
+            {% for debtor, creditor, amount in transfers %}
+            <li>{{ debtor }} should transfer {{ amount|int }} NIS to {{ creditor }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No transfers required.</p>
+    {% endif %}
+
+    <a href="{{ url_for('group_expenses', group_id=group_id) }}">Go back to Group Expenses</a>
+
+</body>
+</html>
