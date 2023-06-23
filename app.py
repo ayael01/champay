@@ -9,6 +9,9 @@ from sqlalchemy import Column, Boolean
 from flask import abort
 import os
 from sqlalchemy.exc import SQLAlchemyError
+from pytz import timezone
+import datetime
+
 
 
 app = Flask(__name__)
@@ -22,6 +25,8 @@ else:
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+
+tz = timezone('Israel')  # Set timezone to Israel
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -41,7 +46,7 @@ class GroupMember(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     group_id = db.Column(db.Integer, db.ForeignKey('group.id'))
     weight = db.Column(db.Integer, default=1.0) 
-    last_updated = db.Column(db.DateTime, default=None, onupdate=datetime.utcnow)
+    last_updated = db.Column(db.DateTime, default=None, onupdate=datetime.datetime.now(tz))
 
 
 class Expense(db.Model):
@@ -51,7 +56,7 @@ class Expense(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     group_id = db.Column(db.Integer, db.ForeignKey('group.id'))
     approved = db.Column(db.Boolean, default=False)
-    last_updated = db.Column(db.DateTime, default=None, onupdate=datetime.utcnow)
+    last_updated = db.Column(db.DateTime, default=None, onupdate=datetime.datetime.now(tz))
     user = db.relationship('User', backref='expenses')
 
 
@@ -168,7 +173,7 @@ def group_expenses(group_id):
             )
             db.session.add(expense)
 
-        expense.last_updated = datetime.utcnow()
+        expense.last_updated = datetime.datetime.now(tz)
 
         try:
             db.session.commit()
@@ -251,7 +256,7 @@ def group_report(group_id):
     # Generate the report
     # Fetch the group members from the database
     group_members = GroupMember.query.filter_by(group_id=group_id).all()
-    
+
     # Check if all members have the same weight
     weights = [member.weight for member in group_members]
     if len(set(weights)) == 1:  # The set operation will remove duplicate values
@@ -431,7 +436,7 @@ def group_settings(group_id):
 
         # Update the user's weight
         group_membership.weight = weight
-        group_membership.last_updated = datetime.utcnow()
+        group_membership.last_updated = datetime.datetime.now(tz)
 
         try:
             db.session.commit()

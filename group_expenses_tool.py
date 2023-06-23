@@ -4,6 +4,9 @@ from werkzeug.security import check_password_hash
 from datetime import datetime
 import os
 from sqlalchemy import func, select
+from pytz import timezone
+from pytz import timezone
+import datetime
 
 
 app = Flask(__name__)
@@ -13,6 +16,8 @@ if os.environ.get('CHAMPAY_ENV') == 'production':
 else:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://aya_el01:ccaa00@localhost/champay_db'
 db = SQLAlchemy(app)
+
+tz = timezone('Israel')  # Set timezone to Israel
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -32,7 +37,8 @@ class GroupMember(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     group_id = db.Column(db.Integer, db.ForeignKey('group.id'))
     weight = db.Column(db.Integer, default=1.0) 
-    last_updated = db.Column(db.DateTime, default=None, onupdate=datetime.utcnow)
+    last_updated = db.Column(db.DateTime, default=None, onupdate=datetime.datetime.now(tz))
+
 
 class Expense(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -41,7 +47,7 @@ class Expense(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     group_id = db.Column(db.Integer, db.ForeignKey('group.id'))
     approved = db.Column(db.Boolean, default=False)
-    last_updated = db.Column(db.DateTime, default=None, onupdate=datetime.utcnow)
+    last_updated = db.Column(db.DateTime, default=None, onupdate=datetime.datetime.now(tz))
     user = db.relationship('User', backref='expenses')
 
 
