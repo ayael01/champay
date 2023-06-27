@@ -140,7 +140,7 @@ input[type="submit"]:hover {
 .center-button {
     display: block;
     margin: 0 auto;
-    width: 100px !important;
+    width: 150px !important;
 }
 
 .weight-select {
@@ -500,6 +500,79 @@ h1 {
 .back2events-link {
     color: #45a049;
 }
+
+.search-form {
+    margin-bottom: 20px; 
+}
+
+.search-wrapper {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;  /* adjust as needed */
+}
+
+.search-button {
+    background-color: #45a049;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition-duration: 0.4s;
+    margin-left: 5px;
+}
+
+.search-button:hover {
+    background-color: white;
+    color: #45a049;
+}
+
+.friend-table {
+    margin-top: 20px;
+    width: 100%;
+    max-width: 550px; /* Same as the search form */
+    border-collapse: collapse;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.friend-table th, .friend-table td {
+    padding: 10px;
+    border: 1px solid #dddddd;
+    text-align: left;
+}
+
+.friend-table th {
+    background-color: #f2f2f2;
+}
+
+
+#finalize-group {
+    background-color: #45a049;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition-duration: 0.4s;
+    margin-top: 20px;
+    display: block;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#finalize-group:hover {
+    background-color: white;
+    color: #45a049;
+}
+
 
 
 

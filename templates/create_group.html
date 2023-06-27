@@ -17,50 +17,59 @@
                     <a href="{{ url_for('logout') }}">Logout</a>
                 </div>
             </div>
-            <h1>Create a new group</h1>
+            <h1>Create a new event {{ event_name }}</h1>
         </div>
     </header>
 
     <div class="menu-panel">
-        <div>
-            <a href="{{ url_for('dashboard') }}" class="back2events-link">Back to events</a>
-        </div>
+        <a href="{{ url_for('dashboard') }}" class="back2events-link">Back to events</a>
     </div>
 
     <main>
-        <h2>Hi {{ username }}, please add your friends</h2>
+        <section class="group-form">
+            <h2>Hi {{ username }}, please add your friends</h2>
 
-        <!-- Gray panel with search input and button -->
-        <div class="search-panel">
-            <form action="{{ url_for('search_friends') }}" method="post" class="form-inline" onsubmit="event.preventDefault(); searchFriends();">
-                <div class="friend-search-form">
-                    <input type="text" id="email" placeholder="Friend's email">
-                    <button>Search</button>
-                </div>
-            
-                <div id="search-results">
-                    <!-- Search results will be inserted here -->
+            <!-- Gray panel with search input and button -->
+            <form action="{{ url_for('search_friends') }}" method="post" class="form-inline search-form" onsubmit="event.preventDefault(); searchFriends();">
+                <div class="form-group">
+                    <label for="email">Friend's Email:</label>
+                    <div class="search-wrapper">
+                        <input type="text" id="email" name="email" required>
+                        <button class="search-button">Search</button>
+                    </div>
                 </div>
             </form>
             
-        </div>
-        <table id="user-table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <!-- Add more headers as needed -->
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Table rows will be added here -->
-            </tbody>
-        </table>
-        
-        
-    </main>
 
+            <div id="search-results">
+                <!-- Search results will be inserted here -->
+            </div>
+
+            <table id="user-table" class="friend-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <!-- Add more headers as needed -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Table rows will be added here -->
+                </tbody>
+            </table>
+            <button id="finalize-group" onclick="finalizeGroup()" class="center-button">Finalize Group</button>
+        </section>
+
+    </main>
 <script>
+    window.onload = function() {
+        var user = {
+            username: "{{ username }}",
+            email: "{{ email }}"
+        };
+        addUserToTable(user);
+    }
+
     function toggleDropdown() {
         const dropdown = document.getElementById("dropdown");
         dropdown.classList.toggle("show");
@@ -86,12 +95,16 @@
         .then(data => {
             var resultsDiv = document.getElementById("search-results");
             if (data.user) {
+                // We no longer want to display user found information
+                // So we comment out or remove the following code
+                /*
                 resultsDiv.innerHTML = `
                     <h2>User Found</h2>
                     <p>Name: ${data.user.username}</p>
                     <p>Email: ${data.user.email}</p>
                     <!-- Add more fields as needed -->
                 `;
+                */
                 addUserToTable(data.user);
             } else {
                 resultsDiv.innerHTML = "<p>" + data.error + "</p>";
@@ -99,7 +112,18 @@
         });
     }
 
+
+    var groupMembers = [];
+
     function addUserToTable(user) {
+        // Check if user already exists in the groupMembers array
+        for (let i = 0; i < groupMembers.length; i++) {
+            if (groupMembers[i].email === user.email) {
+                alert("User already added to the group.");
+                return;
+            }
+        }
+
         var table = document.getElementById("user-table").getElementsByTagName('tbody')[0];
         var row = table.insertRow(-1);
         var nameCell = row.insertCell(0);
@@ -107,8 +131,39 @@
         // Add more cells as needed
         nameCell.innerHTML = user.username;
         emailCell.innerHTML = user.email;
+        // Add user to the group members array
+        groupMembers.push(user);
         // Add more fields as needed
     }
+
+    function finalizeGroup() {
+        // Get the event name (group name) from the form
+        var groupName = document.getElementById("event-name").value;
+        if (!groupName) {
+            alert("Group name is required");
+            return;
+        }
+        
+        // Prepare ids for sending to the server
+        var memberIds = groupMembers.map(member => member.id);
+
+        fetch("/finalize_group", {
+            method: "POST",
+            body: JSON.stringify({ groupMembers: memberIds, groupName: groupName }),
+            headers: { "Content-Type": "application/json" },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Group created successfully");
+                window.location.href = "/dashboard"; // redirect to dashboard or any other page
+            } else {
+                alert("Failed to create group: " + data.error);
+            }
+        });
+    }
+
+
 
 
 </script>

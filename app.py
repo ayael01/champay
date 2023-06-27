@@ -490,40 +490,18 @@ def create_group():
 
     username = session['username']
     user = User.query.filter_by(username=username).first()
+    email = user.email
 
     if request.method == 'POST':
         event_name = request.form.get('event-name')
         event_description = request.form.get('event-description')  # Add other fields as necessary
 
-        # validate event_name and other fields
-        if not event_name or not event_description:  # Update this condition as needed
-            flash("Please provide valid information.", "error")
-            return render_template('create_group.html', username=username)
-        
-        # check if a group with this name already exists
-        if Group.query.filter_by(name=event_name).first():
-            flash("Event with this name already exists.", "error")
-            return render_template('create_group.html', username=username)
+        session['event_name'] = event_name
 
-        # Create new group
-        new_group = Group(name=event_name)  # Add other fields as necessary
+        # rest of the code ...
 
-        # Add current user to the new group as a GroupMember
-        new_group_member = GroupMember(user_id=user.id, group_id=new_group.id)
+    return render_template('create_group.html', username=username, email=email, event_name=session.get('event_name'))
 
-        try:
-            # Add and commit to the database
-            db.session.add(new_group)
-            db.session.add(new_group_member)
-            db.session.commit()
-            flash("New event created successfully.", "success")
-            return redirect(url_for('dashboard'))
-        except SQLAlchemyError as e:
-            db.session.rollback()
-            flash("Failed to create a new event. Please try again.", "error")
-            return render_template('create_group.html', username=username)
-
-    return render_template('create_group.html', username=username)
 
 
 @app.route('/search_friends', methods=['POST'])
@@ -538,6 +516,34 @@ def search_friends():
     else:
         # return an error message if not found
         return jsonify(error="User not found"), 404
+    
+
+@app.route('/finalize_group', methods=['POST'])
+def finalize_group():
+    if 'username' not in session:
+        return jsonify(error="User not logged in"), 401
+
+    group_members = request.json.get('groupMembers')
+    group_name = request.json.get('groupName')  # Assumes you are sending the group name in the request
+
+    if not group_members or len(group_members) < 1:
+        return jsonify(error="At least one group member required"), 400
+
+    if not group_name:
+        return jsonify(error="Group name is required"), 400
+
+    try:
+        # call the function to create the group and expenses
+        message = create_group_expenses(app, group_name, group_members)
+        if "successfully" in message:
+            return jsonify(success=True), 200
+        else:
+            return jsonify(error=message), 500
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify(error=str(e)), 500
+
 
 
 

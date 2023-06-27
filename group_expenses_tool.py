@@ -26,7 +26,13 @@ class User(db.Model):
     email = db.Column(db.String(120), index=True, unique=True)
     is_logged_in = db.Column(db.Boolean, default=False)
     group_memberships = db.relationship("GroupMember", backref="user")
-
+    def serialize(self):
+        return {
+            "id": self.id,
+            "username": self.username,
+            "email": self.email
+            # add more fields as needed
+        }
 
 class Group(db.Model):
     id = db.Column(db.Integer, primary_key=True)
