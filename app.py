@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, session, flash, redirect, url_for, jsonify
+
 from werkzeug.security import check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -35,6 +36,13 @@ class User(db.Model):
     email = db.Column(db.String(120), index=True, unique=True)
     is_logged_in = db.Column(db.Boolean, default=False)
     group_memberships = db.relationship("GroupMember", backref="user")
+    def serialize(self):
+        return {
+            "id": self.id,
+            "username": self.username,
+            "email": self.email
+            # add more fields as needed
+        }
 
 
 class Group(db.Model):
@@ -472,6 +480,65 @@ def group_settings(group_id):
         })
 
     return render_template('group_settings.html', group=group, members=members, username=username)
+
+
+@app.route('/create_group', methods=['GET', 'POST'])
+def create_group():
+    if 'username' not in session:
+        flash("Please login first.")
+        return redirect(url_for('homepage'))
+
+    username = session['username']
+    user = User.query.filter_by(username=username).first()
+
+    if request.method == 'POST':
+        event_name = request.form.get('event-name')
+        event_description = request.form.get('event-description')  # Add other fields as necessary
+
+        # validate event_name and other fields
+        if not event_name or not event_description:  # Update this condition as needed
+            flash("Please provide valid information.", "error")
+            return render_template('create_group.html', username=username)
+        
+        # check if a group with this name already exists
+        if Group.query.filter_by(name=event_name).first():
+            flash("Event with this name already exists.", "error")
+            return render_template('create_group.html', username=username)
+
+        # Create new group
+        new_group = Group(name=event_name)  # Add other fields as necessary
+
+        # Add current user to the new group as a GroupMember
+        new_group_member = GroupMember(user_id=user.id, group_id=new_group.id)
+
+        try:
+            # Add and commit to the database
+            db.session.add(new_group)
+            db.session.add(new_group_member)
+            db.session.commit()
+            flash("New event created successfully.", "success")
+            return redirect(url_for('dashboard'))
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            flash("Failed to create a new event. Please try again.", "error")
+            return render_template('create_group.html', username=username)
+
+    return render_template('create_group.html', username=username)
+
+
+@app.route('/search_friends', methods=['POST'])
+def search_friends():
+    # get the submitted email
+    email = request.json.get('email')
+    # search the database for a user with this email
+    user = User.query.filter_by(email=email).first()
+    if user:
+        # return the user details if found
+        return jsonify(user=user.serialize()), 200
+    else:
+        # return an error message if not found
+        return jsonify(error="User not found"), 404
+
 
 
 

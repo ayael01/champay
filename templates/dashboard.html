@@ -42,6 +42,19 @@
                 <p class="error-message">Please contact the administrator to join a group.</p>
             {% endif %}
         </section>
+
+        <section class="group-form">
+            <h2>Create New Event</h2>
+            <form action="{{ url_for('create_group') }}" method="post">
+                <div class="form-group">
+                    <label for="event-name">Event Name:</label>
+                    <input type="text" id="event-name" name="event-name" required>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Create" class="center-button">
+                </div>
+            </form>
+        </section>
         
         
     </main>
