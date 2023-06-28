@@ -498,6 +498,12 @@ def create_group():
         event_name = request.form.get('event-name')
         event_description = request.form.get('event-description')  # Add other fields as necessary
 
+        # Check if the event name already exists in the database
+        existing_group = Group.query.filter_by(name=event_name).first()
+        if existing_group is not None:
+            flash("Event name already taken. Please choose a different name.")
+            return redirect(url_for('dashboard'))
+
         session['event_name'] = event_name
 
         # rest of the code ...
