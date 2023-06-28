@@ -45,6 +45,10 @@
                 <!-- Search results will be inserted here -->
             </div>
 
+            <div class="users-create-group">
+                <p>Users added to {{ event_name }} event:</p>
+            </div>
+
             <table id="user-table" class="friend-table">
                 <thead>
                     <tr>
@@ -59,6 +63,13 @@
             </table>
             <button id="finalize-group" onclick="finalizeGroup()" class="center-button">Finalize Group</button>
         </section>
+
+        <div id="popup_flash" class="popup">
+            <div class="popup-content">
+                <p id="message_flash" class="popup_flasf-success"></p>
+                <button class="popup-button" onclick="hidePopupFlash()">OK</button>
+            </div>
+        </div>
 
     </main>
 <script>
@@ -91,26 +102,27 @@
             body: JSON.stringify({ email: email }),
             headers: { "Content-Type": "application/json" },
         })
-        .then(response => response.json())
-        .then(data => {
-            var resultsDiv = document.getElementById("search-results");
-            if (data.user) {
-                // We no longer want to display user found information
-                // So we comment out or remove the following code
-                /*
-                resultsDiv.innerHTML = `
-                    <h2>User Found</h2>
-                    <p>Name: ${data.user.username}</p>
-                    <p>Email: ${data.user.email}</p>
-                    <!-- Add more fields as needed -->
-                `;
-                */
-                addUserToTable(data.user);
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw new Error(err.error); });
             } else {
-                resultsDiv.innerHTML = "<p>" + data.error + "</p>";
+                return response.json();
             }
+        })
+        .then(data => {
+            if (data.user) {
+                addUserToTable(data.user);
+            }
+        })
+        .catch(error => {
+            // Display error message in a popup
+            document.getElementById('message_flash').innerText = error.message;
+            document.getElementById('message_flash').className = "popup_flash-error";
+            document.getElementById('popup_flash').style.display = "flex";
         });
     }
+
+
 
 
     var groupMembers = [];
@@ -164,7 +176,10 @@
     }
 
 
-
+    function hidePopupFlash() {
+        const popup = document.getElementById("popup_flash");
+        popup.style.display = "none";
+    }
 
 </script>
 </body>

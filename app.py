@@ -515,7 +515,7 @@ def search_friends():
         return jsonify(user=user.serialize()), 200
     else:
         # return an error message if not found
-        return jsonify(error="User not found"), 404
+        return jsonify(error=f"User {email} not found"), 404
     
 
 @app.route('/finalize_group', methods=['POST'])

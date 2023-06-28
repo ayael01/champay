@@ -297,6 +297,18 @@ input[type="submit"]:hover {
     font-weight: bold;
     text-decoration: none;
   }
+
+  .users-create-group {
+    display: flex;
+    align-items: center;
+  }
+  
+  .users-create-group p {
+    color: #2e8531; /* Change the color to red */
+    margin-right: 10px; /* Add some spacing between the title and the link */
+    font-weight: bold;
+    text-decoration: none;
+  }
   
   .generate-report-link {
     color: #ff0000; /* Change the color to red */
@@ -531,7 +543,7 @@ h1 {
 }
 
 .friend-table {
-    margin-top: 20px;
+    margin-top: auto;
     width: 100%;
     max-width: 550px; /* Same as the search form */
     border-collapse: collapse;
