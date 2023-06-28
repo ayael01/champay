@@ -131,7 +131,10 @@
         // Check if user already exists in the groupMembers array
         for (let i = 0; i < groupMembers.length; i++) {
             if (groupMembers[i].email === user.email) {
-                alert("User already added to the group.");
+                // Display error message in a popup
+                document.getElementById('message_flash').innerText = "User already added to the group.";
+                document.getElementById('message_flash').className = "popup_flash-error";
+                document.getElementById('popup_flash').style.display = "flex";
                 return;
             }
         }
@@ -147,6 +150,7 @@
         groupMembers.push(user);
         // Add more fields as needed
     }
+
 
     function finalizeGroup() {
         // Get the event name (group name) from the form
