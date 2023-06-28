@@ -12,6 +12,8 @@ import os
 from sqlalchemy.exc import SQLAlchemyError
 from pytz import timezone
 import datetime
+import group_expenses_tool as get
+
 
 
 
@@ -500,7 +502,8 @@ def create_group():
 
         # rest of the code ...
 
-    return render_template('create_group.html', username=username, email=email, event_name=session.get('event_name'))
+    return render_template('create_group.html', username=username, email=email, user_id=user.id, event_name=session.get('event_name'))
+
 
 
 
@@ -518,31 +521,63 @@ def search_friends():
         return jsonify(error=f"User {email} not found"), 404
     
 
-@app.route('/finalize_group', methods=['POST'])
-def finalize_group():
-    if 'username' not in session:
-        return jsonify(error="User not logged in"), 401
+def create_group_expenses(group_name, member_ids):
+    # Check if all user IDs are valid and exist in the database
+    users = User.query.filter(User.id.in_(member_ids)).all()
 
-    group_members = request.json.get('groupMembers')
-    group_name = request.json.get('groupName')  # Assumes you are sending the group name in the request
-
-    if not group_members or len(group_members) < 1:
-        return jsonify(error="At least one group member required"), 400
-
-    if not group_name:
-        return jsonify(error="Group name is required"), 400
+    if len(users) != len(member_ids):
+        # Some user IDs are invalid or not found
+        return "Invalid user IDs. Please check the user IDs and try again."
 
     try:
-        # call the function to create the group and expenses
-        message = create_group_expenses(app, group_name, group_members)
-        if "successfully" in message:
-            return jsonify(success=True), 200
-        else:
-            return jsonify(error=message), 500
+        # Create the group
+        group = Group(name=group_name)
+        db.session.add(group)
+        db.session.commit()
+
+        # Create the group memberships
+        for user in users:
+            group_member = GroupMember(user_id=user.id, group_id=group.id)
+            db.session.add(group_member)
+
+            # Create the initial expense for the user
+            initial_expense = Expense(
+                description="N/A",
+                amount=0.0,
+                user_id=user.id,
+                group_id=group.id,
+                approved=False,
+                last_updated=None,  # Set to None initially
+                user=user
+            )
+            db.session.add(initial_expense)
+
+        db.session.commit()
+
+        return "Group expenses created successfully."
 
     except Exception as e:
+        # Handle any exceptions that occur during group creation
         db.session.rollback()
-        return jsonify(error=str(e)), 500
+        return f"Failed to create group expenses. Error: {str(e)}"
+
+@app.route('/finalize_group', methods=['POST'])
+def finalize_group():
+    # Extracting data from the request body
+    data = request.get_json()
+
+    # Collecting required parameters
+    group_name = data.get('groupName')
+    member_ids = data.get('groupMembers')
+
+    # Create the group using create_group_expenses function
+    response_message = create_group_expenses(group_name, member_ids)
+
+    # Check if the group creation was successful
+    if "successfully" in response_message.lower():
+        return jsonify(success=True, message="Group created successfully.")
+    else:
+        return jsonify(success=False, error=response_message)
 
 
 

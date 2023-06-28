@@ -76,10 +76,12 @@
     window.onload = function() {
         var user = {
             username: "{{ username }}",
-            email: "{{ email }}"
+            email: "{{ email }}",
+            id: parseInt("{{ user_id }}", 10)
         };
         addUserToTable(user);
     }
+
 
     function toggleDropdown() {
         const dropdown = document.getElementById("dropdown");
@@ -154,12 +156,12 @@
 
     function finalizeGroup() {
         // Get the event name (group name) from the form
-        var groupName = document.getElementById("event-name").value;
+        var groupName = document.querySelector("header .header-content h1").innerText.replace('Create a new event ', '');
         if (!groupName) {
             alert("Group name is required");
             return;
         }
-        
+            
         // Prepare ids for sending to the server
         var memberIds = groupMembers.map(member => member.id);
 
@@ -178,6 +180,7 @@
             }
         });
     }
+
 
 
     function hidePopupFlash() {

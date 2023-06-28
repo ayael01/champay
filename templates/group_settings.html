@@ -99,14 +99,6 @@
 
     </main>
     <script>
-        window.onload = function() {
-            var user = {
-                username: "{{ username }}",
-                email: "{{ email }}"
-            };
-            addUserToTable(user);
-        }
-
         function toggleDropdown() {
             const dropdown = document.getElementById("dropdown");
             dropdown.classList.toggle("show");
