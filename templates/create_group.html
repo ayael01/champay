@@ -70,6 +70,17 @@
                 <button class="popup-button" onclick="hidePopupFlash()">OK</button>
             </div>
         </div>
+        <script type="text/javascript">
+            window.onload = function() {
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}          
+                        document.getElementById('message_flash').innerText = "{{ messages[0][1] }}";
+                        document.getElementById('message_flash').className = "popup_flash-" + "{{ messages[0][0] }}";
+                        document.getElementById('popup_flash').style.display = "flex";
+                    {% endif %}
+                {% endwith %}
+            };
+        </script>
 
     </main>
 <script>
@@ -173,8 +184,8 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert("Group created successfully");
-                window.location.href = "/dashboard"; // redirect to dashboard or any other page
+            // Redirect to the group_expenses page for the new group
+            window.location.href = "/group_expenses/" + data.group_id;
             } else {
                 alert("Failed to create group: " + data.error);
             }

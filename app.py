@@ -560,12 +560,12 @@ def create_group_expenses(group_name, member_ids):
 
         db.session.commit()
 
-        return "Group expenses created successfully."
+        return group.id, "Group expenses created successfully."
 
     except Exception as e:
         # Handle any exceptions that occur during group creation
         db.session.rollback()
-        return f"Failed to create group expenses. Error: {str(e)}"
+        return None, f"Failed to create group expenses. Error: {str(e)}"
 
 @app.route('/finalize_group', methods=['POST'])
 def finalize_group():
@@ -577,11 +577,12 @@ def finalize_group():
     member_ids = data.get('groupMembers')
 
     # Create the group using create_group_expenses function
-    response_message = create_group_expenses(group_name, member_ids)
+    group_id, response_message = create_group_expenses(group_name, member_ids)
 
     # Check if the group creation was successful
     if "successfully" in response_message.lower():
-        return jsonify(success=True, message="Group created successfully.")
+        flash(f"Successfully created event {group_name}.", "success")
+        return jsonify(success=True, group_id=group_id, message="Group created successfully.")
     else:
         return jsonify(success=False, error=response_message)
 
