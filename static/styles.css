@@ -480,7 +480,9 @@ h1 {
 }
 
 .popup_flash-error {
-    color: red;
+    margin-bottom: 10px;
+    color: #ff0000;
+    font-weight: bold;
 }
 
 

@@ -501,7 +501,7 @@ def create_group():
         # Check if the event name already exists in the database
         existing_group = Group.query.filter_by(name=event_name).first()
         if existing_group is not None:
-            flash("Event name already taken. Please choose a different name.")
+            flash("Event name already taken. Please choose a different name.", "error")
             return redirect(url_for('dashboard'))
 
         session['event_name'] = event_name
