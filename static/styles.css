@@ -591,6 +591,34 @@ h1 {
     width: 60%;  /* adjust this as needed */
 }
 
+.remove-cell {
+    text-align: right;
+}
+
+.remove-link {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    color: red;
+    text-decoration: none;
+    border: 1px solid red;
+    padding: 1px 3px;
+    border-radius: 2px;
+}
+
+.remove-link:hover {
+    color: darkred;
+    border-color: darkred;
+}
+
+/* Add position: relative to the email cell so the 'x' is positioned relative to this cell */
+.friend-table th:nth-child(2),
+.friend-table td:nth-child(2) {
+    position: relative;
+}
+
+
+
 
 
 

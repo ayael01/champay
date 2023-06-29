@@ -136,8 +136,6 @@
     }
 
 
-
-
     var groupMembers = [];
 
     function addUserToTable(user) {
@@ -156,12 +154,25 @@
         var row = table.insertRow(-1);
         var nameCell = row.insertCell(0);
         var emailCell = row.insertCell(1);
-        // Add more cells as needed
+
         nameCell.innerHTML = user.username;
-        emailCell.innerHTML = user.email;
+        if(groupMembers.length > 0) {
+            emailCell.innerHTML = user.email + "<a href='#' class='remove-link'>x</a>";
+
+            var removeLink = emailCell.getElementsByTagName('a')[0];
+            removeLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                // Remove the user from the groupMembers array
+                groupMembers = groupMembers.filter(member => member.email !== user.email);
+                // Remove the row from the table
+                row.remove();
+            });
+        } else {
+            emailCell.innerHTML = user.email;
+        }
+
         // Add user to the group members array
         groupMembers.push(user);
-        // Add more fields as needed
     }
 
 
