@@ -1,0 +1,13 @@
+The Champay Web application is essentially a group expense management system. Here's what it's primarily designed for:
+
+Splitting Expenses: Champay allows users to create groups, where each group represents a unique context where multiple users share expenses. For example, these could be roommates sharing household costs, friends splitting vacation expenses, or coworkers sharing the bill for a team lunch. Each user can record their individual expenses within a group.
+
+Weighted Distribution: What makes Champay distinctive is its support for "weighted" expense distribution. This means not every expense has to be split equally. For instance, if some group members consume more of a shared resource, their "weight" can be increased accordingly, ensuring a fair distribution of costs.
+
+Generating Reports: Users can generate detailed reports showing each group member's expenses and the corresponding weights. If the weights are equal, a regular report is generated; otherwise, a weighted report is prepared.
+
+Balancing Debts: Based on the recorded expenses and their weights, Champay calculates how much each group member owes or is owed. This helps in settling the debts in the most efficient way possible, minimizing the number of transactions between group members.
+
+User Management: Champay allows users to register and manage their accounts. Each user can belong to multiple groups and navigate between them.
+
+In summary, Champay is a comprehensive tool for managing shared expenses in a group setting, ensuring transparency and fairness in financial interactions among peers.
