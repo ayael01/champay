@@ -518,7 +518,7 @@ def search_friends():
     # get the submitted email
     email = request.json.get('email')
     # search the database for a user with this email
-    user = User.query.filter_by(email=email).first()
+    user = User.query.filter(User.email.ilike(email)).first()
     if user:
         # return the user details if found
         return jsonify(user=user.serialize()), 200
