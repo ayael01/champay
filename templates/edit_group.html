@@ -109,16 +109,34 @@
                             return;
                         }
                     }
-    
-                    var table = document.getElementById("user-table").getElementsByTagName('tbody')[0];
-                    var row = table.insertRow(-1);
-                    var nameCell = row.insertCell(0);
-                    var emailCell = row.insertCell(1);
-                    nameCell.innerHTML = data.user.username;
-                    emailCell.innerHTML = data.user.email;
-    
-                    // Add user to the group members array
-                    groupMembers.push(data.user);
+
+                    // Call the new server endpoint to add the user to the group and create an initial expense
+                    fetch("/add_user_to_group", {
+                        method: "POST",
+                        body: JSON.stringify({ email: data.user.email, group_id: "{{ group.id }}" }),
+                        headers: { "Content-Type": "application/json" },
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => { throw new Error(err.error); });
+                        } else {
+                            // Add user to the group members array and the table
+                            var table = document.getElementById("user-table").getElementsByTagName('tbody')[0];
+                            var row = table.insertRow(-1);
+                            var nameCell = row.insertCell(0);
+                            var emailCell = row.insertCell(1);
+                            nameCell.innerHTML = data.user.username;
+                            emailCell.innerHTML = data.user.email;
+
+                            groupMembers.push(data.user);
+                        }
+                    })
+                    .catch(error => {
+                        // Display error message in a popup
+                        document.getElementById('message_flash').innerText = error.message;
+                        document.getElementById('message_flash').className = "popup_flash-error";
+                        document.getElementById('popup_flash').style.display = "flex";
+                    });
                 }
             })
             .catch(error => {
@@ -128,6 +146,7 @@
                 document.getElementById('popup_flash').style.display = "flex";
             });
         }
+
     
         // Functions for the dropdown menu
         function toggleDropdown() {

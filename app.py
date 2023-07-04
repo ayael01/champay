@@ -604,29 +604,46 @@ def edit_group(group_id):
     return render_template('edit_group.html', group=group, group_id=group_id, group_name=group.name, group_members=group_members, username=session['username'])
 
 
-
-@app.route('/add_to_group/<int:group_id>', methods=['POST'])
-def add_to_group(group_id):
-    data = request.json
+@app.route("/add_user_to_group", methods=["POST"])
+def add_user_to_group():
+    data = request.get_json()
     email = data.get('email')
-    if not email:
-        return jsonify(success=False, message="No email provided.")
+    group_id = data.get('group_id')
 
-    group = Group.query.get(group_id)
-    if not group:
-        return jsonify(success=False, message="Group not found.")
-
+    # Check if the user exists
     user = User.query.filter_by(email=email).first()
-    if not user:
-        return jsonify(success=False, message="User not found.")
+    if user is None:
+        return jsonify({"error": "User not found."}), 400
 
-    if GroupMember.query.filter_by(group_id=group_id, user_id=user.id).first():
-        return jsonify(success=False, message="User already in the group.")
+    # Check if the user is already part of the group
+    existing_group_member = GroupMember.query.filter_by(user_id=user.id, group_id=group_id).first()
+    if existing_group_member is not None:
+        return jsonify({"error": "User is already part of the group."}), 400
 
-    group_member = GroupMember(group_id=group_id, user_id=user.id)
-    db.session.add(group_member)
-    db.session.commit()
-    return jsonify(success=True, message="User added to the group.")
+    try:
+        # Add the user to the group
+        group_member = GroupMember(user_id=user.id, group_id=group_id)
+        db.session.add(group_member)
+
+        # Add an initial expense for the user
+        initial_expense = Expense(
+            description="N/A",
+            amount=0.0,
+            user_id=user.id,
+            group_id=group_id,
+            approved=False,
+            last_updated=None,  # Set to None initially
+            user=user
+        )
+        db.session.add(initial_expense)
+        db.session.commit()
+
+        return jsonify({"message": "User added to group successfully."}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Failed to add user to group. Error: {str(e)}"}), 500
+
 
 @app.route('/remove_from_group/<int:group_id>', methods=['POST'])
 def remove_from_group(group_id):
