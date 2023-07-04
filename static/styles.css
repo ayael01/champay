@@ -453,16 +453,6 @@ h1 {
     z-index: 999;
 }
 
-.popup-content {
-    background-color: #fefefe;
-    margin: 20% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 300px;
-    text-align: center;
-    border-radius: 5px; 
-}
-
 .popup-message {
     margin-bottom: 10px;
     color: #ff0000;
@@ -616,6 +606,26 @@ h1 {
 .friend-table td:nth-child(2) {
     position: relative;
 }
+
+.popup-content.popup-warning {
+    background-color: #ff4b5c; /* Adjust this to the exact color you want */
+    color: #ffffff; /* Color of the text */
+    /* Add other styles as needed */
+}
+
+
+.popup-content {
+    background-color: #fefefe;
+    margin: 20% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 300px;
+    text-align: center;
+    border-radius: 5px; 
+}
+
+
+
 
 
 

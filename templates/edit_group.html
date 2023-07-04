@@ -78,6 +78,16 @@
                 <button class="popup-button" onclick="hidePopupFlash()">OK</button>
             </div>
         </div>
+
+        <div id="confirm_popup" class="popup">
+            <div class="popup-content popup-warning">
+                <p id="confirm_message"></p>
+                <button class="popup-button" id="confirm_ok">OK</button>
+                <button class="popup-button" id="confirm_cancel">Cancel</button>
+            </div>
+        </div>        
+        
+        
     </main>
 
     <script type="text/javascript">
@@ -188,6 +198,28 @@
 
         // Function to remove a user from the group
         function removeUser(email, buttonElement) {
+            // Check if the user is trying to remove themselves from the group
+            var current_user_email = "{{ current_user_email }}";
+            if (email === current_user_email) {
+                showConfirmPopup(
+                    "Are you sure you want to remove yourself from the group? You won't be able to return to the group unless someone else adds you.",
+                    function() {
+                        // OK button callback
+                        // Code to remove the user goes here
+                        removeUserFromGroup(email, buttonElement);
+                    },
+                    function() {
+                        // Cancel button callback
+                        // Do nothing
+                    }
+                );
+            } else {
+                // If it's not the current user, proceed to remove the user directly
+                removeUserFromGroup(email, buttonElement);
+            }
+        }
+
+        function removeUserFromGroup(email, buttonElement) {
             fetch("/remove_user_from_group", {
                 method: "POST",
                 body: JSON.stringify({ email: email, group_id: "{{ group.id }}" }),
@@ -223,6 +255,32 @@
                 document.getElementById('popup_flash').style.display = "flex";
             });
         }
+
+        function showConfirmPopup(message, okCallback, cancelCallback) {
+            // Set the message
+            document.getElementById('confirm_message').innerText = message;
+
+            // Set what happens when the OK button is clicked
+            document.getElementById('confirm_ok').onclick = function() {
+                hideConfirmPopup();
+                okCallback();
+            };
+
+            // Set what happens when the Cancel button is clicked
+            document.getElementById('confirm_cancel').onclick = function() {
+                hideConfirmPopup();
+                cancelCallback();
+            };
+
+            // Show the popup
+            document.getElementById('confirm_popup').style.display = "flex";
+        }
+
+        function hideConfirmPopup() {
+            // Hide the popup
+            document.getElementById('confirm_popup').style.display = "none";
+        }
+
 
     </script>
     

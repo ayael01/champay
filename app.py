@@ -600,8 +600,16 @@ def edit_group(group_id):
         flash("Group not found.", "error")
         return redirect(url_for('dashboard'))
 
+    # get current user's email based on the username stored in the session
+    current_user = User.query.filter_by(username=session['username']).first()
+    if current_user is None:
+        flash("User not found.", "error")
+        return redirect(url_for('dashboard'))
+    current_user_email = current_user.email
+
     group_members = [member.user.serialize() for member in group.group_members]
-    return render_template('edit_group.html', group=group, group_id=group_id, group_name=group.name, group_members=group_members, username=session['username'])
+    return render_template('edit_group.html', group=group, group_id=group_id, group_name=group.name, group_members=group_members, username=session['username'], current_user_email=current_user_email)
+
 
 
 @app.route("/add_user_to_group", methods=["POST"])
