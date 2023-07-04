@@ -651,6 +651,13 @@ def remove_user_from_group():
     email = data.get('email')
     group_id = data.get('group_id')
 
+    group = Group.query.get(group_id)  # Retrieve the group data by id
+    users_in_group = group.group_members  # Get all users in the group
+
+    if len(users_in_group) <= 1:
+        # If there's only one user in the group, return an error message
+        return jsonify({'error': 'Cannot remove the user as a group cannot be empty.'}), 400
+
     # Check if the user exists
     user = User.query.filter_by(email=email).first()
     if user is None:
