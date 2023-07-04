@@ -127,8 +127,12 @@
                             var row = table.insertRow(-1);
                             var nameCell = row.insertCell(0);
                             var emailCell = row.insertCell(1);
+                            var removeCell = row.insertCell(2);
                             nameCell.innerHTML = data.user.username;
                             emailCell.innerHTML = data.user.email;
+
+                            // Add the "Remove" button to the newly created row
+                            removeCell.innerHTML = `<button class="remove-button" onclick="removeUser('${data.user.email}', this)">Remove</button>`;
 
                             groupMembers.push(data.user);
                         }
@@ -148,6 +152,7 @@
                 document.getElementById('popup_flash').style.display = "flex";
             });
         }
+
 
     
         // Functions for the dropdown menu
