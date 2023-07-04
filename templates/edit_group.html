@@ -57,6 +57,7 @@
                     <tr>
                         <th>Name</th>
                         <th>Email</th>
+                        <th>Remove</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -64,6 +65,7 @@
                         <tr>
                             <td>{{ member.username }}</td>
                             <td>{{ member.email }}</td>
+                            <td><button class="remove-button" onclick="removeUser('{{ member.email }}', this)">Remove</button></td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -178,6 +180,39 @@
                 {% endif %}
             {% endwith %}
         };
+
+        // Function to remove a user from the group
+        function removeUser(email, buttonElement) {
+            fetch("/remove_user_from_group", {
+                method: "POST",
+                body: JSON.stringify({ email: email, group_id: "{{ group.id }}" }),
+                headers: { "Content-Type": "application/json" },
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.error); });
+                } else {
+                    // Remove user from the group members array and the table
+                    for (let i = 0; i < groupMembers.length; i++) {
+                        if (groupMembers[i].email === email) {
+                            groupMembers.splice(i, 1);
+                            break;
+                        }
+                    }
+
+                    // Remove the row from the table
+                    var row = buttonElement.parentNode.parentNode;
+                    row.parentNode.removeChild(row);
+                }
+            })
+            .catch(error => {
+                // Display error message in a popup
+                document.getElementById('message_flash').innerText = error.message;
+                document.getElementById('message_flash').className = "popup_flash-error";
+                document.getElementById('popup_flash').style.display = "flex";
+            });
+        }
+
     </script>
     
 </body>

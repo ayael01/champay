@@ -645,29 +645,38 @@ def add_user_to_group():
         return jsonify({"error": f"Failed to add user to group. Error: {str(e)}"}), 500
 
 
-@app.route('/remove_from_group/<int:group_id>', methods=['POST'])
-def remove_from_group(group_id):
-    data = request.json
+@app.route("/remove_user_from_group", methods=["POST"])
+def remove_user_from_group():
+    data = request.get_json()
     email = data.get('email')
-    if not email:
-        return jsonify(success=False, message="No email provided.")
+    group_id = data.get('group_id')
 
-    group = Group.query.get(group_id)
-    if not group:
-        return jsonify(success=False, message="Group not found.")
-
+    # Check if the user exists
     user = User.query.filter_by(email=email).first()
-    if not user:
-        return jsonify(success=False, message="User not found.")
+    if user is None:
+        return jsonify({"error": "User not found."}), 400
 
-    group_member = GroupMember.query.filter_by(group_id=group_id, user_id=user.id).first()
-    if not group_member:
-        return jsonify(success=False, message="User is not in the group.")
+    # Check if the user is part of the group
+    existing_group_member = GroupMember.query.filter_by(user_id=user.id, group_id=group_id).first()
+    if existing_group_member is None:
+        return jsonify({"error": "User is not part of the group."}), 400
 
-    db.session.delete(group_member)
-    db.session.commit()
-    return jsonify(success=True, message="User removed from the group.")
+    try:
+        # Remove the user from the group
+        db.session.delete(existing_group_member)
 
+        # Remove the user's expenses from the group
+        expenses = Expense.query.filter_by(user_id=user.id, group_id=group_id).all()
+        for expense in expenses:
+            db.session.delete(expense)
+
+        db.session.commit()
+
+        return jsonify({"message": "User removed from group successfully."}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Failed to remove user from group. Error: {str(e)}"}), 500
 
 
 
