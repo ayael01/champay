@@ -37,6 +37,8 @@ class User(db.Model):
 class Group(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True)
+    group_members = db.relationship('GroupMember', backref='group')  # new line
+
 
 class GroupMember(db.Model):
     id = db.Column(db.Integer, primary_key=True)

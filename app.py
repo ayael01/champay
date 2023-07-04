@@ -50,6 +50,8 @@ class User(db.Model):
 class Group(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True)
+    group_members = db.relationship('GroupMember', backref='group')  # new line
+
 
 class GroupMember(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -587,6 +589,67 @@ def finalize_group():
         return jsonify(success=False, error=response_message)
 
 
+@app.route('/edit_group/<int:group_id>', methods=['GET'])
+def edit_group(group_id):
+    if 'username' not in session:
+        flash("Please login first.")
+        return redirect(url_for('homepage'))
+
+    group = Group.query.get(group_id)
+    if not group:
+        flash("Group not found.", "error")
+        return redirect(url_for('dashboard'))
+
+    group_members = [member.user.serialize() for member in group.group_members]
+    return render_template('edit_group.html', group=group, group_id=group_id, group_name=group.name, group_members=group_members, username=session['username'])
+
+
+
+@app.route('/add_to_group/<int:group_id>', methods=['POST'])
+def add_to_group(group_id):
+    data = request.json
+    email = data.get('email')
+    if not email:
+        return jsonify(success=False, message="No email provided.")
+
+    group = Group.query.get(group_id)
+    if not group:
+        return jsonify(success=False, message="Group not found.")
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify(success=False, message="User not found.")
+
+    if GroupMember.query.filter_by(group_id=group_id, user_id=user.id).first():
+        return jsonify(success=False, message="User already in the group.")
+
+    group_member = GroupMember(group_id=group_id, user_id=user.id)
+    db.session.add(group_member)
+    db.session.commit()
+    return jsonify(success=True, message="User added to the group.")
+
+@app.route('/remove_from_group/<int:group_id>', methods=['POST'])
+def remove_from_group(group_id):
+    data = request.json
+    email = data.get('email')
+    if not email:
+        return jsonify(success=False, message="No email provided.")
+
+    group = Group.query.get(group_id)
+    if not group:
+        return jsonify(success=False, message="Group not found.")
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify(success=False, message="User not found.")
+
+    group_member = GroupMember.query.filter_by(group_id=group_id, user_id=user.id).first()
+    if not group_member:
+        return jsonify(success=False, message="User is not in the group.")
+
+    db.session.delete(group_member)
+    db.session.commit()
+    return jsonify(success=True, message="User removed from the group.")
 
 
 

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Champay - Edit Group</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <div class="user-info-container">
+                <div class="user-info" onclick="toggleDropdown()">{{ username[0] }}</div>
+                <div id="dropdown" class="dropdown-content">
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                </div>
+            </div>
+            <h1>{{ group_name }} members</h1>
+        </div>
+    </header>
+
+    <div class="menu-panel">
+        <div>
+            <a href="{{ url_for('dashboard') }}" class="back2events-link">Back to events</a>
+            <a href="{{ url_for('group_expenses', group_id=group.id) }}" class="back2events-link">Back to expenses</a>
+        </div>
+    </div>
+    
+    <main>
+        <section class="group-form">
+            <h2>Hi {{ username }}, please add friends</h2>
+
+            <!-- The form for adding users -->
+            <form action="{{ url_for('search_friends') }}" method="post" class="form-inline search-form" onsubmit="event.preventDefault(); searchFriends();">
+                <div class="form-group">
+                    <label for="email">Friend's Email:</label>
+                    <div class="search-wrapper">
+                        <input type="text" id="email" name="email" required>
+                        <button class="search-button">Add Friend</button>
+                    </div>
+                </div>
+            </form>
+
+            <div id="search-results">
+                <!-- Search results will be inserted here -->
+            </div>
+
+            <!-- Group members list -->
+            <div class="users-create-group">
+                <p>List of participants:</p>
+            </div>
+
+            <table id="user-table" class="friend-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for member in group_members %}
+                        <tr>
+                            <td>{{ member.username }}</td>
+                            <td>{{ member.email }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+        <div id="popup_flash" class="popup">
+            <div class="popup-content">
+                <p id="message_flash" class="popup_flash-success"></p>
+                <button class="popup-button" onclick="hidePopupFlash()">OK</button>
+            </div>
+        </div>
+    </main>
+
+    <script type="text/javascript">
+        // Initialize group members array with the current members of the group
+        var groupMembers = [{% for member in group_members %}{ username: "{{ member.username }}", email: "{{ member.email }}" },{% endfor %}];
+    
+        // Function to search and add friends to the group
+        function searchFriends() {
+            var email = document.getElementById("email").value;
+            fetch("/search_friends", {
+                method: "POST",
+                body: JSON.stringify({ email: email }),
+                headers: { "Content-Type": "application/json" },
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.error); });
+                } else {
+                    return response.json();
+                }
+            })
+            .then(data => {
+                if (data.user) {
+                    // Check if user already exists in the groupMembers array
+                    for (let i = 0; i < groupMembers.length; i++) {
+                        if (groupMembers[i].email === data.user.email) {
+                            // Display error message in a popup
+                            document.getElementById('message_flash').innerText = "User already added to the group.";
+                            document.getElementById('message_flash').className = "popup_flash-error";
+                            document.getElementById('popup_flash').style.display = "flex";
+                            return;
+                        }
+                    }
+    
+                    var table = document.getElementById("user-table").getElementsByTagName('tbody')[0];
+                    var row = table.insertRow(-1);
+                    var nameCell = row.insertCell(0);
+                    var emailCell = row.insertCell(1);
+                    nameCell.innerHTML = data.user.username;
+                    emailCell.innerHTML = data.user.email;
+    
+                    // Add user to the group members array
+                    groupMembers.push(data.user);
+                }
+            })
+            .catch(error => {
+                // Display error message in a popup
+                document.getElementById('message_flash').innerText = error.message;
+                document.getElementById('message_flash').className = "popup_flash-error";
+                document.getElementById('popup_flash').style.display = "flex";
+            });
+        }
+    
+        // Functions for the dropdown menu
+        function toggleDropdown() {
+            const dropdown = document.getElementById("dropdown");
+            dropdown.classList.toggle("show");
+        }
+    
+        window.onclick = function (event) {
+            if (!event.target.matches(".user-info")) {
+                const dropdown = document.getElementById("dropdown");
+                if (dropdown.classList.contains("show")) {
+                    dropdown.classList.remove("show");
+                }
+            }
+        }
+    
+        // Function to hide the flash popup
+        function hidePopupFlash() {
+            const popup = document.getElementById("popup_flash");
+            popup.style.display = "none";
+        }
+    
+        window.onload = function() {
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}          
+                    document.getElementById('message_flash').innerText = "{{ messages[0][1] }}";
+                    document.getElementById('message_flash').className = "popup_flash-" + "{{ messages[0][0] }}";
+                    document.getElementById('popup_flash').style.display = "flex";
+                {% endif %}
+            {% endwith %}
+        };
+    </script>
+    
+</body>
+
+</html>
