@@ -246,6 +246,12 @@
                     // Remove the row from the table
                     var row = buttonElement.parentNode.parentNode;
                     row.parentNode.removeChild(row);
+
+                    // If the removed user is the current user, redirect to the dashboard page
+                    var current_user_email = "{{ current_user_email }}";
+                    if (email === current_user_email) {
+                        window.location.href = "{{ url_for('dashboard') }}";
+                    }
                 }
             })
             .catch(error => {
@@ -255,6 +261,7 @@
                 document.getElementById('popup_flash').style.display = "flex";
             });
         }
+
 
         function showConfirmPopup(message, okCallback, cancelCallback) {
             // Set the message
