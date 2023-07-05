@@ -97,7 +97,10 @@
     
         // Function to search and add friends to the group
         function searchFriends() {
-            var email = document.getElementById("email").value;
+            
+            var emailInput = document.getElementById("email");
+            var email = emailInput.value;
+            
             fetch("/search_friends", {
                 method: "POST",
                 body: JSON.stringify({ email: email }),
@@ -146,6 +149,8 @@
                             removeCell.innerHTML = `<button class="remove-button" onclick="removeUser('${data.user.email}', this)">Remove</button>`;
 
                             groupMembers.push(data.user);
+                            // Clear the input field
+                            emailInput.value = '';
                         }
                     })
                     .catch(error => {
