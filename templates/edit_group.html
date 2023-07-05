@@ -30,7 +30,7 @@
     
     <main>
         <section class="group-form">
-            <h2>Hi {{ username }}, please add friends</h2>
+            <h2>Hi {{ username }}, add or remove friends</h2>
 
             <!-- The form for adding users -->
             <form action="{{ url_for('search_friends') }}" method="post" class="form-inline search-form" onsubmit="event.preventDefault(); searchFriends();">
