@@ -37,7 +37,10 @@
                 <div class="form-group">
                     <label for="email">Friend's Email:</label>
                     <div class="search-wrapper">
-                        <input type="text" id="email" name="email" required>
+                        <input list="friendsEmails" type="text" id="email" name="email" required>
+                        <datalist id="friendsEmails">
+                            <!-- Previous friends' emails will be inserted here -->
+                        </datalist>
                         <button class="search-button">Add Friend</button>
                     </div>
                 </div>
@@ -85,9 +88,7 @@
                 <button class="popup-button" id="confirm_ok">OK</button>
                 <button class="popup-button" id="confirm_cancel">Cancel</button>
             </div>
-        </div>        
-        
-        
+        </div>            
     </main>
 
     <script type="text/javascript">
@@ -187,6 +188,7 @@
         }
     
         window.onload = function() {
+            fetchFriends();
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}          
                     document.getElementById('message_flash').innerText = "{{ messages[0][1] }}";
@@ -288,6 +290,30 @@
             document.getElementById('confirm_popup').style.display = "none";
         }
 
+        function fetchFriends() {
+            fetch("/previous_friends", {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.error); });
+                } else {
+                    return response.json();
+                }
+            })
+            .then(data => {
+                const datalist = document.getElementById('friendsEmails');
+                data.friends.forEach(friend => {
+                    const option = document.createElement('option');
+                    option.value = friend.email;
+                    datalist.appendChild(option);
+                });
+            })
+            .catch(error => {
+                // Handle any errors here
+            });
+        }
 
     </script>
     

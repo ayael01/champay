@@ -517,7 +517,7 @@ def create_group():
 
 @app.route('/search_friends', methods=['POST'])
 def search_friends():
-    
+
     # Check if the user is logged in
     if 'username' not in session:
         return jsonify({"error": "You must be logged in to perform this action."}), 401
@@ -718,6 +718,31 @@ def remove_user_from_group():
         db.session.rollback()
         return jsonify({"error": f"Failed to remove user from group. Error: {str(e)}"}), 500
 
+
+@app.route('/previous_friends', methods=['GET'])
+def previous_friends():
+    # Check if user is logged in
+    if 'username' not in session:
+        return jsonify({'message': 'Not logged in.'}), 401
+
+    # Get current user
+    current_user = User.query.filter_by(username=session['username']).first()
+
+    # If the user doesn't exist, return an error
+    if current_user is None:
+        return jsonify({'message': 'User not found.'}), 404
+
+    current_user_groups = GroupMember.query.filter_by(user_id=current_user.id).all()
+    group_ids = [gm.group_id for gm in current_user_groups]
+
+    # Query distinct users who are a part of these groups but not the current user
+    group_members = GroupMember.query.filter(GroupMember.group_id.in_(group_ids), GroupMember.user_id != current_user.id).distinct(GroupMember.user_id).all()
+
+    friends = [gm.user for gm in group_members]
+
+    return jsonify({
+        'friends': [{'email': friend.email} for friend in friends]
+    }), 200
 
 
 @app.after_request
