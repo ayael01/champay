@@ -517,6 +517,11 @@ def create_group():
 
 @app.route('/search_friends', methods=['POST'])
 def search_friends():
+    
+    # Check if the user is logged in
+    if 'username' not in session:
+        return jsonify({"error": "You must be logged in to perform this action."}), 401
+
     # get the submitted email
     email = request.json.get('email')
     # search the database for a user with this email
@@ -571,6 +576,11 @@ def create_group_expenses(group_name, member_ids):
 
 @app.route('/finalize_group', methods=['POST'])
 def finalize_group():
+
+    # Check if the user is logged in
+    if 'username' not in session:
+        return jsonify({"error": "You must be logged in to perform this action."}), 401
+
     # Extracting data from the request body
     data = request.get_json()
 
@@ -607,13 +617,23 @@ def edit_group(group_id):
         return redirect(url_for('dashboard'))
     current_user_email = current_user.email
 
+    # Check if the user is a member of the group
+    group_membership = GroupMember.query.filter_by(user_id=current_user.id, group_id=group_id).first()
+    if not group_membership:
+        flash("You are not a member of this group.", "error")
+        return redirect(url_for('dashboard')) 
+
     group_members = [member.user.serialize() for member in group.group_members]
     return render_template('edit_group.html', group=group, group_id=group_id, group_name=group.name, group_members=group_members, username=session['username'], current_user_email=current_user_email)
 
 
-
 @app.route("/add_user_to_group", methods=["POST"])
 def add_user_to_group():
+
+    # Check if the user is logged in
+    if 'username' not in session:
+        return jsonify({"error": "You must be logged in to perform this action."}), 401
+
     data = request.get_json()
     email = data.get('email')
     group_id = data.get('group_id')
@@ -655,6 +675,11 @@ def add_user_to_group():
 
 @app.route("/remove_user_from_group", methods=["POST"])
 def remove_user_from_group():
+
+    # Check if the user is logged in
+    if 'username' not in session:
+        return jsonify({"error": "You must be logged in to perform this action."}), 401
+
     data = request.get_json()
     email = data.get('email')
     group_id = data.get('group_id')
