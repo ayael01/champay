@@ -13,6 +13,15 @@ from sqlalchemy.exc import SQLAlchemyError
 from pytz import timezone
 import datetime
 import group_expenses_tool as get
+import logging
+
+# Configure the logger
+logging.basicConfig(
+    filename='output.log', 
+    level=logging.INFO, 
+    format='%(asctime)s [%(levelname)s] - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 
 
@@ -72,6 +81,9 @@ class Expense(db.Model):
     user = db.relationship('User', backref='expenses')
 
 
+def log(username, message):
+    logging.info(f"User: {username}, Action: {message}")
+
 
 @app.route("/", methods=["GET", "POST"])
 def homepage():
@@ -81,6 +93,7 @@ def homepage():
         email = request.form["email"].lower()
         password = request.form["password"]
         user = User.query.filter_by(email=email).first()
+
         if user and check_password_hash(user.password, password):
             session["username"] = user.username
             session["email"] = user.email
@@ -89,8 +102,11 @@ def homepage():
             user.is_logged_in = True
             db.session.commit()
 
+            log(user.email, f'Attempted to access {request.path} path')
+
             return redirect(url_for("dashboard"))
         else:
+            log(email, 'Unknown user or incorrect password.')
             flash("Unknown user or incorrect password.", "error")
 
     return render_template("homepage.html", username=session.get("username"))
@@ -107,11 +123,15 @@ def logout():
         user.is_logged_in = False
         db.session.commit()
 
+        # Log the successful logout action
+        log(user.email, f'Successfully logged out from {request.path} path')
+
     # Clear the session data
     session.clear()
 
     # Redirect the user to the homepage or any other desired page
     return redirect(url_for("homepage"))
+
 
 
 @app.route("/dashboard", methods=["GET", "POST"])
@@ -126,6 +146,9 @@ def dashboard():
     if not user:
         return redirect(url_for("homepage"))  # Redirect to login page
 
+    # Log that user has accessed dashboard
+    log(user.email, f'Accessed {request.path} path')
+
     # Fetch the groups that the user is a member of
     group_memberships = GroupMember.query.filter_by(user_id=user.id).all()
     group_ids = [gm.group_id for gm in group_memberships]
@@ -133,9 +156,12 @@ def dashboard():
 
     if request.method == "POST":
         selected_group_id = int(request.form["group"])
+        # Log group selection
+        log(user.email, f'Selected group with id {selected_group_id} in {request.path} path')
         return redirect(url_for("group_expenses", group_id=selected_group_id))
 
     return render_template("dashboard.html", message=message, groups=groups, username=username)
+
 
 
 @app.route("/group_expenses/<int:group_id>", methods=["GET", "POST"])
@@ -158,6 +184,9 @@ def group_expenses(group_id):
         abort(403)  # Forbidden
 
     group = Group.query.get(group_id)
+
+    # Log the user's attempt to access group expenses
+    log(user.email, f'Attempted to access {request.path} path')
 
     if request.method == "POST":
         description = request.form["description"]
@@ -193,13 +222,19 @@ def group_expenses(group_id):
             if all_expenses_updated:
                 # If all expenses are updated, redirect to the report page
                 flash(f"Expenses updated successfully! {description} - {expenses}", "success")
+                # Log the successful update
+                log(user.email, f'Successfully updated expenses on {request.path} path')
                 return redirect(url_for("group_expenses", group_id=group_id))
             else:
                 flash(f"Expenses updated successfully! {description} - {expenses}", "success")
+                # Log the successful update
+                log(user.email, f'Successfully updated expenses on {request.path} path')
 
         except SQLAlchemyError:
             db.session.rollback()
             flash("Failed to update expenses. Please try again.", "error")
+            # Log the failed update
+            log(user.email, f'Failed to update expenses on {request.path} path')
 
         return redirect(url_for("group_expenses", group_id=group_id))
 
@@ -226,6 +261,7 @@ def group_expenses(group_id):
 
     return render_template("group_expenses.html", group=group, group_expenses=group_expenses_list, username=username, all_expenses_updated=all_expenses_updated)
 
+
 def are_all_expenses_updated(group_id):
     # Count the number of group members
     num_members = GroupMember.query.filter_by(group_id=group_id).count()
@@ -241,19 +277,23 @@ def are_all_expenses_updated(group_id):
 @app.route("/group_report/<int:group_id>")
 def group_report(group_id):
 
+    username = session.get('username', 'Unknown')
+    user = User.query.filter_by(username=username).first()
+    
+    # Log the user's attempt to access group report
+    log(user.email if user else 'Unknown', f'Attempted to access {request.path} path')
+
     # Check if all expenses are updated for the group
     all_expenses_updated = are_all_expenses_updated(group_id)
     if not all_expenses_updated:
         flash("Cannot generate report. Not all users have updated their expenses.", "error")
+        # Log the failed report generation
+        log(user.email if user else 'Unknown', f'Failed to generate report on {request.path} path due to unupdated expenses')
         return redirect(url_for("group_expenses", group_id=group_id))
-
-    username = session.get('username', 'Unknown')
 
     # Check if the user is logged in
     if not username:
         abort(401)  # Unauthorized
-
-    user = User.query.filter_by(username=username).first()
 
     # Check if the user is found
     if not user:
@@ -283,7 +323,11 @@ def group_report(group_id):
         # Not all members have the same weight, so generate a weighted report
         report = generate_group_report_by_weight(group, group_expenses)
 
+    # Log the successful report generation
+    log(user.email, f'Successfully generated report on {request.path} path')
+
     return report
+
 
 
 
@@ -424,54 +468,54 @@ def calculate_transfers_by_weight(group_expenses, weighted_share, group_id):
 
 @app.route('/group_settings/<int:group_id>', methods=['GET', 'POST'])
 def group_settings(group_id):
-    # Check if the user is logged in
     username = session.get('username')
+    
+    # Log the user's attempt to access group settings
+    log(username if username else 'Unknown', f'Attempted to access {request.path} path')
+    
     if not username:
         abort(401)  # Unauthorized
 
     user = User.query.filter_by(username=username).first()
 
-    # Check if the user is found
     if not user:
         abort(401)  # Unauthorized
 
-    # Check if the user is a member of the group
     group_membership = GroupMember.query.filter_by(user_id=user.id, group_id=group_id).first()
     if not group_membership:
         abort(403)  # Forbidden
 
-    # Retrieve the group information by ID
     group = Group.query.get(group_id)
 
     if request.method == "POST":
-        weight = int(request.form["weight"])  # Make sure weight is treated as a number
+        weight = int(request.form["weight"])
 
-        # Block updates with weight less than one or more than ten
         if weight < 1 or weight > 10:
             flash("Weight should be between 1 and 10. Please enter a valid weight.", "error")
+            # Log the failed weight update due to invalid weight
+            log(user.email, f'Failed to update weight on {request.path} path due to invalid weight')
             return redirect(url_for("group_settings", group_id=group_id))
 
-        # Update the user's weight
         group_membership.weight = weight
         group_membership.last_updated = datetime.datetime.now(tz)
 
         try:
             db.session.commit()
             flash(f"Weight updated successfully! Your weight in the expenses is {weight}", "success")
+            # Log the successful weight update
+            log(user.email, f'Successfully updated weight on {request.path} path')
 
         except SQLAlchemyError:
             db.session.rollback()
             flash("Failed to update weight. Please try again.", "error")
+            # Log the failed weight update due to a database error
+            log(user.email, f'Failed to update weight on {request.path} path due to database error')
 
         return redirect(url_for("group_settings", group_id=group_id))
 
-    # Retrieve group members who have updated their weights and sort by update time
     updated_group_members = GroupMember.query.filter(GroupMember.last_updated.isnot(None), GroupMember.group_id==group_id).order_by(GroupMember.last_updated.desc()).all()
-    
-    # Retrieve group members who have not updated their weights
     not_updated_group_members = GroupMember.query.filter(GroupMember.last_updated.is_(None), GroupMember.group_id==group_id).all()
 
-    # Combine both lists
     group_members = updated_group_members + not_updated_group_members
 
     members = []
@@ -486,10 +530,12 @@ def group_settings(group_id):
     return render_template('group_settings.html', group=group, members=members, username=username)
 
 
+
 @app.route('/create_group', methods=['GET', 'POST'])
 def create_group():
     if 'username' not in session:
         flash("Please login first.")
+        log(session.get('email', 'Guest'), 'Attempted to access create_group without logging in')
         return redirect(url_for('homepage'))
 
     username = session['username']
@@ -504,13 +550,16 @@ def create_group():
         existing_group = Group.query.filter_by(name=event_name).first()
         if existing_group is not None:
             flash("Event name already taken. Please choose a different name.", "error")
+            log(email, f'Attempted to create group with existing name: {event_name}')
             return redirect(url_for('dashboard'))
 
         session['event_name'] = event_name
+        log(email, f'Successfully created group: {event_name}')
 
-        # rest of the code ...
-
+    log(email, f'Accessed create_group')
     return render_template('create_group.html', username=username, email=email, user_id=user.id, event_name=session.get('event_name'))
+
+
 
 
 
@@ -576,9 +625,9 @@ def create_group_expenses(group_name, member_ids):
 
 @app.route('/finalize_group', methods=['POST'])
 def finalize_group():
-
     # Check if the user is logged in
     if 'username' not in session:
+        log(session.get('email', 'Guest'), 'Attempted to access finalize_group without logging in')
         return jsonify({"error": "You must be logged in to perform this action."}), 401
 
     # Extracting data from the request body
@@ -588,32 +637,41 @@ def finalize_group():
     group_name = data.get('groupName')
     member_ids = data.get('groupMembers')
 
+    # Log the group creation attempt
+    log(session['email'], f'Attempted to create group: {group_name} with members: {member_ids}')
+
     # Create the group using create_group_expenses function
     group_id, response_message = create_group_expenses(group_name, member_ids)
 
     # Check if the group creation was successful
     if "successfully" in response_message.lower():
+        log(session['email'], f'Successfully created group: {group_name}')
         flash(f"Successfully created event {group_name}.", "success")
         return jsonify(success=True, group_id=group_id, message="Group created successfully.")
     else:
+        log(session['email'], f'Failed to create group: {group_name}. Error: {response_message}')
         return jsonify(success=False, error=response_message)
+
 
 
 @app.route('/edit_group/<int:group_id>', methods=['GET'])
 def edit_group(group_id):
     if 'username' not in session:
+        log(session.get('email', 'Guest'), 'Attempted to access edit_group without logging in')
         flash("Please login first.")
         return redirect(url_for('homepage'))
 
     group = Group.query.get(group_id)
     if not group:
         flash("Group not found.", "error")
+        log(session['email'], f'Attempted to edit non-existing group with id: {group_id}')
         return redirect(url_for('dashboard'))
 
     # get current user's email based on the username stored in the session
     current_user = User.query.filter_by(username=session['username']).first()
     if current_user is None:
         flash("User not found.", "error")
+        log(session['email'], f'User not found when attempting to edit group with id: {group_id}')
         return redirect(url_for('dashboard'))
     current_user_email = current_user.email
 
@@ -621,22 +679,27 @@ def edit_group(group_id):
     group_membership = GroupMember.query.filter_by(user_id=current_user.id, group_id=group_id).first()
     if not group_membership:
         flash("You are not a member of this group.", "error")
+        log(current_user_email, f'Attempted to edit group {group_id} without being a member')
         return redirect(url_for('dashboard')) 
 
     group_members = [member.user.serialize() for member in group.group_members]
+    log(current_user_email, f'Accessed edit_group for group {group_id}')
     return render_template('edit_group.html', group=group, group_id=group_id, group_name=group.name, group_members=group_members, username=session['username'], current_user_email=current_user_email)
 
 
 @app.route("/add_user_to_group", methods=["POST"])
 def add_user_to_group():
-
     # Check if the user is logged in
     if 'username' not in session:
+        log(session.get('email', 'Guest'), 'Attempted to access add_user_to_group without logging in')
         return jsonify({"error": "You must be logged in to perform this action."}), 401
 
     data = request.get_json()
     email = data.get('email')
     group_id = data.get('group_id')
+
+    # Log the attempt to add a user to a group
+    log(session['email'], f'Attempted to add user {email} to group {group_id}')
 
     # Check if the user exists
     user = User.query.filter_by(email=email).first()
@@ -646,6 +709,7 @@ def add_user_to_group():
     # Check if the user is already part of the group
     existing_group_member = GroupMember.query.filter_by(user_id=user.id, group_id=group_id).first()
     if existing_group_member is not None:
+        log(session['email'], f'Attempted to add user {email} who is already a member of group {group_id}')
         return jsonify({"error": "User is already part of the group."}), 400
 
     try:
@@ -666,39 +730,49 @@ def add_user_to_group():
         db.session.add(initial_expense)
         db.session.commit()
 
+        log(session['email'], f'Successfully added user {email} to group {group_id}')
         return jsonify({"message": "User added to group successfully."}), 200
 
     except Exception as e:
         db.session.rollback()
+        log(session['email'], f'Failed to add user {email} to group {group_id}. Error: {str(e)}')
         return jsonify({"error": f"Failed to add user to group. Error: {str(e)}"}), 500
+
 
 
 @app.route("/remove_user_from_group", methods=["POST"])
 def remove_user_from_group():
+    current_user_email = session.get('email', 'Guest')  # retrieve current user email, or set to 'Guest' if not logged in
 
     # Check if the user is logged in
     if 'username' not in session:
+        log(current_user_email, 'Attempted to access remove_user_from_group without logging in')
         return jsonify({"error": "You must be logged in to perform this action."}), 401
 
     data = request.get_json()
     email = data.get('email')
     group_id = data.get('group_id')
 
+    log(current_user_email, f'Attempting to remove user with email {email} from group {group_id}')
+
     group = Group.query.get(group_id)  # Retrieve the group data by id
     users_in_group = group.group_members  # Get all users in the group
 
     if len(users_in_group) <= 1:
         # If there's only one user in the group, return an error message
+        log(current_user_email, 'Attempted to remove the only user from a group')
         return jsonify({'error': 'Cannot remove the user as a group cannot be empty.'}), 400
 
     # Check if the user exists
     user = User.query.filter_by(email=email).first()
     if user is None:
+        log(current_user_email, f'User with email {email} not found')
         return jsonify({"error": "User not found."}), 400
 
     # Check if the user is part of the group
     existing_group_member = GroupMember.query.filter_by(user_id=user.id, group_id=group_id).first()
     if existing_group_member is None:
+        log(current_user_email, f'User with email {email} is not part of group {group_id}')
         return jsonify({"error": "User is not part of the group."}), 400
 
     try:
@@ -712,11 +786,14 @@ def remove_user_from_group():
 
         db.session.commit()
 
+        log(current_user_email, f'Successfully removed user with email {email} from group {group_id}')
         return jsonify({"message": "User removed from group successfully."}), 200
 
     except Exception as e:
         db.session.rollback()
+        log(current_user_email, f'Failed to remove user with email {email} from group {group_id}. Error: {str(e)}')
         return jsonify({"error": f"Failed to remove user from group. Error: {str(e)}"}), 500
+
 
 
 @app.route('/previous_friends', methods=['GET'])
