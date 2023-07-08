@@ -554,7 +554,7 @@ def create_group():
             return redirect(url_for('dashboard'))
 
         session['event_name'] = event_name
-        log(email, f'Successfully created group: {event_name}')
+        log(email, f'Successfully entered to group creation: {event_name}')
 
     log(email, f'Accessed create_group')
     return render_template('create_group.html', username=username, email=email, user_id=user.id, event_name=session.get('event_name'))
