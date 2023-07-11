@@ -80,6 +80,15 @@ class Expense(db.Model):
     last_updated = db.Column(db.DateTime, default=None, onupdate=datetime.datetime.now(tz))
     user = db.relationship('User', backref='expenses')
 
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    group_id = db.Column(db.Integer, db.ForeignKey('group.id'))
+    text = db.Column(db.String(500))  # or use db.Text
+    date = db.Column(db.DateTime, default=datetime.datetime.now(tz))
+    user = db.relationship('User', backref='comments')
+    group = db.relationship('Group', backref='comments')
+
 
 def log(username, message):
     logging.info(f"User: {username}, Action: {message}")
@@ -820,6 +829,57 @@ def previous_friends():
     return jsonify({
         'friends': [{'email': friend.email} for friend in friends]
     }), 200
+
+
+@app.route('/group_retrospective/<int:group_id>', methods=['GET'])
+def group_retrospective(group_id):
+    if 'username' not in session:
+        flash("Please login first.")
+        return redirect(url_for('homepage'))
+
+    # Fetch group by id
+    group = Group.query.get(group_id)
+
+    # Check that group exists
+    if not group:
+        flash("Group not found.", "error")
+        return redirect(url_for('dashboard'))
+
+    # Fetch comments for this group
+    group_comments = Comment.query.filter_by(group_id=group.id).all()
+
+    return render_template('group_retrospective.html', username=session['username'], group=group, group_comments=group_comments)
+
+
+    
+@app.route('/add_comment', methods=['POST'])
+def add_comment():
+    if 'username' not in session:
+        flash("Please login first.")
+        return redirect(url_for('homepage'))
+
+    # Assume you have a Comment model with fields 'user_id', 'group_id', 'text', and 'date'
+    # Also, check that user is member of the group where he tries to add a comment.
+    current_user = User.query.filter_by(username=session['username']).first()
+    group_id = request.form.get('group_id')
+    group_membership = GroupMember.query.filter_by(user_id=current_user.id, group_id=group_id).first()
+    
+    if not group_membership:
+        flash("You are not a member of this group.", "error")
+        return redirect(url_for('dashboard'))
+
+    comment_text = request.form.get('comment')
+    if not comment_text:
+        flash("Comment cannot be empty.", "error")
+        return redirect(url_for("group_retrospective", group_id=group_id))
+
+    comment = Comment(user_id=current_user.id, group_id=group_id, text=comment_text, date=datetime.datetime.now())
+    db.session.add(comment)
+    db.session.commit()
+
+    flash("Your comment has been added.", "success")
+    return redirect(url_for("group_retrospective", group_id=group_id))
+
 
 
 @app.after_request

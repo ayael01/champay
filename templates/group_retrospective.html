@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Champay - Group Retrospective</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <div class="user-info-container">
+                <div class="user-info" onclick="toggleDropdown()">{{ username[0] }}</div>
+                <div id="dropdown" class="dropdown-content">
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                </div>
+            </div>
+            <h1>Retrospective for {{ group_name }}</h1>
+        </div>
+    </header>
+
+    <div class="menu-panel">
+        <div>
+            <a href="{{ url_for('dashboard') }}" class="back2events-link">Back to events</a>
+            <a href="{{ url_for('group_expenses', group_id=group.id) }}" class="back2events-link">Back to expenses</a>
+        </div>
+    </div>
+    
+    <main>
+        <section class="group-form">
+            <h2>Hi {{ username }}, share your comments and conclusion</h2>
+
+            <form action="{{ url_for('add_comment') }}" method="post" class="retro-form">
+                <input type="hidden" name="group_id" value="{{ group.id }}">
+                <div class="form-group">
+                    <label for="comment">Your Comment:</label>
+                    <textarea id="comment" name="comment" placeholder="Write your retrospective conclusion here..." required></textarea>
+                    <button type="submit" class="retro-button">Submit</button>
+                </div>
+            </form>            
+
+            <!-- Comments list -->
+            <div class="comments-section">
+                <h2>Group's comments:</h2>
+                <table id="comments-table" class="comments-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Comment</th>
+                            <th>Date</th>
+                            <th>Remove</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for comment in group_comments %}
+                            <tr>
+                                <td>{{ comment.user.username }}</td>
+                                <td>{{ comment.text }}</td>
+                                <td>{{ comment.date }}</td>
+                                <td><button class="remove-button" onclick="removeComment('{{ comment.id }}', this)">Remove</button></td>
+                            </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script type="text/javascript">
+        // Functions for the dropdown menu
+        function toggleDropdown() {
+            const dropdown = document.getElementById("dropdown");
+            dropdown.classList.toggle("show");
+        }
+    
+        window.onclick = function (event) {
+            if (!event.target.matches(".user-info")) {
+                const dropdown = document.getElementById("dropdown");
+                if (dropdown.classList.contains("show")) {
+                    dropdown.classList.remove("show");
+                }
+            }
+        }
+
+        // Function to remove a comment
+        function removeComment(commentId, buttonElement) {
+            fetch("/remove_comment", {
+                method: "POST",
+                body: JSON.stringify({ comment_id: commentId, group_id: "{{ group.id }}" }),
+                headers: { "Content-Type": "application/json" },
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.error); });
+                } else {
+                    // Remove the row from the table
+                    var row = buttonElement.parentNode.parentNode;
+                    row.parentNode.removeChild(row);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+
+</html>
