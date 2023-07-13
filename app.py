@@ -881,6 +881,30 @@ def add_comment():
     return redirect(url_for("group_retrospective", group_id=group_id))
 
 
+@app.route('/remove_comment', methods=['POST'])
+def remove_comment():
+    if 'username' not in session:
+        return jsonify({ 'error': "Please login first.", 'category': "error" }), 400
+
+    current_user = User.query.filter_by(username=session['username']).first()
+
+    data = request.get_json()
+    comment_id = data.get('comment_id')
+
+    comment = Comment.query.filter_by(id=comment_id).first()
+
+    if not comment:
+        return jsonify({ 'error': "This comment does not exist.", 'category': "error" }), 400
+
+    if comment.user_id != current_user.id:
+        return jsonify({ 'error': "You cannot delete someone else's comment.", 'category': "error" }), 400
+
+    db.session.delete(comment)
+    db.session.commit()
+
+    return jsonify({ 'message': "Your comment has been removed.", 'category': "success" }), 200
+
+
 
 @app.after_request
 def add_header(response):

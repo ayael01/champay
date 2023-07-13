@@ -653,6 +653,11 @@ h1 {
     cursor: pointer;
 }
 
+#comments-table {
+    width: 1000px;
+}
+
+
 
 
 

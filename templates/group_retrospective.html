@@ -17,7 +17,7 @@
                     <a href="{{ url_for('logout') }}">Logout</a>
                 </div>
             </div>
-            <h1>Retrospective for {{ group_name }}</h1>
+            <h1>Retrospective for {{ group.name }}</h1>
         </div>
     </header>
 
@@ -39,18 +39,21 @@
                     <textarea id="comment" name="comment" placeholder="Write your retrospective conclusion here..." required></textarea>
                     <button type="submit" class="retro-button">Submit</button>
                 </div>
-            </form>            
+            </form>       
+            
+             <!-- Group members list -->
+             <div class="users-create-group">
+                <p>Group's comments:</p>
+            </div>
 
             <!-- Comments list -->
             <div class="comments-section">
-                <h2>Group's comments:</h2>
-                <table id="comments-table" class="comments-table">
+                <table id="comments-table" class="friend-table" style="width:1000px;">
                     <thead>
                         <tr>
-                            <th>User</th>
-                            <th>Comment</th>
-                            <th>Date</th>
-                            <th>Remove</th>
+                            <th style="width:15%">User</th>
+                            <th style="width:70%">Comment</th>
+                            <th style="width:15%">Remove</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -58,15 +61,34 @@
                             <tr>
                                 <td>{{ comment.user.username }}</td>
                                 <td>{{ comment.text }}</td>
-                                <td>{{ comment.date }}</td>
                                 <td><button class="remove-button" onclick="removeComment('{{ comment.id }}', this)">Remove</button></td>
                             </tr>
                         {% endfor %}
-
                     </tbody>
                 </table>
             </div>
+
         </section>
+
+        <div id="popup_flash" class="popup">
+            <div class="popup-content">
+                <p id="message_flash" class="popup_flasf-success"></p>
+                <button class="popup-button" onclick="hidePopupFlash()">OK</button>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            window.onload = function() {
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}          
+                        document.getElementById('message_flash').innerText = "{{ messages[0][1] }}";
+                        document.getElementById('message_flash').className = "popup_flash-" + "{{ messages[0][0] }}";
+                        document.getElementById('popup_flash').style.display = "flex";
+                    {% endif %}
+                {% endwith %}
+            };
+        </script>
+
     </main>
 
     <script type="text/javascript">
@@ -85,25 +107,39 @@
             }
         }
 
-        // Function to remove a comment
         function removeComment(commentId, buttonElement) {
             fetch("/remove_comment", {
                 method: "POST",
                 body: JSON.stringify({ comment_id: commentId, group_id: "{{ group.id }}" }),
                 headers: { "Content-Type": "application/json" },
             })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(err => { throw new Error(err.error); });
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
                 } else {
                     // Remove the row from the table
                     var row = buttonElement.parentNode.parentNode;
                     row.parentNode.removeChild(row);
                 }
+                // Show the popup with the message
+                document.getElementById('message_flash').innerText = data.message || data.error;
+                document.getElementById('message_flash').className = "popup_flash-" + data.category;
+                document.getElementById('popup_flash').style.display = "flex";
             })
             .catch(error => {
                 console.error('Error:', error);
+                // Show the popup with the error message
+                document.getElementById('message_flash').innerText = error.message;
+                document.getElementById('message_flash').className = "popup_flash-error";
+                document.getElementById('popup_flash').style.display = "flex";
             });
+        }
+
+
+        function hidePopupFlash() {
+            const popup = document.getElementById("popup_flash");
+            popup.style.display = "none";
         }
     </script>
 </body>
