@@ -664,6 +664,30 @@ h1 {
     -webkit-overflow-scrolling: touch;
 }
 
+@media screen and (max-width: 600px) {
+    .table-responsive {
+        overflow-x: auto;
+        display: block;
+    }
+}
+
+.remove-button {
+    padding: 5px 10px;
+    background-color: #f44336; /* red */
+    border: none;
+    color: white;
+    text-align: center;
+    display: inline-block;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.remove-button:hover {
+    background-color: #d32f2f; /* dark red */
+}
+
+
+
 
 
 
