@@ -47,27 +47,25 @@
             </div>
 
             <!-- Comments list -->
-            <div class="comments-section">
-                <table id="comments-table" class="friend-table">
-                    <thead>
+           
+            <table id="comments-table" class="friend-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Comment</th>
+                        <th>Remove</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for comment in group_comments %}
                         <tr>
-                            <th>User</th>
-                            <th>Comment</th>
-                            <th>Remove</th>
+                            <td>{{ comment.user.username }}</td>
+                            <td>{{ comment.text }}</td>
+                            <td><button class="remove-button" onclick="removeComment('{{ comment.id }}', this)">Remove</button></td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        {% for comment in group_comments %}
-                            <tr>
-                                <td>{{ comment.user.username }}</td>
-                                <td>{{ comment.text }}</td>
-                                <td><button class="remove-button" onclick="removeComment('{{ comment.id }}', this)">Remove</button></td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
+                    {% endfor %}
+                </tbody>
+            </table>
         </section>
 
         <div id="popup_flash" class="popup">
