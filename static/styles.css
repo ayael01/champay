@@ -686,6 +686,12 @@ h1 {
     background-color: #d32f2f; /* dark red */
 }
 
+.comments-section {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 1em 0;
+}
 
 
 
