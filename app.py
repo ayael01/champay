@@ -363,16 +363,27 @@ def generate_group_report(group, group_expenses):
             "last_updated": formatted_last_updated
         })
 
+    # Fetch the group comments
+    group_comments = Comment.query.filter_by(group_id=group.id).all()
+    retrospectives = {}
+    for comment in group_comments:
+        comment_owner = User.query.filter_by(id=comment.user_id).first()
+        if comment_owner.username not in retrospectives:
+            retrospectives[comment_owner.username] = []
+        retrospectives[comment_owner.username].append(comment.text)
+
     report_data = {
         'group_name': group.name,
         'group_expenses': group_expenses_list,
         'total_expenses': total_expenses,
         'share': share,
         'transfers': calculate_transfers(group_expenses, share),
-        'group_id': group.id  # Pass group_id to the template
+        'group_id': group.id,  # Pass group_id to the template
+        'retrospectives': retrospectives  # Pass the comments to the template
     }
 
     return render_template('group_report_template.html', **report_data)
+
 
 
 def calculate_transfers(group_expenses, share):

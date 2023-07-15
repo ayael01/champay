@@ -4,7 +4,7 @@
     <title>Group Report - {{ group_name }}</title>
     <style>
         th, td {
-            text-align: center;  /* Aligns text to the center */
+            text-align: left;  /* Aligns text to the center */
         }
     </style>
 </head>
@@ -47,6 +47,16 @@
     {% else %}
         <p>No transfers required.</p>
     {% endif %}
+    
+    <h2>Retrospective</h2>
+    {% for user, comments in retrospectives.items() %}
+        <h3>{{ user }}:</h3>
+        <ul>
+            {% for comment in comments %}
+            <li>{{ comment }}</li>
+            {% endfor %}
+        </ul>
+    {% endfor %}
 
     <a href="{{ url_for('group_expenses', group_id=group_id) }}">Go back to Group Expenses</a>
 
