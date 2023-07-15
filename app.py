@@ -441,6 +441,15 @@ def generate_group_report_by_weight(group, group_expenses):
             "last_updated": formatted_last_updated
         })
 
+    # Fetch the group comments
+    group_comments = Comment.query.filter_by(group_id=group.id).all()
+    retrospectives = {}
+    for comment in group_comments:
+        comment_owner = User.query.filter_by(id=comment.user_id).first()
+        if comment_owner.username not in retrospectives:
+            retrospectives[comment_owner.username] = []
+        retrospectives[comment_owner.username].append(comment.text)
+
     report_data = {
         'group_name': group.name,
         'group_expenses': group_expenses_list,
@@ -448,10 +457,12 @@ def generate_group_report_by_weight(group, group_expenses):
         'share': weighted_share,
         'transfers': calculate_transfers_by_weight(group_expenses, weighted_share, group.id),
         'group_id': group.id,  # Pass group_id to the template
-        'total_weight': total_weight  # Pass total_weight to the template
+        'total_weight': total_weight,  # Pass total_weight to the template
+        'retrospectives': retrospectives  # Pass the comments to the template
     }
 
     return render_template('group_report_template_by_weight.html', **report_data)
+
 
 
 def calculate_transfers_by_weight(group_expenses, weighted_share, group_id):

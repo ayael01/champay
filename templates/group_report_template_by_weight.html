@@ -51,6 +51,16 @@
         <p>No transfers required.</p>
     {% endif %}
 
+    <h2>Retrospective</h2>
+    {% for user, comments in retrospectives.items() %}
+        <h3>{{ user }}:</h3>
+        <ul>
+            {% for comment in comments %}
+            <li>{{ comment }}</li>
+            {% endfor %}
+        </ul>
+    {% endfor %}
+
     <a href="{{ url_for('group_expenses', group_id=group_id) }}">Go back to Group Expenses</a>
 
 </body>
