@@ -989,7 +989,7 @@ def add_task():
         db.session.add(task)
         db.session.commit()
 
-        return jsonify({"message": "Task added successfully.", "task": task_content}), 200
+        return jsonify({"message": "Task added successfully.", "task": task_content, "task_id": task.id}), 200
     except SQLAlchemyError as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
@@ -1043,10 +1043,42 @@ def get_tasks():
 
     try:
         tasks = Task.query.filter_by(group_id=group_id).all()
-        tasks_serialized = [{"task": task.task, "user": task.user.username} for task in tasks]
+        tasks_serialized = [{"task": task.task, "user": task.user.username, "id": task.id} for task in tasks]
         return jsonify({"tasks": tasks_serialized}), 200
     except SQLAlchemyError as e:
         return jsonify({"error": str(e)}), 500
+    
+
+@app.route('/delete_task', methods=['POST'])
+def delete_task():
+    if 'username' not in session:
+        return jsonify({"error": "You must be logged in to perform this action."}), 401
+
+    current_user = User.query.filter_by(username=session['username']).first()
+    if current_user is None:
+        return jsonify({"error": "User not found."}), 400
+
+    data = request.get_json()
+    task_id = data.get('task_id')
+
+    log(current_user.username, f'Task ID is {task_id}')
+
+    task = Task.query.get(task_id)
+    if task is None:
+        return jsonify({"error": "Task not found."}), 400
+
+    # verify the task belongs to the current user or the current user is a member of the group of the task
+    if task.user_id != current_user.id and not GroupMember.query.filter_by(user_id=current_user.id, group_id=task.group_id).first():
+        return jsonify({"error": "You are not authorized to delete this task."}), 403
+
+    try:
+        db.session.delete(task)
+        db.session.commit()
+        return jsonify({"message": "Task deleted successfully."}), 200
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
 
 
     
