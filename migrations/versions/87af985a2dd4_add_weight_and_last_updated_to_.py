@@ -17,9 +17,19 @@ depends_on = None
 
 
 def upgrade():
+    # create the group_member table
+    op.create_table(
+        'group_member',
+        sa.Column('id', sa.Integer, primary_key=True),
+        # include all other necessary columns here,
+        # make sure the column definitions match those in your model
+    )
+    
+    # then add new columns
     op.add_column('group_member', sa.Column('weight', sa.Integer(), nullable=False, server_default='1'))
     op.add_column('group_member', sa.Column('last_updated', sa.DateTime(), nullable=True))
 
+
 def downgrade():
-    op.drop_column('group_member', 'weight')
-    op.drop_column('group_member', 'last_updated')
+    op.drop_table('group_member')
+

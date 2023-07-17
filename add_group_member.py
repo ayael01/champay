@@ -34,4 +34,4 @@ def add_group_member(user_id, group_id):
 
 # Usage example
 if __name__ == "__main__":
-    add_group_member(6, 2)
+    add_group_member(1, 13)

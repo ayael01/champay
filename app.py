@@ -54,12 +54,14 @@ class User(db.Model):
             "email": self.email
             # add more fields as needed
         }
+    tasks = db.relationship('Task', backref='user', lazy=True)
 
 
 class Group(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True)
     group_members = db.relationship('GroupMember', backref='group')  # new line
+    tasks = db.relationship('Task', backref='group', lazy=True)
 
 
 class GroupMember(db.Model):
@@ -88,6 +90,13 @@ class Comment(db.Model):
     date = db.Column(db.DateTime, default=datetime.datetime.now(tz))
     user = db.relationship('User', backref='comments')
     group = db.relationship('Group', backref='comments')
+
+class Task(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    task = db.Column(db.String(500))
+    group_id = db.Column(db.Integer, db.ForeignKey('group.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
 
 
 def log(username, message):
@@ -927,6 +936,120 @@ def remove_comment():
     return jsonify({ 'message': "Your comment has been removed.", 'category': "success" }), 200
 
 
+@app.route('/group_tasks/<int:group_id>')
+def group_tasks(group_id):
+    if 'username' not in session:
+        # log the unauthorized access
+        return redirect(url_for('login'))
+
+    current_user = User.query.filter_by(username=session['username']).first()
+    group = Group.query.get(group_id)
+    if group is None or current_user is None:
+        # log the error
+        return "Group or User not found.", 400
+
+    group_membership = GroupMember.query.filter_by(user_id=current_user.id, group_id=group_id).first()
+    if not group_membership:
+        # log the error
+        return "You are not a member of this group.", 400
+
+    return render_template('group_tasks.html', group=group, username=session['username'])
+
+@app.route('/add_task', methods=['POST'])
+def add_task():
+    if 'username' not in session:
+        return jsonify({"error": "You must be logged in to perform this action."}), 401
+
+    current_user = User.query.filter_by(username=session['username']).first()
+    if current_user is None:
+        return jsonify({"error": "User not found."}), 400
+
+    data = request.get_json()
+    task_content = data.get('task')
+    group_id = data.get('group_id')
+    username = data.get('user')  # get username from request data
+
+    user = User.query.filter_by(username=username).first()  # query User table to get User object
+    if user is None:
+        return jsonify({"error": "User not found."}), 400
+
+
+    group = Group.query.get(group_id)
+    if group is None:
+        return jsonify({"error": "Group not found."}), 400
+
+    # verify that both the current user and the selected user are members of the group
+    current_user_membership = GroupMember.query.filter_by(user_id=current_user.id, group_id=group_id).first()
+    selected_user_membership = GroupMember.query.filter_by(user_id=user.id, group_id=group_id).first()
+    if not current_user_membership or not selected_user_membership:
+        return jsonify({"error": "You and the selected user must be members of this group."}), 400
+
+    try:
+        task = Task(task=task_content, group_id=group_id, user_id=user.id)  # assign task to selected user
+        db.session.add(task)
+        db.session.commit()
+
+        return jsonify({"message": "Task added successfully.", "task": task_content}), 200
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/get_group_users', methods=['POST'])
+def get_group_users():
+    if 'username' not in session:
+        return jsonify({"error": "You must be logged in to perform this action."}), 401
+
+    current_user = User.query.filter_by(username=session['username']).first()
+    if current_user is None:
+        return jsonify({"error": "User not found."}), 400
+
+    data = request.get_json()
+    group_id = data.get('group_id')
+
+    group = Group.query.get(group_id)
+    if group is None:
+        return jsonify({"error": "Group not found."}), 400
+
+    group_membership = GroupMember.query.filter_by(user_id=current_user.id, group_id=group_id).first()
+    if not group_membership:
+        return jsonify({"error": "You are not a member of this group."}), 400
+
+    try:
+        group_members = GroupMember.query.filter_by(group_id=group_id).all()
+        users = [member.user.serialize() for member in group_members]  # serialize the User objects to make them JSON serializable
+        return jsonify({"users": users}), 200
+    except SQLAlchemyError as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/get_tasks', methods=['POST'])
+def get_tasks():
+    if 'username' not in session:
+        return jsonify({"error": "You must be logged in to perform this action."}), 401
+
+    current_user = User.query.filter_by(username=session['username']).first()
+    if current_user is None:
+        return jsonify({"error": "User not found."}), 400
+
+    data = request.get_json()
+    group_id = data.get('group_id')
+
+    group = Group.query.get(group_id)
+    if group is None:
+        return jsonify({"error": "Group not found."}), 400
+
+    group_membership = GroupMember.query.filter_by(user_id=current_user.id, group_id=group_id).first()
+    if not group_membership:
+        return jsonify({"error": "You are not a member of this group."}), 400
+
+    try:
+        tasks = Task.query.filter_by(group_id=group_id).all()
+        tasks_serialized = [{"task": task.task, "user": task.user.username} for task in tasks]
+        return jsonify({"tasks": tasks_serialized}), 200
+    except SQLAlchemyError as e:
+        return jsonify({"error": str(e)}), 500
+
+
+    
 
 @app.after_request
 def add_header(response):
