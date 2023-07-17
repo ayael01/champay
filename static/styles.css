@@ -799,5 +799,19 @@ h1 {
     text-decoration: none;
 }
 
+#task-table th:nth-child(1) {
+    width: 20%;
+}
+#task-table th:nth-child(2) {
+    width: 60%;
+}
+#task-table th:nth-child(3) {
+    width: 20%;
+}
+
+#task-table th {
+    text-align: center;
+}
+
 
 
