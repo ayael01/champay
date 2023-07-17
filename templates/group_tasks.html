@@ -110,6 +110,7 @@
                     var cell2 = row.insertCell(1);
                     cell2.textContent = data.task; 
                     var cell3 = row.insertCell(2);
+                    cell3.className = 'button-cell';
                     cell3.innerHTML = `<button class="remove-task-button" onclick="removeTask('${data.task_id}')">Remove</button>`;
                 })
                 .catch(error => {
@@ -190,6 +191,7 @@
                         var cell2 = row.insertCell(1);
                         cell2.textContent = task.task; 
                         var cell3 = row.insertCell(2);
+                        cell3.className = 'button-cell';
                         cell3.innerHTML = `<button class="remove-task-button" onclick="removeTask('${task.id}')">Remove</button>`;
 
                     });
@@ -232,9 +234,6 @@
                         document.getElementById('popup_flash').style.display = "flex";
                     });
             }
-
-
-
     </script>
 </body>
 

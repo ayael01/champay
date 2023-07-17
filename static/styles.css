@@ -803,15 +803,28 @@ h1 {
     width: 20%;
 }
 #task-table th:nth-child(2) {
-    width: 60%;
+    width: 65%;
 }
 #task-table th:nth-child(3) {
-    width: 20%;
+    width: 15%;
 }
 
 #task-table th {
     text-align: center;
 }
+
+.remove-task-button {
+    padding: 5px 10px;
+    background-color: #f44336; /* red */
+    border: none;
+    color: white;
+    text-align: center;
+    display: inline-block;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+
 
 
 
