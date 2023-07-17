@@ -786,6 +786,18 @@ h1 {
     align-items: center;
 }
 
+.task-form {
+    margin-bottom: 50px; /* change the value as needed */
+    margin-top: 30px;
+}
+
+.task-table-title {
+    text-align: center;
+    color: #2e8531; /* Change the color to red */
+    margin-right: 10px; /* Add some spacing between the title and the link */
+    font-weight: bold;
+    text-decoration: none;
+}
 
 
 
