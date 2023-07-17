@@ -408,8 +408,6 @@ input[type="submit"]:hover {
     text-decoration: underline;
 }
 
-
-
 .header-content {
     display: flex;
     flex-direction: row;
@@ -421,6 +419,10 @@ input[type="submit"]:hover {
     display: flex;
     align-items: center;
     margin-right: 10px;
+}
+
+.header-content h1 {
+    text-align: center;
 }
 
 .user-info {
@@ -757,3 +759,33 @@ h1 {
     background-color: white;
     color: #45a049;
 }
+
+/* This targets the table with id "task-table" */
+#task-table {
+    table-layout: fixed; /* This makes the table width fixed */
+    width: 100%; /* This makes the table span the full width of its container */
+}
+
+/* This targets the table data cells in the "task-table" */
+#task-table td {
+    word-wrap: break-word; /* This makes the cell content wrap instead of overflowing */
+}
+
+.tasks-add-group {
+    display: flex;
+    align-items: center;
+}
+  
+.tasks-add-group p {
+    color: #2e8531; 
+    margin-right: 10px; 
+    font-weight: bold;
+    text-decoration: none;
+    display: flex;
+    justify-content: center; /* This will center the content horizontally */
+    align-items: center;
+}
+
+
+
+
