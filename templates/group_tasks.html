@@ -59,8 +59,8 @@
             <table id="task-table" class="friend-table">
                 <thead>
                     <tr>
-                        <th>Task Description</th>
-                        <th>Assigned To</th>
+                        <th>Assigned To</th>  
+                        <th>Task Description</th>  
                         <th>Actions</th>
                     </tr>
                 </thead>                
@@ -106,9 +106,9 @@
                     var taskTableBody = document.getElementById("task-table").getElementsByTagName("tbody")[0];
                     var row = taskTableBody.insertRow();
                     var cell1 = row.insertCell(0);
-                    cell1.textContent = data.task;
+                    cell1.textContent = user; 
                     var cell2 = row.insertCell(1);
-                    cell2.textContent = user;
+                    cell2.textContent = data.task; 
                     var cell3 = row.insertCell(2);
                     cell3.innerHTML = `<button class="remove-task-button" onclick="removeTask('${data.task_id}')">Remove</button>`;
                 })
@@ -186,9 +186,9 @@
                     data.tasks.forEach(task => {
                         var row = taskTableBody.insertRow();
                         var cell1 = row.insertCell(0);
-                        cell1.textContent = task.task;
+                        cell1.textContent = task.user; 
                         var cell2 = row.insertCell(1);
-                        cell2.textContent = task.user;
+                        cell2.textContent = task.task; 
                         var cell3 = row.insertCell(2);
                         cell3.innerHTML = `<button class="remove-task-button" onclick="removeTask('${task.id}')">Remove</button>`;
 
