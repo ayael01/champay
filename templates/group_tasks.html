@@ -111,7 +111,7 @@
                     cell2.textContent = data.task; 
                     var cell3 = row.insertCell(2);
                     cell3.className = 'button-cell';
-                    cell3.innerHTML = `<button class="remove-task-button" onclick="removeTask('${data.task_id}')">Remove</button>`;
+                    cell3.innerHTML = `<button class="remove-button" onclick="removeTask('${data.task_id}')">Remove</button>`;
                 })
                 .catch(error => {
                     // Display error message in a popup
@@ -192,7 +192,7 @@
                         cell2.textContent = task.task; 
                         var cell3 = row.insertCell(2);
                         cell3.className = 'button-cell';
-                        cell3.innerHTML = `<button class="remove-task-button" onclick="removeTask('${task.id}')">Remove</button>`;
+                        cell3.innerHTML = `<button class="remove-button" onclick="removeTask('${task.id}')">Remove</button>`;
 
                     });
                 })
