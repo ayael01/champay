@@ -49,9 +49,7 @@
                         <button class="addtask-button">Add Task</button>
                     </div>
                 </div>
-            </form>
-
-           
+            </form>          
 
             <!-- Task list -->
             <p class="task-table-title">Group's Tasks</p>
@@ -60,18 +58,22 @@
                 <table id="task-table" class="friend-table">
                     <thead>
                         <tr>
-                            <th>Assigned To</th>  
+                            <th>User</th>  
                             <th>Task Description</th>  
                             <th>Actions</th>
                         </tr>
                     </thead>                
                     <tbody>
-                        <!-- Tasks will be inserted here -->
+                        {% for task in group_tasks %}
+                            <tr>
+                                <td>{{ task.user.username }}</td>
+                                <td>{{ task.text }}</td>
+                                <td><button class="remove-button" onclick="removeTask('{{ task.id }}', this)">Remove</button></td>
+                            </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
-            </div>
-
-
+            </div> 
         </section>
 
         <div id="popup_flash" class="popup">
@@ -83,20 +85,14 @@
     </main>
 
     <script type="text/javascript">
-        // Initialize tasks array
-        var tasks = [];
-        
         // Add task
         function addTask() {
-            var taskInput = document.getElementById("task");
-            var userSelect = document.getElementById("user");
-            var task = taskInput.value;
-            var user = userSelect.value;
-            taskInput.value = '';  // clear the input immediately
+            var user = document.getElementById('user').value;
+            var task = document.getElementById('task').value;
 
             fetch("/add_task", {
                 method: "POST",
-                body: JSON.stringify({ task: task, user: user, group_id: "{{ group.id }}" }),
+                body: JSON.stringify({ user: user, task: task, group_id: '{{ group.id }}' }),
                 headers: { "Content-Type": "application/json" },
             })
             .then(response => response.json())
@@ -105,15 +101,7 @@
                         throw new Error(data.error);
                     }
                     // Add task to the table
-                    var taskTableBody = document.getElementById("task-table").getElementsByTagName("tbody")[0];
-                    var row = taskTableBody.insertRow();
-                    var cell1 = row.insertCell(0);
-                    cell1.textContent = user; 
-                    var cell2 = row.insertCell(1);
-                    cell2.textContent = data.task; 
-                    var cell3 = row.insertCell(2);
-                    cell3.className = 'button-cell';
-                    cell3.innerHTML = `<button class="remove-button" onclick="removeTask('${data.task_id}')">Remove</button>`;
+                    appendTask(data.task, user, data.task_id);
                 })
                 .catch(error => {
                     // Display error message in a popup
@@ -123,32 +111,23 @@
                 });
         }
 
-        // Function to hide the flash popup
-        function hidePopupFlash() {
-            const popup = document.getElementById("popup_flash");
-            popup.style.display = "none";
-        }
-
-        // Functions for the dropdown menu
-        function toggleDropdown() {
-            const dropdown = document.getElementById("dropdown");
-            dropdown.classList.toggle("show");
-        }
-    
-        window.onclick = function (event) {
-            if (!event.target.matches(".user-info")) {
-                const dropdown = document.getElementById("dropdown");
-                if (dropdown.classList.contains("show")) {
-                    dropdown.classList.remove("show");
-                }
-            }
+        // Append task to tasks table
+        function appendTask(task, user, taskId) {
+            var table = document.getElementById('task-table');
+            var row = table.insertRow(-1);
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+            var cell3 = row.insertCell(2);
+            cell1.innerHTML = user;
+            cell2.innerHTML = task;
+            cell3.innerHTML = '<button class="remove-button" onclick="removeTask(\'' + taskId + '\', this)">Remove</button>';
         }
 
         window.onload = function() {
             // Fetch the users of the group
             fetch("/get_group_users", {
                 method: "POST",
-                body: JSON.stringify({ group_id: "{{ group.id }}" }),
+                body: JSON.stringify({ group_id: '{{ group.id }}' }),
                 headers: { "Content-Type": "application/json" },
             })
             .then(response => response.json())
@@ -156,15 +135,14 @@
                     if (data.error) {
                         throw new Error(data.error);
                     }
-                    // Add users to the select field
-                    var userSelect = document.getElementById("user");
-                    data.users.forEach(user => {
-                        var option = document.createElement("option");
-                        option.text = user.username;
+                    // Fill the users select options
+                    var userSelect = document.getElementById('user');
+                    data.users.forEach(function(user) {
+                        var option = document.createElement('option');
                         option.value = user.username;
+                        option.text = user.username;
                         userSelect.add(option);
                     });
-
                 })
                 .catch(error => {
                     // Display error message in a popup
@@ -173,10 +151,10 @@
                     document.getElementById('popup_flash').style.display = "flex";
                 });
 
-                // Fetch the tasks of the group
+            // Fetch the tasks of the group
             fetch("/get_tasks", {
                 method: "POST",
-                body: JSON.stringify({ group_id: "{{ group.id }}" }),
+                body: JSON.stringify({ group_id: '{{ group.id }}' }),
                 headers: { "Content-Type": "application/json" },
             })
             .then(response => response.json())
@@ -184,18 +162,9 @@
                     if (data.error) {
                         throw new Error(data.error);
                     }
-                    // Add tasks to the table
-                    var taskTableBody = document.getElementById("task-table").getElementsByTagName("tbody")[0];
-                    data.tasks.forEach(task => {
-                        var row = taskTableBody.insertRow();
-                        var cell1 = row.insertCell(0);
-                        cell1.textContent = task.user; 
-                        var cell2 = row.insertCell(1);
-                        cell2.textContent = task.task; 
-                        var cell3 = row.insertCell(2);
-                        cell3.className = 'button-cell';
-                        cell3.innerHTML = `<button class="remove-button" onclick="removeTask('${task.id}')">Remove</button>`;
-
+                    // Fill the tasks table rows
+                    data.tasks.forEach(function(task) {
+                        appendTask(task.task, task.user, task.id);
                     });
                 })
                 .catch(error => {
@@ -204,38 +173,29 @@
                     document.getElementById('message_flash').className = "popup_flash-error";
                     document.getElementById('popup_flash').style.display = "flex";
                 });
-            }
-
-            function removeTask(taskId) {
-                fetch("/delete_task", {
-                    method: "POST",
-                    body: JSON.stringify({ task_id: taskId }),
-                    headers: { "Content-Type": "application/json" },
+        }
+        function removeTask(taskId, element) {
+            fetch("/delete_task", {
+                method: "POST",
+                body: JSON.stringify({ task_id: taskId }),
+                headers: { "Content-Type": "application/json" },
+            })
+            .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    // Remove task from the table
+                    var row = element.parentNode.parentNode;
+                    row.parentNode.removeChild(row);
                 })
-                .then(response => response.json())
-                    .then(data => {
-                        if (data.error) {
-                            throw new Error(data.error);
-                        }
-                        // Remove task from the table
-                        var taskTable = document.getElementById("task-table");
-                        for (var i = 1, row; row = taskTable.rows[i]; i++) { // Start from 1 to avoid the header
-                            //iterate through rows
-                            var removeButton = row.cells[2].getElementsByTagName("button")[0];
-                            if(removeButton.getAttribute("onclick") === `removeTask('${taskId}')`){
-                                //if we find the task id, delete the row
-                                taskTable.deleteRow(i);
-                                return;
-                            }  
-                        }
-                    })
-                    .catch(error => {
-                        // Display error message in a popup
-                        document.getElementById('message_flash').innerText = error.message;
-                        document.getElementById('message_flash').className = "popup_flash-error";
-                        document.getElementById('popup_flash').style.display = "flex";
-                    });
-            }
+                .catch(error => {
+                    // Display error message in a popup
+                    document.getElementById('message_flash').innerText = error.message;
+                    document.getElementById('message_flash').className = "popup_flash-error";
+                    document.getElementById('popup_flash').style.display = "flex";
+                });
+        }
     </script>
 </body>
 

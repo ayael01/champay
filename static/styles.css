@@ -764,7 +764,6 @@ h1 {
 
 /* This targets the table with id "task-table" */
 #task-table {
-    table-layout: fixed; /* This makes the table width fixed */
     width: 100%; /* This makes the table span the full width of its container */
 }
 
@@ -799,16 +798,6 @@ h1 {
     margin-right: 10px; /* Add some spacing between the title and the link */
     font-weight: bold;
     text-decoration: none;
-}
-
-#task-table th:nth-child(1) {
-    width: 20%;
-}
-#task-table th:nth-child(2) {
-    width: 65%;
-}
-#task-table th:nth-child(3) {
-    width: 15%;
 }
 
 #task-table th {
