@@ -91,7 +91,7 @@
             const dropdown = document.getElementById("dropdown");
             dropdown.classList.toggle("show");
         }
-        
+
         // Add task
         function addTask() {
             var user = document.getElementById('user').value;
@@ -109,6 +109,9 @@
                     }
                     // Add task to the table
                     appendTask(data.task, user, data.task_id);
+
+                    // Clear the task input field after successfully adding the task
+                    document.getElementById('task').value = '';
                 })
                 .catch(error => {
                     // Display error message in a popup
@@ -117,6 +120,7 @@
                     document.getElementById('popup_flash').style.display = "flex";
                 });
         }
+
 
         // Append task to tasks table
         function appendTask(task, user, taskId) {
