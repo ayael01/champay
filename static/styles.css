@@ -767,7 +767,7 @@ h1 {
     color: white;
     border: none;
     border-radius: 4px;
-    padding: 5px 2vw; /* Use vw units for responsive horizontal padding */
+    padding: 7px 2vw; /* Use vw units for responsive horizontal padding and increase vertical padding */
     box-sizing: border-box;
     text-align: center;
     text-decoration: none;
@@ -775,10 +775,12 @@ h1 {
     cursor: pointer;
     transition-duration: 0.4s;
     margin-left: 5px;
-    height: 30px; /* set height same as input fields */
-    line-height: 1.2; /* adjust as needed */
+    height: auto; /* Set to auto so the height fits the content */
     white-space: nowrap; /* Prevent the text inside from wrapping */
     min-width: 70px; /* Minimum width to accommodate the text inside */
+    display: flex; /* Add flex properties */
+    align-items: center; /* Vertically align the text */
+    justify-content: center; /* Horizontally align the text */
 }
 
 
