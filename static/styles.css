@@ -683,6 +683,7 @@ h1 {
     transition: 0.3s;
     cursor: pointer;
     border-radius: 4px;
+    white-space: nowrap;
 }
 
 .remove-button:hover {
@@ -822,10 +823,13 @@ h1 {
 
 @media only screen and (max-width: 600px) {
     .remove-button {
-        padding: 2px 5px;
+        padding: 2px;
     }
 }
 
+.table-container {
+    overflow-x: auto;
+}
 
 
 
