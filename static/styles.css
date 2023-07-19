@@ -723,6 +723,11 @@ h1 {
     flex: 2;
 }
 
+.flex-05, .flex-1, .flex-2 {
+    flex-shrink: 1; /* Add this line */
+    min-width: 0; /* Add this line */
+}
+
 .form-addtasks label {
     text-align: center; /* Centers the text of the labels */
 }
@@ -741,6 +746,20 @@ h1 {
     display: flex;
     flex-direction: column;
     justify-content: flex-end; /* Aligns button along the end of the main axis */
+    flex-shrink: 1; /* Add this line */
+    min-width: 0; /* Add this line */
+}
+
+.form-addtasks input[type="text"] {
+    height: 30px;  /* Adjust this value as per your requirements */
+    padding: 5px;  /* Add padding for a better look */
+    box-sizing: border-box;
+}
+
+.form-addtasks select {
+    height: 30px;  /* Adjust this value as per your requirements */
+    padding: 5px;  /* Add padding for a better look */
+    box-sizing: border-box;
 }
 
 .addtask-button {
@@ -748,14 +767,20 @@ h1 {
     color: white;
     border: none;
     border-radius: 4px;
-    padding: 8px 20px;
+    padding: 5px 10px; /* Use same vertical padding as input fields */
+    box-sizing: border-box;
     text-align: center;
     text-decoration: none;
-    font-size: 16px;
+    font-size: 1rem; /* adjust as needed */
     cursor: pointer;
     transition-duration: 0.4s;
     margin-left: 5px;
+    height: 30px; /* set height same as input fields */
+    line-height: 1.2; /* adjust as needed */
 }
+
+
+
 
 .addtask-button:hover {
     background-color: white;
