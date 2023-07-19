@@ -85,6 +85,13 @@
     </main>
 
     <script type="text/javascript">
+
+        // Functions for the dropdown menu
+        function toggleDropdown() {
+            const dropdown = document.getElementById("dropdown");
+            dropdown.classList.toggle("show");
+        }
+        
         // Add task
         function addTask() {
             var user = document.getElementById('user').value;
