@@ -1043,10 +1043,15 @@ def get_tasks():
 
     try:
         tasks = Task.query.filter_by(group_id=group_id).all()
-        tasks_serialized = [{"task": task.task, "user": task.user.username, "id": task.id} for task in tasks]
+        tasks_serialized = [{"task": task.task, 
+                             "user": task.user.username, 
+                             "id": task.id, 
+                             "is_member": task.user in [group_member.user for group_member in group.group_members]}
+                            for task in tasks]
         return jsonify({"tasks": tasks_serialized}), 200
     except SQLAlchemyError as e:
         return jsonify({"error": str(e)}), 500
+
     
 
 @app.route('/delete_task', methods=['POST'])

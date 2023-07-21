@@ -847,6 +847,9 @@ h1 {
     overflow-x: auto;
 }
 
+.non-member {
+    color: red;
+}
 
 
 

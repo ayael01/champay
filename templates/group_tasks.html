@@ -129,17 +129,19 @@
         }
 
 
-        // Append task to tasks table
-        function appendTask(task, user, taskId) {
+        function appendTask(task, user, taskId, isMember) {
             var table = document.getElementById('task-table');
             var row = table.insertRow(-1);
             var cell1 = row.insertCell(0);
             var cell2 = row.insertCell(1);
             var cell3 = row.insertCell(2);
+
             cell1.innerHTML = user;
+            cell1.className = isMember ? "" : "non-member"; // add a class to non-member user
             cell2.innerHTML = task;
             cell3.innerHTML = '<button class="remove-button" onclick="removeTask(\'' + taskId + '\', this)">Remove</button>';
         }
+
 
         window.onload = function() {
             // Fetch the users of the group
@@ -169,20 +171,20 @@
                     document.getElementById('popup_flash').style.display = "flex";
                 });
 
-            // Fetch the tasks of the group
-            fetch("/get_tasks", {
-                method: "POST",
-                body: JSON.stringify({ group_id: '{{ group.id }}' }),
-                headers: { "Content-Type": "application/json" },
-            })
-            .then(response => response.json())
+                // Fetch the tasks of the group
+                fetch("/get_tasks", {
+                    method: "POST",
+                    body: JSON.stringify({ group_id: '{{ group.id }}' }),
+                    headers: { "Content-Type": "application/json" },
+                })
+                .then(response => response.json())
                 .then(data => {
                     if (data.error) {
                         throw new Error(data.error);
                     }
                     // Fill the tasks table rows
                     data.tasks.forEach(function(task) {
-                        appendTask(task.task, task.user, task.id);
+                        appendTask(task.task, task.user, task.id, task.is_member);
                     });
                 })
                 .catch(error => {
