@@ -851,5 +851,11 @@ h1 {
     color: red;
 }
 
+.warning-container {
+    margin-top: 30px; /* Change this according to your needs */
+    margin-left: 30px;
+    width: 100%;
+    word-wrap: break-word;
+}
 
 

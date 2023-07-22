@@ -82,6 +82,8 @@
                     {% endfor %}
                 </tbody>
             </table>
+
+            <div id="warning-container" class="warning-container"></div>
         </section>
 
         <div id="popup_flash" class="popup">
@@ -97,54 +99,27 @@
                 <button class="popup-button" id="confirm_ok">OK</button>
                 <button class="popup-button" id="confirm_cancel">Cancel</button>
             </div>
-        </div>            
+        </div>  
+        <div id="warning-container" style="width:100%;"></div>          
     </main>
-    <script type="text/javascript">
-        // Call the new endpoint to get non-member users with tasks
-        fetch("/get_non_member_users_with_tasks", {
-            method: "POST",
-            body: JSON.stringify({ group_id: "{{ group.id }}" }),
-            headers: { "Content-Type": "application/json" },
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(err => { throw new Error(err.error); });
-            } else {
-                return response.json();
-            }
-        })
-        .then(data => {
-            if (data.non_member_users.length > 0) {
-                var message = "Warning: The following users have tasks in the group but are no longer members: ";
-    
-                for (let i = 0; i < data.non_member_users.length; i++) {
-                    message += data.non_member_users[i].username;
-                    if (i < data.non_member_users.length - 1) {
-                        message += ", ";
-                    }
-                }
-    
-                var warningElement = document.createElement("p");
-                warningElement.style.color = "red";
-                warningElement.innerText = message;
-    
-                var warningDiv = document.createElement("div");
-                warningDiv.style.width = document.getElementById("user-table").offsetWidth + 'px';
-                warningDiv.appendChild(warningElement);
-    
-                document.getElementById("user-table").parentElement.appendChild(warningDiv);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    </script>
-    
-    
 
     <script type="text/javascript">
         // Initialize group members array with the current members of the group
         var groupMembers = [{% for member in group_members %}{ username: "{{ member.username }}", email: "{{ member.email }}" },{% endfor %}];
+
+        // Load warning messages and fetch friends when the page is loaded
+        window.onload = function() {
+            fetchFriends();
+            fetchNonMemberUsersWithTasks();
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    document.getElementById('message_flash').innerText = "{{ messages[0][1] }}";
+                    document.getElementById('message_flash').className = "popup_flash-" + "{{ messages[0][0] }}";
+                    document.getElementById('popup_flash').style.display = "flex";
+                {% endif %}
+            {% endwith %}
+        };        
     
         // Function to search and add friends to the group
         function searchFriends() {
@@ -242,17 +217,6 @@
             const popup = document.getElementById("popup_flash");
             popup.style.display = "none";
         }
-    
-        window.onload = function() {
-            fetchFriends();
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}          
-                    document.getElementById('message_flash').innerText = "{{ messages[0][1] }}";
-                    document.getElementById('message_flash').className = "popup_flash-" + "{{ messages[0][0] }}";
-                    document.getElementById('popup_flash').style.display = "flex";
-                {% endif %}
-            {% endwith %}
-        };
 
         // Function to remove a user from the group
         function removeUser(email, buttonElement) {
@@ -310,6 +274,9 @@
                     if (email === current_user_email) {
                         window.location.href = "{{ url_for('dashboard') }}";
                     }
+
+                    // After removing the user, fetch the non-member users with tasks
+                    return fetchNonMemberUsersWithTasks();
                 }
             })
             .catch(error => {
@@ -320,6 +287,45 @@
             });
         }
 
+        function fetchNonMemberUsersWithTasks() {
+            fetch("/get_non_member_users_with_tasks", {
+                method: "POST",
+                body: JSON.stringify({ group_id: "{{ group.id }}" }),
+                headers: { "Content-Type": "application/json" },
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.error); });
+                } else {
+                    return response.json();
+                }
+            })
+            .then(data => {
+                var warningContainer = document.getElementById("warning-container");
+
+                // Clear the previous warning message, if any
+                warningContainer.innerText = "";
+
+                if (data.non_member_users.length > 0) {
+                    var message = "Warning: The following users have tasks in the group but are no longer members: ";
+
+                    for (let i = 0; i < data.non_member_users.length; i++) {
+                        message += data.non_member_users[i].username;
+                        if (i < data.non_member_users.length - 1) {
+                            message += ", ";
+                        }
+                    }
+
+                    warningContainer.style.color = "red";
+                    warningContainer.innerText = message;
+
+
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }      
 
         function showConfirmPopup(message, okCallback, cancelCallback) {
             // Set the message
