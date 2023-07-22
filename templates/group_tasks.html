@@ -37,7 +37,8 @@
     </div>
     <main>
         <section class="task-list">
-            <h2>Hi {{ username }}, add or manage tasks</h2>
+            <h2>Hi {{ username }}, What are the tasks for this event?</h2>
+            <p class="task-table-title">Add or manage group tasks</p>
 
            <!-- The form for adding tasks -->
             <form action="{{ url_for('add_task') }}" method="post" class="task-form" onsubmit="event.preventDefault(); addTask();">
@@ -59,7 +60,7 @@
             </form>          
 
             <!-- Task list -->
-            <p class="task-table-title">Group's Tasks</p>
+            <p class="task-table-title">Group Tasks</p>
 
             <div class="table-container">
                 <table id="task-table" class="friend-table">
