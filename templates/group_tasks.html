@@ -18,7 +18,7 @@
                     <a href="{{ url_for('logout') }}">Logout</a>
                 </div>
             </div>
-            <h1>{{ group_name }} Tasks</h1>
+            <h1>{{ group.name }} planning</h1>
         </div>
     </header>
     <div class="menu-panel">
@@ -93,7 +93,7 @@
     </main>
 
     <script type="text/javascript">
-        
+
         // Functions for the dropdown menu
         function toggleDropdown() {
             const dropdown = document.getElementById("dropdown");
