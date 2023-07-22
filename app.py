@@ -1083,6 +1083,24 @@ def delete_task():
     except SQLAlchemyError as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+    
+@app.route("/get_non_member_users_with_tasks", methods=["POST"])
+def get_non_member_users_with_tasks():
+    data = request.get_json()
+    group_id = data.get('group_id')
+
+    # Query for tasks where the user is not a member of the group
+    tasks = Task.query.filter_by(group_id=group_id).all()
+
+    non_member_users = []
+    for task in tasks:
+        user = User.query.get(task.user_id)
+        group_member = GroupMember.query.filter_by(user_id=user.id, group_id=group_id).first()
+        if group_member is None and user not in non_member_users:
+            non_member_users.append(user)
+
+    return jsonify({"non_member_users": [user.serialize() for user in non_member_users]})
+
 
 
 

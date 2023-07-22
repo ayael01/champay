@@ -99,6 +99,48 @@
             </div>
         </div>            
     </main>
+    <script type="text/javascript">
+        // Call the new endpoint to get non-member users with tasks
+        fetch("/get_non_member_users_with_tasks", {
+            method: "POST",
+            body: JSON.stringify({ group_id: "{{ group.id }}" }),
+            headers: { "Content-Type": "application/json" },
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw new Error(err.error); });
+            } else {
+                return response.json();
+            }
+        })
+        .then(data => {
+            if (data.non_member_users.length > 0) {
+                var message = "Warning: The following users have tasks in the group but are no longer members: ";
+    
+                for (let i = 0; i < data.non_member_users.length; i++) {
+                    message += data.non_member_users[i].username;
+                    if (i < data.non_member_users.length - 1) {
+                        message += ", ";
+                    }
+                }
+    
+                var warningElement = document.createElement("p");
+                warningElement.style.color = "red";
+                warningElement.innerText = message;
+    
+                var warningDiv = document.createElement("div");
+                warningDiv.style.width = document.getElementById("user-table").offsetWidth + 'px';
+                warningDiv.appendChild(warningElement);
+    
+                document.getElementById("user-table").parentElement.appendChild(warningDiv);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    </script>
+    
+    
 
     <script type="text/javascript">
         // Initialize group members array with the current members of the group
