@@ -177,6 +177,9 @@
                             groupMembers.push(data.user);
                             // Clear the input field
                             emailInput.value = '';
+
+                            // Fetch non-member users with tasks after a new user is added
+                            return fetchNonMemberUsersWithTasks();
                         }
                     })
                     .catch(error => {
