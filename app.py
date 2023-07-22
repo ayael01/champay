@@ -941,6 +941,10 @@ def group_tasks(group_id):
     if 'username' not in session:
         # log the unauthorized access
         return redirect(url_for('login'))
+    
+    new_group = request.args.get('new_group', default = False, type = bool)
+    if new_group:
+        flash("New group created successfully.", "success")
 
     current_user = User.query.filter_by(username=session['username']).first()
     group = Group.query.get(group_id)

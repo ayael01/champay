@@ -203,7 +203,7 @@
         .then(data => {
             if (data.success) {
             // Redirect to the group_expenses page for the new group
-            window.location.href = "/group_expenses/" + data.group_id;
+            window.location.href = "/group_tasks/" + data.group_id + "?new_group=true";
             } else {
                 alert("Failed to create group: " + data.error);
             }

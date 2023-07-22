@@ -38,7 +38,7 @@
     
     <main>
         <section class="group-form">
-            <h2>Hi {{ username }}, share your comments and conclusion</h2>
+            <h2>Hi {{ username }}, share your comments and conclusion to this event</h2>
 
             <form action="{{ url_for('add_comment') }}" method="post" class="retro-form">
                 <input type="hidden" name="group_id" value="{{ group.id }}">
