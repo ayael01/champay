@@ -1081,8 +1081,6 @@ def delete_task():
     data = request.get_json()
     task_id = data.get('task_id')
 
-    log(current_user.username, f'Task ID is {task_id}')
-
     task = Task.query.get(task_id)
     if task is None:
         return jsonify({"error": "Task not found."}), 400
