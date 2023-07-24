@@ -867,6 +867,17 @@ def group_retrospective(group_id):
     if 'username' not in session:
         flash("Please login first.")
         return redirect(url_for('homepage'))
+    
+    # Retrieve the currently logged-in user
+    username = session.get("username")
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        return jsonify({"error": "User not found."}), 400
+    
+    # Check if the user is a member of the group
+    group_membership = GroupMember.query.filter_by(user_id=user.id, group_id=group_id).first()
+    if not group_membership:
+        abort(403)  # Forbidden
 
     # Fetch group by id
     group = Group.query.get(group_id)
@@ -940,7 +951,7 @@ def remove_comment():
 def group_tasks(group_id):
     if 'username' not in session:
         # log the unauthorized access
-        return redirect(url_for('login'))
+        return redirect(url_for('homepage'))
     
     new_group = request.args.get('new_group', default = False, type = bool)
     if new_group:
