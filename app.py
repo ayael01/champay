@@ -864,6 +864,7 @@ def previous_friends():
 
 @app.route('/group_retrospective/<int:group_id>', methods=['GET'])
 def group_retrospective(group_id):
+    
     if 'username' not in session:
         flash("Please login first.")
         return redirect(url_for('homepage'))
@@ -873,6 +874,12 @@ def group_retrospective(group_id):
     user = User.query.filter_by(username=username).first()
     if user is None:
         return jsonify({"error": "User not found."}), 400
+
+    # Get the email of the current user
+    current_user_email = user.email
+
+    # Log the attempt
+    log(current_user_email, f'Attempting to retrospective in group {group_id}')
     
     # Check if the user is a member of the group
     group_membership = GroupMember.query.filter_by(user_id=user.id, group_id=group_id).first()
@@ -891,6 +898,7 @@ def group_retrospective(group_id):
     group_comments = Comment.query.filter_by(group_id=group.id).all()
 
     return render_template('group_retrospective.html', username=session['username'], group=group, group_comments=group_comments)
+
 
 
     
@@ -953,15 +961,24 @@ def group_tasks(group_id):
         # log the unauthorized access
         return redirect(url_for('homepage'))
     
+    current_user = User.query.filter_by(username=session['username']).first()
+    
+    if current_user is None:
+        return "User not found.", 400
+
+    # Get the email of the current user
+    current_user_email = current_user.email
+    
+    log(current_user_email, f'Attempting to group_tasks in group {group_id}')
+    
     new_group = request.args.get('new_group', default = False, type = bool)
     if new_group:
         flash("New group created successfully.", "success")
 
-    current_user = User.query.filter_by(username=session['username']).first()
     group = Group.query.get(group_id)
-    if group is None or current_user is None:
+    if group is None:
         # log the error
-        return "Group or User not found.", 400
+        return "Group not found.", 400
 
     group_membership = GroupMember.query.filter_by(user_id=current_user.id, group_id=group_id).first()
     if not group_membership:
@@ -969,6 +986,7 @@ def group_tasks(group_id):
         return "You are not a member of this group.", 400
 
     return render_template('group_tasks.html', group=group, username=session['username'])
+
 
 @app.route('/add_task', methods=['POST'])
 def add_task():
