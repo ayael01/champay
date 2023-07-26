@@ -266,11 +266,6 @@ input[type="submit"]:hover {
     margin-left: 10px;
 }
 
-/* Adjust the layout of the expense table */
-.expense-table {
-    margin-top: 20px;
-}
-
 .top-right {
     position: absolute;
     top: 20px;
@@ -389,9 +384,13 @@ input[type="submit"]:hover {
     margin: 0 10px;
 }
 
-.menu-panel a:hover {
-    text-decoration: underline;
+
+
+.menu-panel .active-page {
+    color: #ffffff;
+    background-color: #45a049;
 }
+
 
 .home-button {
     margin-top: 10px;
@@ -407,6 +406,12 @@ input[type="submit"]:hover {
 .home-button a:hover {
     text-decoration: underline;
 }
+
+.material-icons {
+    line-height: normal;  /* This value will center the icon */
+    vertical-align: middle;  /* Align the icon vertically in the middle */
+}
+
 
 .header-content {
     display: flex;
@@ -504,7 +509,26 @@ h1 {
 }
 
 .back2events-link {
-    color: #45a049;
+    color: #45a049; /* Original green color */
+    text-decoration: none; /* Remove the underline */
+    padding: 3px 10px; /* Added padding for better visibility of the background */
+    border-radius: 3px;
+}
+
+.back2events-link:hover {
+    color: #ffffff; /* White color when hovered */
+    background-color: #45a049; /* Light green background when hovered */
+    text-decoration: none;
+}
+
+.back2events-link:active {
+    color: #ffffff; /* White color when clicked */
+    background-color: #45a049; /* Dull green background when clicked */
+}
+
+.active-page {
+    color: #ffffff; /* White color when clicked */
+    background-color: #45a049; /* Dull green background when clicked */
 }
 
 .search-form {

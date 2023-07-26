@@ -24,16 +24,16 @@
     </header>
     <div class="menu-panel">
         <div>
-            <a href="{{ url_for('dashboard') }}" class="back2events-link">
+            <a href="{{ url_for('dashboard') }}" class="back2events-link {% if request.endpoint == 'dashboard' %}active-page{% endif %}">
                 <span class="material-icons">
                     home
                 </span>
             </a>            
-            <a href="{{ url_for('group_settings', group_id=group.id) }}" class="back2events-link">Edit weight</a>
-            <a href="{{ url_for('edit_group', group_id=group.id) }}" class="back2events-link">Edit members</a>
-            <a href="{{ url_for('group_tasks', group_id=group.id) }}" class="back2events-link">Planning</a>
-            <a href="{{ url_for('group_expenses', group_id=group.id) }}" class="back2events-link">Expenses</a>
-            <a href="{{ url_for('group_retrospective', group_id=group.id) }}" class="back2events-link">Retrospective</a>
+            <a href="{{ url_for('group_settings', group_id=group.id) }}" class="back2events-link {% if request.endpoint == 'group_settings' %}active-page{% endif %}">Edit weight</a>
+            <a href="{{ url_for('edit_group', group_id=group.id) }}" class="back2events-link {% if request.endpoint == 'edit_group' %}active-page{% endif %}">Edit members</a>
+            <a href="{{ url_for('group_tasks', group_id=group.id) }}" class="back2events-link {% if request.endpoint == 'group_tasks' %}active-page{% endif %}">Planning</a>
+            <a href="{{ url_for('group_expenses', group_id=group.id) }}" class="back2events-link {% if request.endpoint == 'group_expenses' %}active-page{% endif %}">Expenses</a>
+            <a href="{{ url_for('group_retrospective', group_id=group.id) }}" class="back2events-link {% if request.endpoint == 'group_retrospective' %}active-page{% endif %}">Retrospective</a>            
         </div>
     </div>
 
