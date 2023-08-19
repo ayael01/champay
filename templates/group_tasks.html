@@ -116,7 +116,7 @@
                         throw new Error(data.error);
                     }
                     // Add task to the table
-                    appendTask(data.task, user, data.task_idb, true);
+                    appendTask(data.task, user, data.task_id, true);
 
                     // Clear the task input field after successfully adding the task
                     document.getElementById('task').value = '';
