@@ -202,6 +202,7 @@ def group_expenses(group_id):
         abort(403)  # Forbidden
 
     group = Group.query.get(group_id)
+    user_weight = GroupMember.query.filter_by(group_id=group_id, user_id=user.id).first().weight
 
     # Log the user's attempt to access group expenses
     log(user.email, f'Attempted to access {request.path} path')
@@ -277,7 +278,7 @@ def group_expenses(group_id):
     # Check if all expenses are updated for the group
     all_expenses_updated = are_all_expenses_updated(group_id)
 
-    return render_template("group_expenses.html", group=group, group_expenses=group_expenses_list, username=username, all_expenses_updated=all_expenses_updated)
+    return render_template("group_expenses.html", group=group, group_expenses=group_expenses_list, username=username, all_expenses_updated=all_expenses_updated, user_weight=user_weight)
 
 
 def are_all_expenses_updated(group_id):

@@ -887,4 +887,30 @@ h1 {
     word-wrap: break-word;
 }
 
+.weight-display {
+    background-color: #4CAF50;  /* Button background color */
+    color: white;             /* Text color */
+    border: none;             /* Remove default borders */
+    padding: 5px 10px;       /* Some padding for better appearance */
+    border-radius: 4px;      /* Rounded corners */
+    cursor: default;         /* To avoid the hand pointer on hover */
+    outline: none;           /* Remove default focus outline */
+}
+
+/* Optional: Style for hover state */
+.weight-display:hover {
+    background-color: #45a049;  /* A darker shade of green for hover effect */
+    cursor: pointer;
+}
+
+.weight-link {
+    text-decoration: none; /* Removes the underline from the link */
+    color: inherit; /* Inherits the color from the parent, if needed */
+    display: inline-block; /* Makes it inline like the button, but allows block behaviors */
+}
+
+.weight-link:hover {
+    text-decoration: none; /* Ensures no hover underline */
+}
+
 

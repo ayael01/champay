@@ -29,7 +29,6 @@
                     home
                 </span>
             </a>            
-            <a href="{{ url_for('group_settings', group_id=group.id) }}" class="back2events-link {% if request.endpoint == 'group_settings' %}active-page{% endif %}">Edit weight</a>
             <a href="{{ url_for('edit_group', group_id=group.id) }}" class="back2events-link {% if request.endpoint == 'edit_group' %}active-page{% endif %}">Edit members</a>
             <a href="{{ url_for('group_tasks', group_id=group.id) }}" class="back2events-link {% if request.endpoint == 'group_tasks' %}active-page{% endif %}">Planning</a>
             <a href="{{ url_for('group_expenses', group_id=group.id) }}" class="back2events-link {% if request.endpoint == 'group_expenses' %}active-page{% endif %}">Expenses</a>
@@ -56,7 +55,13 @@
                 </form>
             </div>
         </section>
-        
+        <div class="user-expenses">
+            <p>My weight in this event expenses is 
+                <a href="{{ url_for('group_settings', group_id=group.id) }}" class="weight-link">
+                    <button class="weight-display">{{ user_weight }}</button>
+                </a>
+            </p>
+        </div>
         <div class="user-expenses">
             <p>List of user expenses</p>
             <a class="generate-report-link" href="#" onclick="generateReport()">Generate Report</a>
