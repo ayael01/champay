@@ -268,12 +268,14 @@ def group_expenses(group_id):
 
     for expense in group_expenses:
         expense_owner = User.query.filter_by(id=expense.user_id).first()
+        member_weight = GroupMember.query.filter_by(group_id=group_id, user_id=expense.user_id).first().weight
         group_expenses_list.append({
-            "user": expense_owner.username,
+            "user": f"{expense_owner.username} ({member_weight})",
             "description": expense.description,
             "expenses": expense.amount,
             "last_updated": expense.last_updated
         })
+
 
     # Check if all expenses are updated for the group
     all_expenses_updated = are_all_expenses_updated(group_id)
