@@ -298,19 +298,25 @@ def are_all_expenses_updated(group_id):
 @app.route("/group_report/<int:group_id>")
 def group_report(group_id):
 
+    force_generate = request.args.get('force', 'false').lower() == 'true'
+
     username = session.get('username', 'Unknown')
     user = User.query.filter_by(username=username).first()
     
     # Log the user's attempt to access group report
     log(user.email if user else 'Unknown', f'Attempted to access {request.path} path')
 
-    # Check if all expenses are updated for the group
-    all_expenses_updated = are_all_expenses_updated(group_id)
-    if not all_expenses_updated:
-        flash("Cannot generate report. Not all users have updated their expenses.", "error")
-        # Log the failed report generation
-        log(user.email if user else 'Unknown', f'Failed to generate report on {request.path} path due to unupdated expenses')
-        return redirect(url_for("group_expenses", group_id=group_id))
+    if not force_generate:
+        # Check if all expenses are updated for the group
+        all_expenses_updated = are_all_expenses_updated(group_id)
+        if not all_expenses_updated:
+            flash("Not all users have updated their expenses. Generate anyway?", "warning")
+            # Log the failed report generation
+            log(user.email if user else 'Unknown', f'Failed to generate report on {request.path} path due to unupdated expenses')
+            return redirect(url_for("group_expenses", group_id=group_id))
+    else:
+        # Log that report generation was forced
+        log(user.email if user else 'Unknown', f'Forced report generation on {request.path} path despite unupdated expenses')
 
     # Check if the user is logged in
     if not username:
@@ -367,7 +373,7 @@ def generate_group_report(group, group_expenses):
 
     for expense in group_expenses:
         expense_owner = User.query.filter_by(id=expense.user_id).first()
-        formatted_last_updated = expense.last_updated.strftime('%Y-%m-%d %H:%M')
+        formatted_last_updated = expense.last_updated.strftime('%Y-%m-%d %H:%M') if expense.last_updated else "Not updated"
         group_expenses_list.append({
             "user": expense_owner,
             "description": expense.description,
@@ -444,7 +450,7 @@ def generate_group_report_by_weight(group, group_expenses):
     for expense in group_expenses:
         expense_owner = User.query.filter_by(id=expense.user_id).first()
         weight = GroupMember.query.filter_by(user_id=expense.user_id, group_id=group.id).first().weight  # Get weight
-        formatted_last_updated = expense.last_updated.strftime('%Y-%m-%d %H:%M')
+        formatted_last_updated = expense.last_updated.strftime('%Y-%m-%d %H:%M') if expense.last_updated else "Not updated"
         group_expenses_list.append({
             "user": expense_owner.username,
             "description": expense.description,
