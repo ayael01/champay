@@ -12,12 +12,9 @@
     </header>
     <main>
         <section>
-            <h2>Introduction</h2>
-            <p>
-                Champay is a web application that helps friends and groups easily split expenses.
-                Whether you're planning a trip or just sharing the costs of a dinner, Champay takes the hassle out of calculating who owes what.
-                Sign up and start tracking your expenses with your friends today!
-            </p>
+            <h2>Your Ultimate Trip Manager</h2>
+            <p>Embarking on a new adventure with friends or colleagues? Champay is here to streamline the entire journey for you. From initial planning to setting tasks, from splitting expenses to reflecting on your experiences, Champay ensures every aspect of your trip is organized and stress-free.</p>
+            <p>Dive into a seamless trip management experience, where everyone knows the plan, the costs, and can share their memories and feedback. With Champay, make every trip not just a memory, but a story worth retelling.</p>
         </section>
         <section>
             <h2>Login</h2>
@@ -41,5 +38,20 @@
             </form>
         </section>
     </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            function highlightWord(rootElement, word) {
+                let content = rootElement.innerHTML;
+                const regExp = new RegExp(`(${word})`, 'gi'); 
+                const replacement = `<span class="champay-highlight">$1</span>`;
+                rootElement.innerHTML = content.replace(regExp, replacement);
+            }
+    
+            // Applying it to the entire body. You can limit the scope if needed.
+            highlightWord(document.body, "Champay");
+        });
+    </script>
+    
 </body>
 </html>
