@@ -176,7 +176,7 @@ input[type="submit"]:hover {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 40px;
+    margin-top: 0;
 }
 
 .go-button {
@@ -669,8 +669,7 @@ h1 {
 }
 
 .retro-form {
-    margin: 20px;
-    border: 1px solid #ccc;
+    margin: 10px;
     padding: 20px;
     border-radius: 4px;
     background-color: #f8f8f8;
@@ -682,7 +681,6 @@ h1 {
     padding: 12px 20px;
     margin: 8px 0;
     box-sizing: border-box;
-    border: 2px solid #ccc;
     border-radius: 4px;
     resize: vertical;
 }
