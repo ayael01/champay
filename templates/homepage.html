@@ -38,20 +38,5 @@
             </form>
         </section>
     </main>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            function highlightWord(rootElement, word) {
-                let content = rootElement.innerHTML;
-                const regExp = new RegExp(`(${word})`, 'gi'); 
-                const replacement = `<span class="champay-highlight">$1</span>`;
-                rootElement.innerHTML = content.replace(regExp, replacement);
-            }
-    
-            // Applying it to the entire body. You can limit the scope if needed.
-            highlightWord(document.body, "Champay");
-        });
-    </script>
-    
 </body>
 </html>
