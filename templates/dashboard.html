@@ -8,7 +8,7 @@
 </head>
 <body>
     <header>
-        <h1>Champay Event Selection</h1>
+        <h1>Champay Dashboard</h1>
         {% if username %}
             <div class="user-info" onclick="toggleDropdown()">{{ username[0] }}</div>
             <div id="dropdown" class="dropdown-content">
@@ -20,10 +20,10 @@
     <main>
         <section class="group-form">
             {% if groups %}
-                <h2>Select a trip to manage</h2>
+                <h2>Manage Your Trip</h2>
                 <form action="{{ url_for('dashboard') }}" method="post">
                     <div class="form-group">
-                        <label for="group">Events:</label>
+                        <label for="group">Trip Selector:</label>
                         <select name="group" id="group">
                             {% for group in groups %}
                                 <option value="{{ group.id }}">{{ group.name }}</option>
@@ -41,10 +41,10 @@
         </section>
 
         <section class="group-form">
-            <h2>Create a new trip</h2>
+            <h2>Plan a New Trip</h2>
             <form action="{{ url_for('create_group') }}" method="post">
                 <div class="form-group">
-                    <label for="event-name">Event Name:</label>
+                    <label for="event-name">Trip Name:</label>
                     <input type="text" id="event-name" name="event-name" class="event-name-input" required>
                 </div>
                 <div class="form-group">
