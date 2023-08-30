@@ -483,7 +483,7 @@ h1 {
 }
 
 .popup_flash-error {
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     color: #ff0000;
     font-weight: bold;
 }
@@ -497,6 +497,7 @@ h1 {
 
 
 .popup-button {
+    width: 120px;  /* Set to the width you want both buttons to have */
     padding: 8px 12px;
     background-color: #4CAF50;
     color: white;
@@ -504,7 +505,10 @@ h1 {
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s;
+    margin: 0 10px;
+    text-align: center;  /* Ensures that the text remains centered even if the button width exceeds the text width */
 }
+
 
 .popup-button:hover {
     background-color: #45a049;
