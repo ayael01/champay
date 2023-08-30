@@ -936,7 +936,6 @@ def add_comment():
     db.session.add(comment)
     db.session.commit()
 
-    flash("Your comment has been added.", "success")
     return redirect(url_for("group_retrospective", group_id=group_id))
 
 
