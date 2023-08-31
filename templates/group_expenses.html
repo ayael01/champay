@@ -68,13 +68,13 @@
         </div>
 
         <section class="expense-table">
-            <table class="center-table">
+            <table class="friend-table">
                 <thead>
                     <tr>
-                        <th>Name (weight)</th>
+                        <th class="name-col">Name (weight)</th>
                         <th>Description</th>
-                        <th>Expenses</th>
-                        <th>Last Updated</th>
+                        <th class="name-col">Expenses</th>
+                        <th class="lastupd-col">Last Updated</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -85,7 +85,7 @@
                         <td {% if expense.last_updated is none %}class="not-updated"{% endif %}>{{ expense.expenses }}</td>
                         <td {% if expense.last_updated is none %}class="not-updated"{% endif %}>
                             {% if expense.last_updated %}
-                                {{ expense.last_updated.strftime("%Y-%m-%d %H:%M:%S") }}
+                                {{ expense.last_updated.strftime("%d/%m/%y %H:%M") }}
                             {% else %}
                                 Not updated yet
                             {% endif %}
