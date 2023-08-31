@@ -18,7 +18,7 @@
                     <a href="{{ url_for('logout') }}">Logout</a>
                 </div>
             </div>
-            <h1>Create a new event {{ event_name }}</h1>
+            <h1>Begin Your Trip: {{ event_name }}</h1>
         </div>
     </header>
     <div class="menu-panel">
@@ -67,7 +67,7 @@
                     <!-- Table rows will be added here -->
                 </tbody>
             </table>
-            <button id="finalize-group" onclick="finalizeGroup()" class="center-button">Create Event</button>
+            <button id="finalize-group" onclick="finalizeGroup()" class="center-button">Launch Trip</button>
         </section>
 
         <div id="popup_flash" class="popup">
@@ -185,7 +185,7 @@
 
     function finalizeGroup() {
         // Get the event name (group name) from the form
-        var groupName = document.querySelector("header .header-content h1").innerText.replace('Create a new event ', '');
+        var groupName = document.querySelector("header .header-content h1").innerText.replace('Begin Your Trip: ', '');
         if (!groupName) {
             alert("Group name is required");
             return;

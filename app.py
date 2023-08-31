@@ -695,7 +695,7 @@ def finalize_group():
     # Check if the group creation was successful
     if "successfully" in response_message.lower():
         log(session['email'], f'Successfully created group: {group_name}')
-        flash(f"Successfully created event {group_name}.", "success")
+        flash(f"Successfully created trip {group_name}.", "success")
         return jsonify(success=True, group_id=group_id, message="Group created successfully.")
     else:
         log(session['email'], f'Failed to create group: {group_name}. Error: {response_message}')
