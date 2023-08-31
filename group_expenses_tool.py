@@ -33,11 +33,14 @@ class User(db.Model):
             "email": self.email
             # add more fields as needed
         }
+    tasks = db.relationship('Task', backref='user', lazy=True)
+
 
 class Group(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True)
     group_members = db.relationship('GroupMember', backref='group')  # new line
+    tasks = db.relationship('Task', backref='group', lazy=True)
 
 
 class GroupMember(db.Model):
@@ -58,6 +61,20 @@ class Expense(db.Model):
     last_updated = db.Column(db.DateTime, default=None, onupdate=datetime.datetime.now(tz))
     user = db.relationship('User', backref='expenses')
 
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    group_id = db.Column(db.Integer, db.ForeignKey('group.id'))
+    text = db.Column(db.String(500))  # or use db.Text
+    date = db.Column(db.DateTime, default=datetime.datetime.now(tz))
+    user = db.relationship('User', backref='comments')
+    group = db.relationship('Group', backref='comments')
+
+class Task(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    task = db.Column(db.String(500))
+    group_id = db.Column(db.Integer, db.ForeignKey('group.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
 def create_group_expenses(app, group_name, user_ids):
     with app.app_context():
@@ -114,13 +131,20 @@ def delete_group_expenses(app, group_id):
             return f"Group id {group_id} does not exist."
 
         try:
+            # Delete all tasks related to the group
+            Task.query.filter_by(group_id=group_id).delete()
+
+            # Delete all comments related to the group
+            Comment.query.filter_by(group_id=group_id).delete()
+
+            # Continue with the previous deletion logic
             # Delete all expenses related to the group
             Expense.query.filter_by(group_id=group_id).delete()
 
             # Delete all memberships related to the group
             GroupMember.query.filter_by(group_id=group_id).delete()
 
-            # Delete the group
+            # Delete the group itself
             db.session.delete(group)
 
             db.session.commit()
@@ -130,6 +154,7 @@ def delete_group_expenses(app, group_id):
         except Exception as e:
             db.session.rollback()
             return f"Failed to delete group id {group_id}. Error: {str(e)}"
+
 
 
 if __name__ == "__main__":
