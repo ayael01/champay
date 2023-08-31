@@ -589,12 +589,13 @@ h1 {
     border-collapse: collapse;
     margin-left: auto;
     margin-right: auto;
+    text-align: center;
 }
 
 .friend-table th, .friend-table td {
     padding: 10px;
     border: 1px solid #dddddd;
-    text-align: left;
+    text-align: center;
 }
 
 .friend-table th {
@@ -928,4 +929,11 @@ h1 {
     text-decoration: none; /* Ensures no hover underline */
 }
 
+.actions-col {
+    width: 70px;  /* You can adjust this width to your liking */
+}
+
+.name-col {
+    width: 70px;  /* You can adjust this width to your liking */
+}
 
