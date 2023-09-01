@@ -1055,6 +1055,16 @@ button.rename-button {
 
 
 /* Added specificity to ensure styles are not overridden by external styles */
+#login-form {
+    display: flex;
+    flex-direction: column;
+    background-color: #e4e4e4; /* Darker shade of gray for the login form */
+    padding: 20px;
+    border-radius: 10px;
+    width: 80%;  /* to ensure the form wraps around its content */
+    margin: 0 auto;  /* to center the form */
+}
+
 body #login-form .login-input {
     width: 100%;
     box-sizing: border-box; 
@@ -1096,6 +1106,7 @@ input[type="email"], input[type="password"] {
     font-size: 16px;
     box-sizing: border-box;
 }
+
 
 @media only screen and (max-width: 600px) {
     main {
