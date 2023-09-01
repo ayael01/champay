@@ -1141,6 +1141,47 @@ def get_non_member_users_with_tasks():
     return jsonify({"non_member_users": [user.serialize() for user in non_member_users]})
 
 
+@app.route('/rename_group/<int:group_id>', methods=['POST'])
+def rename_group(group_id):
+    
+    if not request.is_json:
+        return jsonify({"error": "Request content type must be application/json."}), 415
+
+    # Check if user is logged in
+    if 'username' not in session:
+        return jsonify({"error": "You must be logged in to perform this action."}), 401
+
+    current_user = User.query.filter_by(username=session['username']).first()
+    if current_user is None:
+        return jsonify({"error": "User not found."}), 400
+
+    data = request.get_json()
+    new_name = data.get('newGroupName').strip()
+
+    # Check if group with the new name already exists
+    existing_group = Group.query.filter_by(name=new_name).first()
+    if existing_group:
+        return jsonify({"error": "A group with that name already exists."}), 400
+    
+    group = Group.query.get(group_id)
+    if group is None:
+        return jsonify({"error": "Group not found."}), 400
+
+    # Verify that the current user is a member of the group
+    current_user_membership = GroupMember.query.filter_by(user_id=current_user.id, group_id=group_id).first()
+    if not current_user_membership:
+        return jsonify({"error": "You must be a member of this group to rename it."}), 400
+
+    try:
+        group.name = new_name
+        db.session.commit()
+
+        return jsonify({"message": "Group name updated successfully.", "new_name": new_name}), 200
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
 
 
     

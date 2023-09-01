@@ -37,8 +37,25 @@
     </div>
     
     <main>
+        
         <section class="group-form">
-            <h2>Hi {{ username }}, add or remove trip members</h2>
+            <h2>Rename group</h2>
+        
+            <form id="renameGroupForm" action="{{ url_for('rename_group', group_id=group.id) }}" method="post" class="form-inline">
+                <div class="form-group">
+                    <label for="newGroupName">New Group Name:</label>
+                    <div class="rename-input">
+                        <input type="text" id="newGroupName" name="newGroupName" value="{{ group_name }}" required>    
+                        <button class="rename-button">Rename</button>                  
+                    </div>
+                </div>
+            </form>
+        
+        </section>
+        
+        
+        <section class="group-form">
+            <h2>Add or remove trip members</h2>
 
             <!-- The form for adding users -->
             <form action="{{ url_for('search_friends') }}" method="post" class="form-inline search-form" onsubmit="event.preventDefault(); searchFriends();">
@@ -110,6 +127,7 @@
         window.onload = function() {
             fetchFriends();
             fetchNonMemberUsersWithTasks();
+            renameGroup();
 
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -376,6 +394,46 @@
             })
             .catch(error => {
                 // Handle any errors here
+            });
+        }
+
+        function renameGroup() {
+            document.getElementById("renameGroupForm").addEventListener("submit", function(event) {
+                event.preventDefault();  // Prevent form from submitting normally
+
+                // Get the group_id and newGroupName from the form
+                let group_id = "{{ group.id }}";  // Assuming group.id is passed in your context to the template
+                let newGroupName = document.getElementById("newGroupName").value;
+
+                // Send an AJAX request
+                fetch(`/rename_group/${group_id}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        newGroupName: newGroupName
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        // Show the success popup
+                        document.getElementById('message_flash').innerText = data.message;
+                        document.getElementById('popup_flash').style.display = "flex";
+                        
+                        // Update group name on the page
+                        document.querySelector("h1").textContent = data.new_name + " Settings";
+                    } else if (data.error) {
+                        // Handle the error (e.g., show a different popup or an alert)
+                        alert(data.error);
+                    }
+                })
+                .catch(error => {
+                    console.log("Request failed:", error);
+                    console.error("Error:", error);
+                    alert("An unexpected error occurred.");
+                });
             });
         }
 
