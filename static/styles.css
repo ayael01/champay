@@ -557,48 +557,6 @@ h1 {
     margin-bottom: 20px; 
 }
 
-.search-wrapper {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;  /* adjust as needed */
-}
-
-.rename-input {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;  /* This will vertically center the items */
-    width: 100%;
-    margin-right: 3px;
-}
-
-
-#newGroupName {
-    padding: 5px; /* same padding as .rename-button */
-    font-size: 14px; /* same font-size as .rename-button */
-    height: calc(100% - 22px); /* adjusting for the top and bottom padding */
-    vertical-align: middle; /* to align it vertically in line with the button */
-}
-
-
-.search-button {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 10px 20px;
-    text-align: center;
-    text-decoration: none;
-    font-size: 16px;
-    cursor: pointer;
-    transition-duration: 0.4s;
-    margin-left: 5px;
-}
-
-.search-button:hover {
-    background-color: #45a049;  
-    cursor: pointer;
-}
-
 .friend-table {
     margin-top: auto;
     width: 100%;
@@ -974,9 +932,66 @@ h1 {
     margin: 4px 2px;
     cursor: pointer;
     border-radius: 4px;
+    height: 32px;
+    line-height: 13px
 }
 
 .rename-button:hover {
     background-color: #45a049;  /* A darker shade of green for hover effect */
     cursor: pointer;
+}
+
+.search-button {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+    height: 32px;
+    line-height: 13px;
+    width: 100px; 
+}
+
+.search-button:hover {
+    background-color: #45a049;  
+    cursor: pointer;
+}
+
+.rename-input {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;  /* This will vertically center the items */
+    width: 100%;
+    margin-right: 10px;
+}
+
+
+#newGroupName {
+    padding: 5px; /* same padding as .rename-button */
+    font-size: 14px; /* same font-size as .rename-button */
+    height: 15px; /* adjusting for the top and bottom padding */
+    vertical-align: middle; /* to align it vertically in line with the button */
+}
+
+#email {
+    padding: 5px; /* same padding as .rename-button */
+    font-size: 14px; /* same font-size as .rename-button */
+    height: 15px; /* adjusting for the top and bottom padding */
+    vertical-align: middle; /* to align it vertically in line with the button */
+
+    flex-grow: 1;  /* allows the input to grow and take available space */
+    width: auto;  /* or a specific width if needed, like 70% */
+    margin-right: 10px;  
+}
+
+.search-wrapper {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;  /* adjust as needed */
+    align-items: center;
 }
