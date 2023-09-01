@@ -43,11 +43,11 @@
                 <form action="{{ url_for('group_expenses', group_id=group.id) }}" method="post" class="form-inline">
                     <div class="form-group">
                         <label for="expenses">How much:</label>
-                        <input type="number" name="expenses" id="expenses" required>
+                        <input id="howMuchForWhat" type="number" name="expenses" id="expenses" required>
                     </div>
                     <div class="form-group">
                         <label for="description">For what:</label>
-                        <input type="text" name="description" id="description" required>
+                        <input id="howMuchForWhat" type="text" name="description" id="description" required>
                     </div>
                     <div class="form-group">
                         <input type="submit" value="Approve" class="center-button">

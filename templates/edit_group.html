@@ -62,7 +62,7 @@
                 <div class="form-group">
                     <label for="email">Friend's Email:</label>
                     <div class="search-wrapper">
-                        <input list="friendsEmails" type="text" id="email" name="email" required>
+                        <input list="friendsEmails" type="text" id="addFriendInput" name="email" required>
                         <datalist id="friendsEmails">
                             <!-- Previous friends' emails will be inserted here -->
                         </datalist>
@@ -141,7 +141,7 @@
         // Function to search and add friends to the group
         function searchFriends() {
             
-            var emailInput = document.getElementById("email");
+            var emailInput = document.getElementById("addFriendInput");
             var email = emailInput.value;
             
             fetch("/search_friends", {

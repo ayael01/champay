@@ -40,8 +40,8 @@
                 <div class="form-group">
                     <label for="email">Friend's Email:</label>
                     <div class="search-wrapper">
-                        <input type="text" id="email" name="email" required>
-                        <button class="search-button">Add Friend</button>
+                        <input type="text" id="addFriendInput" name="email" required>
+                        <button class="search-button-cre">Add Friend</button>
                     </div>
                 </div>
             </form>
@@ -115,7 +115,7 @@
     }
 
     function searchFriends() {
-        var email = document.getElementById("email").value;
+        var email = document.getElementById("addFriendInput").value;
         fetch("/search_friends", {
             method: "POST",
             body: JSON.stringify({ email: email }),
@@ -131,7 +131,7 @@
         .then(data => {
             if (data.user) {
                 addUserToTable(data.user);
-                document.getElementById('email').value = '';
+                document.getElementById('addFriendInput').value = '';
             }
         })
         .catch(error => {

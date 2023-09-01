@@ -55,14 +55,6 @@ label {
     margin: 0.5rem 0;
 }
 
-input[type="email"],
-input[type="password"] {
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
 input[type="submit"] {
     display: block;
     width: 100%;
@@ -579,7 +571,7 @@ h1 {
 
 
 #finalize-group {
-    background-color: #45a049;
+    background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 4px;
@@ -591,18 +583,19 @@ h1 {
     transition-duration: 0.4s;
     margin-top: 20px;
     display: block;
-    width: fit-content;
     margin-left: auto;
     margin-right: auto;
+    height: 35px;
 }
 
 #finalize-group:hover {
-    background-color: white;
-    color: #45a049;
+    background-color: #45a049;  
+    cursor: pointer;
 }
 
 .event-name-input {
     width: 60%;  /* adjust this as needed */
+    height: 25px;
 }
 
 .remove-cell {
@@ -941,6 +934,11 @@ h1 {
     cursor: pointer;
 }
 
+button.rename-button {
+    width: 100px; /* or a specific width you desire e.g. width: 100px; */
+    padding: 5px 10px; /* adjust padding as needed */
+}
+
 .search-button {
     background-color: #4CAF50; /* Green */
     border: none;
@@ -955,9 +953,32 @@ h1 {
     height: 32px;
     line-height: 13px;
     width: 100px; 
+    margin-left: 13px;
 }
 
 .search-button:hover {
+    background-color: #45a049;  
+    cursor: pointer;
+}
+
+.search-button-cre {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+    height: 32px;
+    line-height: 13px;
+    width: 100px; 
+    margin-left: 13px;
+}
+
+.search-button-cre:hover {
     background-color: #45a049;  
     cursor: pointer;
 }
@@ -970,12 +991,24 @@ h1 {
     margin-right: 10px;
 }
 
+#howMuchForWhat {
+    height: 25px;
+}
 
 #newGroupName {
     padding: 5px; /* same padding as .rename-button */
     font-size: 14px; /* same font-size as .rename-button */
     height: 15px; /* adjusting for the top and bottom padding */
     vertical-align: middle; /* to align it vertically in line with the button */
+    width: 200px;
+}
+
+#addFriendInput {
+    padding: 5px; /* same padding as .rename-button */
+    font-size: 14px; /* same font-size as .rename-button */
+    height: 15px; /* adjusting for the top and bottom padding */
+    vertical-align: middle; /* to align it vertically in line with the button */
+    width: 200px;
 }
 
 #email {
@@ -995,3 +1028,73 @@ h1 {
     width: 100%;  /* adjust as needed */
     align-items: center;
 }
+
+.login-input {
+    width: 100%;
+    height: 30px; /* Explicit height */
+    line-height: 18px; /* Adjust if needed */
+    padding: 8px 10px; /* Adjust padding to match the set height */
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    appearance: none;
+    -webkit-appearance: none; 
+    -moz-appearance: none; 
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    font-weight: normal; /* Ensure consistent font weight */
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+
+.login-input:focus {
+    border-color: #4CAF50; /* Changes the border color when the input is focused */
+}
+
+
+/* Added specificity to ensure styles are not overridden by external styles */
+body #login-form .login-input {
+    width: 100%;
+    box-sizing: border-box; 
+}
+
+/* Reset input styles */
+input[type="email"], input[type="password"] { 
+    background-color: #fff;
+}
+
+#email {
+    width: 100% !important; /* Use !important to override any conflicting styles */
+    max-width: 100% !important;
+}
+
+#login-form input[type="email"],
+#login-form input[type="password"] {
+    /* Reset styles */
+    width: auto;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    border: none;
+    font-size: 100%;
+    background: none;
+    box-shadow: none;
+    box-sizing: content-box;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+
+    /* Apply your desired styles */
+    width: 100%;
+    padding: 8px 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+
