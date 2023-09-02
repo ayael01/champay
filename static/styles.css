@@ -1089,7 +1089,6 @@ input[type="email"], input[type="password"] {
     margin: 0;
     border: none;
     font-size: 100%;
-    background: none;
     box-shadow: none;
     box-sizing: content-box;
     -webkit-appearance: none;
@@ -1104,6 +1103,7 @@ input[type="email"], input[type="password"] {
     border-radius: 5px;
     font-family: Arial, sans-serif;
     font-size: 16px;
+    background-color: #fff;
     box-sizing: border-box;
 }
 
