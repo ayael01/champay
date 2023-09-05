@@ -82,6 +82,9 @@
                     </tbody>
                 </table>
             </div> 
+
+            <button class="group-notification-button" onclick="sendGroupNotification()">Notify All Group Members</button>
+
         </section>
 
         <div id="popup_flash" class="popup">
@@ -131,18 +134,17 @@
 
 
         function appendTask(task, user, taskId, isMember) {
-            var table = document.getElementById('task-table');
-            var row = table.insertRow(-1);
+            var tableBody = document.querySelector('#task-table tbody');
+            var row = tableBody.insertRow(-1);
             var cell1 = row.insertCell(0);
             var cell2 = row.insertCell(1);
             var cell3 = row.insertCell(2);
 
             cell1.innerHTML = user;
-            cell1.className = isMember ? "" : "non-member"; // add a class to non-member user
+            cell1.className = isMember ? "" : "non-member";
             cell2.innerHTML = task;
             cell3.innerHTML = '<button class="remove-button" onclick="removeTask(\'' + taskId + '\', this)">Remove</button>';
         }
-
 
         window.onload = function() {
 
@@ -231,6 +233,71 @@
             const popup = document.getElementById("popup_flash");
             popup.style.display = "none";
         }
+
+        function sendUserNotification(username) {
+            // Retrieve tasks for the user
+            const tasksForUser = [...document.querySelectorAll('#task-table tbody tr')].filter(row => {
+                return row.cells[0].innerText === username;
+            }).map(row => row.cells[1].innerText);
+
+            // Format the message
+            const message = `Hey ${username}, here are your tasks: ${tasksForUser.join(', ')}`;
+
+            // Send the notification
+            sendNotification(username, message);
+        }
+
+        function sendGroupNotification() {
+            // Show a loading message in a popup
+            document.getElementById('message_flash').innerText = "Sending notifications...";
+            document.getElementById('message_flash').className = "popup_flash-info"; // Use a neutral color for the loading message
+            document.getElementById('popup_flash').style.display = "flex";
+
+            const allRows = [...document.querySelectorAll('#task-table tbody tr')];
+            const userTaskMap = {};
+
+            allRows.forEach(row => {
+                const username = row.cells[0].innerText;
+                const task = row.cells[1].innerText;
+
+                if (!userTaskMap[username]) {
+                    userTaskMap[username] = [];
+                }
+                userTaskMap[username].push(task);
+            });
+
+            for (let [username, tasks] of Object.entries(userTaskMap)) {
+                const message = `Hey ${username}, here are your tasks: ${tasks.join(', ')}`;
+                sendNotification(username, message);
+            }
+        }
+
+
+        function sendNotification(username, message) {
+            fetch("/send_notification", {
+                method: "POST",
+                body: JSON.stringify({ username: username, message: message, group_id: '{{ group.id }}' }),
+                headers: { "Content-Type": "application/json" },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                // Show a success message in a popup
+                document.getElementById('message_flash').innerText = "Notification sent successfully!";
+                document.getElementById('message_flash').className = "popup_flash-success";
+                document.getElementById('popup_flash').style.display = "flex";
+            })
+            .catch(error => {
+                // Display error message in a popup
+                document.getElementById('message_flash').innerText = error.message;
+                document.getElementById('message_flash').className = "popup_flash-error";
+                document.getElementById('popup_flash').style.display = "flex";
+            });
+        }
+
+
     </script>
 </body>
 

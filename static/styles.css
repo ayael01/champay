@@ -1120,3 +1120,28 @@ input[type="email"], input[type="password"] {
 }
 
 
+.group-notification-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    transition-duration: 0.4s;
+    border-radius: 8px;
+}
+
+.group-notification-button:hover:hover {
+    background-color: #45a049;
+}
+
+.popup_flash-info {
+    color: #45a049;
+}
+
+
+

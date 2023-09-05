@@ -14,6 +14,8 @@ from pytz import timezone
 import datetime
 import group_expenses_tool as get
 import logging
+from boto3 import client
+
 
 # Configure the logger
 logging.basicConfig(
@@ -1143,7 +1145,7 @@ def get_non_member_users_with_tasks():
 
 @app.route('/rename_group/<int:group_id>', methods=['POST'])
 def rename_group(group_id):
-    
+
     if not request.is_json:
         return jsonify({"error": "Request content type must be application/json."}), 415
 
@@ -1182,6 +1184,68 @@ def rename_group(group_id):
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/send_notification', methods=['POST'])
+def send_notification():
+    if 'username' not in session:
+        return jsonify({"error": "You must be logged in to perform this action."}), 401
+
+    current_user = User.query.filter_by(username=session['username']).first()
+    if current_user is None:
+        return jsonify({"error": "User not found."}), 400
+
+    data = request.get_json()
+    group_id = data.get('group_id')
+    recipient_username = data.get('user')  # this can be None if you're notifying all members
+
+    group = Group.query.get(group_id)
+    if group is None:
+        return jsonify({"error": "Group not found."}), 400
+
+    if recipient_username:
+        user = User.query.filter_by(username=recipient_username).first()
+        if user is None:
+            return jsonify({"error": "Recipient user not found."}), 400
+        recipients = [user.email]
+    else:
+        # get all emails in the group
+        recipients = [gm.user.email for gm in group.group_members]
+
+    # Prepare the email content
+    tasks = Task.query.filter_by(group_id=group_id).all()
+    if recipient_username:
+        tasks = [t for t in tasks if t.user.username == recipient_username]
+
+    task_list = "\n".join(["- " + t.task for t in tasks])
+    email_content = f"Hello, here are your tasks for the {group.name} trip:\n\n{task_list}"
+
+    # Send the email via Amazon SES
+    ses = client('ses', region_name='eu-north-1')
+
+    try:
+        response = ses.send_email(
+            Source='no-reply@cham-pay.com',
+            Destination={
+                'ToAddresses': recipients,
+            },
+            Message={
+                'Subject': {
+                    'Data': 'Tasks Summary',
+                    'Charset': 'UTF-8'
+                },
+                'Body': {
+                    'Text': {
+                        'Data': email_content,
+                        'Charset': 'UTF-8'
+                    }
+                }
+            }
+        )
+        return jsonify({"message": "Notification sent successfully."}), 200
+
+    except Exception as e:
+        error_message = f"Error sending notification: {str(e)}"
+        log(current_user.username, error_message)
+        return jsonify({"error": str(e)}), 500
 
 
     
