@@ -1195,14 +1195,14 @@ def send_notification():
 
     data = request.get_json()
     group_id = data.get('group_id')
-    recipient_username = data.get('user')  # this can be None if you're notifying all members
+    recipient_user_id = data.get('user_id')  # can be None if you're notifying all members
 
     group = Group.query.get(group_id)
     if group is None:
         return jsonify({"error": "Group not found."}), 400
 
-    if recipient_username:
-        user = User.query.filter_by(username=recipient_username).first()
+    if recipient_user_id:
+        user = User.query.get(recipient_user_id)
         if user is None:
             return jsonify({"error": "Recipient user not found."}), 400
         recipients = [user.email]
@@ -1212,8 +1212,8 @@ def send_notification():
 
     # Prepare the email content
     tasks = Task.query.filter_by(group_id=group_id).all()
-    if recipient_username:
-        tasks = [t for t in tasks if t.user.username == recipient_username]
+    if recipient_user_id:
+        tasks = [t for t in tasks if t.user.id == recipient_user_id]
 
     task_list = "\n".join(["- " + t.task for t in tasks])
     email_content = f"Hello, here are your tasks for the {group.name} trip:\n\n{task_list}"
@@ -1246,8 +1246,6 @@ def send_notification():
         error_message = f"Error sending notification: {str(e)}"
         log(current_user.username, error_message)
         return jsonify({"error": str(e)}), 500
-
-
     
 
 @app.after_request
