@@ -82,10 +82,27 @@
                     </tbody>
                 </table>
             </div> 
-
-            <button class="group-notification-button" onclick="sendGroupNotification()">Notify All Group Members</button>
-
         </section>
+
+        <!-- ... -->
+        <p class="task-table-title">Notify members</p>
+        <section>
+            <form action="javascript:void(0);" onsubmit="handleNotificationSend()">
+                <div class="notification-form-fields">
+                    <div class="form-notifications">
+                        <select id="notification-user" name="notification-user" required>
+                            <option value="all">Notify All</option>
+                            <!-- Option values for members with tasks will be filled in dynamically -->
+                        </select>
+                    </div>
+                    <div class="form-notifications-button">
+                        <button class="notification-button">Notify</button>
+                    </div>
+                </div>
+            </form>
+        </section>
+<!-- ... -->
+
 
         <div id="popup_flash" class="popup">
             <div class="popup-content">
@@ -174,6 +191,14 @@
                         option.value = user.username;
                         option.text = user.username;
                         userSelect.add(option);
+                    });
+                    // Fill the users select options for notifications
+                    var notifyUserSelect = document.getElementById('notification-user');
+                    data.users.forEach(function(user) {
+                        var option = document.createElement('option');
+                        option.value = user.id;  // Assuming each user has an ID
+                        option.text = user.username;
+                        notifyUserSelect.add(option);
                     });
                 })
                 .catch(error => {
@@ -282,8 +307,16 @@
             });
         }
 
+        function handleNotificationSend() {
+            const notifyUserSelect = document.getElementById('notification-user');
+            const selectedUser = notifyUserSelect.value;
 
-
+            if (selectedUser === "all") {
+                sendGroupNotification();
+            } else {
+                sendUserNotification(selectedUser);
+            }
+        }
 
     </script>
 </body>

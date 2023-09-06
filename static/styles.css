@@ -557,6 +557,7 @@ h1 {
     margin-left: auto;
     margin-right: auto;
     text-align: center;
+    margin-bottom: 20px;
 }
 
 .friend-table th, .friend-table td {
@@ -1119,11 +1120,10 @@ input[type="email"], input[type="password"] {
     /* Adjust other text sizes or styles as needed */
 }
 
-
-.group-notification-button {
+.notification-button {
     background-color: #4CAF50;
     color: white;
-    padding: 10px 20px;
+    padding: 8px 30px;
     border: none;
     cursor: pointer;
     text-align: center;
@@ -1135,7 +1135,7 @@ input[type="email"], input[type="password"] {
     border-radius: 8px;
 }
 
-.group-notification-button:hover:hover {
+.notification-button:hover:hover {
     background-color: #45a049;
 }
 
@@ -1143,5 +1143,45 @@ input[type="email"], input[type="password"] {
     color: #45a049;
 }
 
+.notification-center {
+    background-color: #f4f4f4; /* Light grey background for the section */
+    border-radius: 8px; /* Rounded edges */
+    padding: 8px; /* Spacing inside the section */
+    max-width: 400px; /* Limiting the width */
+    margin: 20px auto; /* Centering the section if it's inside a wider container */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Slight shadow for depth */
+}
+
+.notification-form-fields {
+    display: flex; /* Using flexbox for alignment */
+    gap: 15px; /* Spacing between flex items */
+    align-items: center; /* Vertically centering the children */
+    justify-content: center;
+    width: 60%; /* or any percentage or fixed width of your choice */
+    margin: 0 auto; /* center the flex container within its parent */
+}
+
+.form-notifications {
+    width: 100%; /* Ensuring the dropdown takes full width of its container */
+    max-width: 150px;
+}
+
+.form-notifications select {
+    width: 100%; /* Full width for dropdown */
+    padding: 8px; /* Padding for dropdown */
+    border-radius: 3px; /* Rounded edges for dropdown */   
+    appearance: none; /* Removing default appearance */
+    background-color: #fff; /* White background */
+    font-size: 16px; /* Adjusting font size */
+}
+
+.form-notifications-button {
+    width: 100%; /* Ensuring button takes full width of its container */
+}
+
+.form-notifications, .form-notifications-button {
+    margin-left: auto;
+    margin-right: auto;
+}
 
 
