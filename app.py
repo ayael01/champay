@@ -1195,7 +1195,7 @@ def send_notification():
 
     data = request.get_json()
     group_id = data.get('group_id')
-    recipient_user_id = data.get('user_id')  # can be None if you're notifying all members
+    recipient_user_id = data.get('user_id')
 
     group = Group.query.get(group_id)
     if group is None:
@@ -1207,53 +1207,79 @@ def send_notification():
             return jsonify({"error": "Recipient user not found."}), 400
         recipients = [user.email]
     else:
-        # get all emails in the group
         recipients = [gm.user.email for gm in group.group_members]
 
-    # Prepare the email content
-
     tasks = Task.query.filter_by(group_id=group_id).all()
+    print("Fetched Tasks: ", tasks)
+    print("Recipient User ID: ", recipient_user_id)
+    print("User IDs from tasks: ", [t.user.id for t in tasks if t.user])
 
-    # If specific user, filter the tasks
+
     if recipient_user_id:
-        tasks = [t for t in tasks if t.user.id == recipient_user_id]
+        tasks = [t for t in tasks if str(t.user.id) == str(recipient_user_id)]
 
-    # Group tasks by user assignment
     grouped_tasks = {}
+
+    print("Printing task details...")
+
     for t in tasks:
+        print(f"Task ID: {t.id}, Task: {t.task}, User ID: {t.user_id}, User Name: {t.user.username if t.user else 'No User'}")
         if t.user.username not in grouped_tasks:
             grouped_tasks[t.user.username] = []
         grouped_tasks[t.user.username].append(t)
 
-    # Construct the email content based on grouped tasks
-    email_body_lines = [
-        f"Hello there,",
-        "",
-        f"{current_user.username} wants to remind you:",
-        "Exciting times ahead! The trip - {} is drawing near! To make everything go smoothly, here are the assigned tasks:".format(group.name),
-        "---"
-    ]
+    print("Grouped Tasks: ", grouped_tasks)
 
-
+    tasks_html = ""
     for user, user_tasks in grouped_tasks.items():
-        email_body_lines.append(f"🌟 **Tasks for {user}:**")
+        tasks_html += f'<div class="user-tasks"><h3>Tasks for {user}:</h3><ul>'
         for t in user_tasks:
-            email_body_lines.append(f"- {t.task}")
-        email_body_lines.append("---")
+            tasks_html += f"<li>{t.task}</li>"
+        tasks_html += "</ul></div>"
 
-    email_body_lines.extend([
-        "Let's ensure everything is ready for our unforgettable adventure! 🚀 Should there be any questions about the tasks, feel free to ask.",
-        "",
-        "Cheers to our impending escapade!",
-        "",
-        "Warm regards,",
-        "",
-        "Safe Travels and Happy Memories!"
-    ])
+    print("Tasks HTML: ", tasks_html)
 
-    email_content = "\n".join(email_body_lines)
+    email_content = f"""
+    <html>
+        <head>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                }}
+                .header {{
+                    background-color: #4CAF50;
+                    color: white;
+                    padding: 10px 0;
+                    text-align: center;
+                }}
+                .content {{
+                    margin: 20px;
+                }}
+                .user-tasks {{
+                    margin-top: 10px;
+                }}
+                .user-tasks h3 {{
+                    color: #4CAF50;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h2>Tasks Summary for the Trip: {group.name}</h2>
+            </div>
+            <div class="content">
+                <p>Hello there,</p>
+                <p><strong>{current_user.username}</strong> wants to remind you of the following tasks:</p>
+                {tasks_html}
+                <p>Let's ensure everything is ready for our unforgettable adventure! 🚀 Should there be any questions about the tasks, feel free to ask.</p>
+                <p>Cheers to our impending escapade!</p>
+                <p>Warm regards,</p>
+                <p>Safe Travels and Happy Memories!</p>
+            </div>
+        </body>
+    </html>
+    """
 
-    # Send the email via Amazon SES
     ses = client('ses', region_name='eu-north-1')
 
     try:
@@ -1268,7 +1294,7 @@ def send_notification():
                     'Charset': 'UTF-8'
                 },
                 'Body': {
-                    'Text': {
+                    'Html': {
                         'Data': email_content,
                         'Charset': 'UTF-8'
                     }
@@ -1279,8 +1305,9 @@ def send_notification():
 
     except Exception as e:
         error_message = f"Error sending notification: {str(e)}"
-        log(current_user.username, error_message)
+        log(current_user.username, error_message)  
         return jsonify({"error": str(e)}), 500
+
     
 
 @app.after_request
