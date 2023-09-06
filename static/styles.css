@@ -1162,15 +1162,24 @@ input[type="email"], input[type="password"] {
 }
 
 .form-notifications {
-    width: 100%; /* Ensuring the dropdown takes full width of its container */
+    position: relative; /* Added to set context for absolute positioning */
+    width: 100%;
     max-width: 150px;
 }
+
+.select-label {
+    position: absolute; /* Absolute positioning */
+    top: -35px; /* Adjust this value to position the label where you desire */
+    left: 50%; /* Start positioning from the center */
+    transform: translateX(-50%); /* Centers the element based on its own width */
+    font-size: 16px; /* Size similar to other text elements, adjust as needed */
+}
+
 
 .form-notifications select {
     width: 100%; /* Full width for dropdown */
     padding: 8px; /* Padding for dropdown */
-    border-radius: 3px; /* Rounded edges for dropdown */   
-    appearance: none; /* Removing default appearance */
+    border-radius: 3px; /* Rounded edges for dropdown */      
     background-color: #fff; /* White background */
     font-size: 16px; /* Adjusting font size */
 }
