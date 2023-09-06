@@ -1211,12 +1211,47 @@ def send_notification():
         recipients = [gm.user.email for gm in group.group_members]
 
     # Prepare the email content
+
     tasks = Task.query.filter_by(group_id=group_id).all()
+
+    # If specific user, filter the tasks
     if recipient_user_id:
         tasks = [t for t in tasks if t.user.id == recipient_user_id]
 
-    task_list = "\n".join(["- " + t.task for t in tasks])
-    email_content = f"Hello, here are your tasks for the {group.name} trip:\n\n{task_list}"
+    # Group tasks by user assignment
+    grouped_tasks = {}
+    for t in tasks:
+        if t.user.username not in grouped_tasks:
+            grouped_tasks[t.user.username] = []
+        grouped_tasks[t.user.username].append(t)
+
+    # Construct the email content based on grouped tasks
+    email_body_lines = [
+        f"Hello there,",
+        "",
+        f"{current_user.username} wants to remind you:",
+        "Exciting times ahead! The trip - {} is drawing near! To make everything go smoothly, here are the assigned tasks:".format(group.name),
+        "---"
+    ]
+
+
+    for user, user_tasks in grouped_tasks.items():
+        email_body_lines.append(f"🌟 **Tasks for {user}:**")
+        for t in user_tasks:
+            email_body_lines.append(f"- {t.task}")
+        email_body_lines.append("---")
+
+    email_body_lines.extend([
+        "Let's ensure everything is ready for our unforgettable adventure! 🚀 Should there be any questions about the tasks, feel free to ask.",
+        "",
+        "Cheers to our impending escapade!",
+        "",
+        "Warm regards,",
+        "",
+        "Safe Travels and Happy Memories!"
+    ])
+
+    email_content = "\n".join(email_body_lines)
 
     # Send the email via Amazon SES
     ses = client('ses', region_name='eu-north-1')
