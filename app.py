@@ -1210,25 +1210,16 @@ def send_notification():
         recipients = [gm.user.email for gm in group.group_members]
 
     tasks = Task.query.filter_by(group_id=group_id).all()
-    print("Fetched Tasks: ", tasks)
-    print("Recipient User ID: ", recipient_user_id)
-    print("User IDs from tasks: ", [t.user.id for t in tasks if t.user])
-
 
     if recipient_user_id:
         tasks = [t for t in tasks if str(t.user.id) == str(recipient_user_id)]
 
     grouped_tasks = {}
 
-    print("Printing task details...")
-
     for t in tasks:
-        print(f"Task ID: {t.id}, Task: {t.task}, User ID: {t.user_id}, User Name: {t.user.username if t.user else 'No User'}")
         if t.user.username not in grouped_tasks:
             grouped_tasks[t.user.username] = []
         grouped_tasks[t.user.username].append(t)
-
-    print("Grouped Tasks: ", grouped_tasks)
 
     tasks_html = ""
     for user, user_tasks in grouped_tasks.items():
@@ -1236,8 +1227,6 @@ def send_notification():
         for t in user_tasks:
             tasks_html += f"<li>{t.task}</li>"
         tasks_html += "</ul></div>"
-
-    print("Tasks HTML: ", tasks_html)
 
     email_content = f"""
     <html>
