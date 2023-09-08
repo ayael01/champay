@@ -1211,9 +1211,6 @@ def send_notification():
 
     tasks = Task.query.filter_by(group_id=group_id).all()
 
-    if recipient_user_id:
-        tasks = [t for t in tasks if str(t.user.id) == str(recipient_user_id)]
-
     grouped_tasks = {}
 
     for t in tasks:

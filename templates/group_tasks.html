@@ -111,9 +111,29 @@
                 <button class="popup-button" onclick="hidePopupFlash()">OK</button>
             </div>
         </div>
+
+        <!-- Confirmation Popup -->
+        <div id="popup_confirm" class="popup">
+            <div class="popup-content">
+                <p id="message_flash" class="popup_flash-success">Are you sure you want to send notifications?</p>
+                <button class="popup-button" onclick="proceedWithNotification()">Yes</button>
+                <button class="popup-button" onclick="hidePopupConfirm()">No</button>
+            </div>
+        </div>
+
     </main>
 
     <script type="text/javascript">
+
+        function showPopupConfirm() {
+            const popup = document.getElementById("popup_confirm");
+            popup.style.display = "flex";
+        }
+
+        function hidePopupConfirm() {
+            const popup = document.getElementById("popup_confirm");
+            popup.style.display = "none";
+        }
 
         // Functions for the dropdown menu
         function toggleDropdown() {
@@ -309,6 +329,10 @@
         }
 
         function handleNotificationSend() {
+            showPopupConfirm();
+        }
+
+        function proceedWithNotification() {
             const notifyUserSelect = document.getElementById('notification-user');
             const selectedUser = notifyUserSelect.value;
 
@@ -317,7 +341,12 @@
             } else {
                 sendUserNotification(selectedUser);
             }
+            
+            hidePopupConfirm();  // Close the confirmation popup after proceeding
         }
+
+
+
 
     </script>
 </body>
