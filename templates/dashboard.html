@@ -6,16 +6,20 @@
     <title>Champay - Dashboard</title>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
+
+
+
 <body>
     <header>
-        <h1>Champay Dashboard</h1>
-        {% if username %}
-            <div class="user-info" onclick="toggleDropdown()">{{ username[0] }}</div>
-            <div id="dropdown" class="dropdown-content">
-                <a href="{{ url_for('logout') }}">Logout</a>
-            </div>
-        {% endif %}
-
+        <div class="header-content">
+            <h1>Champay Dashboard</h1>
+            {% if username %}
+                <div class="user-info" onclick="toggleDropdown()">{{ username[0] }}</div>
+                <div id="dropdown" class="dropdown-content">
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                </div>
+            {% endif %}
+        </div>
     </header>
     <main>
         <section class="group-form">

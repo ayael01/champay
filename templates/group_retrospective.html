@@ -12,13 +12,13 @@
 <body>
     <header>
         <div class="header-content">
+            <h1>{{ group.name }} Retrospective</h1>
             <div class="user-info-container">
                 <div class="user-info" onclick="toggleDropdown()">{{ username[0] }}</div>
                 <div id="dropdown" class="dropdown-content">
                     <a href="{{ url_for('logout') }}">Logout</a>
                 </div>
             </div>
-            <h1>{{ group.name }} Retrospective</h1>
         </div>
     </header>
     <div class="menu-panel">
