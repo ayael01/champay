@@ -124,7 +124,12 @@ def homepage():
 
             log(user.email, f'Attempted to access {request.path} path')
 
-            return redirect(url_for("dashboard"))
+            # Redirect to intended URL if it exists
+            next_url = session.pop('next_url', None)
+            if next_url:
+                return redirect(next_url)
+            else:
+                return redirect(url_for("dashboard"))
         else:
             log(email, 'Unknown user or incorrect password.')
             flash("Unknown user or incorrect password.", "error")
@@ -156,6 +161,12 @@ def logout():
 
 @app.route("/dashboard", methods=["GET", "POST"])
 def dashboard():
+
+    if 'username' not in session:
+        # Store the intended URL to redirect after login
+        session['next_url'] = url_for('dashboard')
+        return redirect(url_for('homepage'))
+    
     message = session.pop("message", None)
 
     # Retrieve the currently logged-in user
@@ -186,6 +197,12 @@ def dashboard():
 
 @app.route("/group_expenses/<int:group_id>", methods=["GET", "POST"])
 def group_expenses(group_id):
+
+    if 'username' not in session:
+        # Store the intended URL to redirect after login
+        session['next_url'] = url_for('group_expenses', group_id=group_id)
+        return redirect(url_for('homepage'))
+
     username = session.get('username', 'Unknown')
 
     # Check if the user is logged in
@@ -707,9 +724,10 @@ def finalize_group():
 
 @app.route('/edit_group/<int:group_id>', methods=['GET'])
 def edit_group(group_id):
+
     if 'username' not in session:
-        log(session.get('email', 'Guest'), 'Attempted to access edit_group without logging in')
-        flash("Please login first.")
+        # Store the intended URL to redirect after login
+        session['next_url'] = url_for('edit_group', group_id=group_id)
         return redirect(url_for('homepage'))
 
     group = Group.query.get(group_id)
@@ -877,7 +895,8 @@ def previous_friends():
 def group_retrospective(group_id):
     
     if 'username' not in session:
-        flash("Please login first.")
+        # Store the intended URL to redirect after login
+        session['next_url'] = url_for('group_retrospective', group_id=group_id)
         return redirect(url_for('homepage'))
     
     # Retrieve the currently logged-in user
@@ -967,8 +986,10 @@ def remove_comment():
 
 @app.route('/group_tasks/<int:group_id>')
 def group_tasks(group_id):
+    
     if 'username' not in session:
-        # log the unauthorized access
+        # Store the intended URL to redirect after login
+        session['next_url'] = url_for('group_tasks', group_id=group_id)
         return redirect(url_for('homepage'))
     
     current_user = User.query.filter_by(username=session['username']).first()
