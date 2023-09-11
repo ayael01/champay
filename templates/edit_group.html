@@ -39,11 +39,11 @@
     <main>
         
         <section class="group-form">
-            <h2>Rename group</h2>
+            <h2>Rename Trip</h2>
         
             <form id="renameGroupForm" action="{{ url_for('rename_group', group_id=group.id) }}" method="post" class="form-inline">
                 <div class="form-group">
-                    <label for="newGroupName">New Group Name:</label>
+                    <label for="newGroupName">New Trip Name:</label>
                     <div class="rename-input">
                         <input type="text" id="newGroupName" name="newGroupName" value="{{ group_name }}" required>    
                         <button class="rename-button">Rename</button>                  
