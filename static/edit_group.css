@@ -1,0 +1,560 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #4CAF50;
+    color: white;
+    padding: 1rem;
+    text-align: center;
+    position: relative;
+}
+
+h1 {
+    margin: 0;
+}
+
+h2 {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    margin-top: 120px;
+}
+
+section {
+    width: 100%;
+    max-width: 600px;
+}
+
+.header-content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    position: fixed; /* Add this */
+    top: 0; /* Add this to position it at the top */
+    left: 0; /* Ensures it's left-aligned */
+    width: 100%; /* Ensures it takes the full width */
+    background-color: #45a049; /* Assuming you want a white background, adjust as necessary */
+    z-index: 2000; /* To ensure it stays on top of other content */
+    height: 80px;
+}
+
+.header-content h1 {
+    text-align: center;
+}
+
+
+.user-info-container {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+    z-index: 2000;
+}
+
+
+.user-info {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #4CAF50;
+    color: white;
+    font-size: 16px;
+    border: 2px solid white;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.user-info:hover {
+    background-color: #a9bdaa;
+}
+
+.user-info {
+    margin-right: 10px;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 60px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    top: 100%;
+    left: 0;
+    border-radius: 5px;
+    z-index: 2000;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 8px 12px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+
+.back2events-link {
+    display: inline-block;  
+    color: #45a049; 
+    text-decoration: none; 
+    padding: 2px 6px; /* Reduced padding for less space */
+    margin: 1px; /* Reduced margin to bring buttons closer together */
+    border-radius: 5px;
+    transition: background-color 0.3s ease; 
+}
+
+.back2events-link:hover {
+    color: #ffffff; 
+    background-color: #45a049; 
+    text-decoration: none;
+}
+
+.back2events-link:active,
+.active-page {
+    color: #ffffff; 
+    background-color: #307235; 
+}
+
+/* Popup Styles */
+.popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+}
+
+.popup-message {
+    margin-bottom: 10px;
+    color: #ff0000;
+    font-weight: bold;
+}
+
+.popup_flasf-success {
+    margin-bottom: 10px;
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+.popup_flasf-warning {
+    margin-bottom: 10px;
+    color: #ff0000;
+    font-weight: bold;
+}
+
+.popup_flash-success {
+    color: green;
+}
+
+.popup-notification-confirm {
+    color: green;
+}
+
+.popup_flash-error {
+    margin-bottom: 20px;
+    color: #ff0000;
+    font-weight: bold;
+}
+
+.popup_flash-warning {
+    color: red;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+
+
+.popup-button {
+    width: 120px;  /* Set to the width you want both buttons to have */
+    padding: 8px 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin: 0 10px;
+    text-align: center;  /* Ensures that the text remains centered even if the button width exceeds the text width */
+}
+
+
+.popup-button:hover {
+    background-color: #45a049;
+}
+
+
+.popup-content.popup-warning {
+    background-color: #ff4b5c; /* Adjust this to the exact color you want */
+    color: #ffffff; /* Color of the text */
+    /* Add other styles as needed */
+}
+
+
+.popup-content {
+    background-color: #fefefe;
+    margin: 20% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 300px;
+    text-align: center;
+    border-radius: 5px; 
+}
+
+
+.popup_flash-info {
+    color: #45a049;
+}
+
+
+.popup_flash-success {
+    color: green;
+}
+
+.popup-notification-confirm {
+    color: green;
+}
+
+.popup_flash-error {
+    margin-bottom: 20px;
+    color: #ff0000;
+    font-weight: bold;
+}
+
+.popup_flash-warning {
+    color: red;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+label {
+    display: block;
+    margin: 0.5rem 0;
+}
+
+.menu-panel {
+    background-color: #f4f4f4;
+    padding: 0.5rem;
+    text-align: center;
+    display: flex;
+    justify-content: flex-start;
+    position: fixed; /* Add this */
+    top: 80px; /* Set this according to the height of your header. Adjust as needed. */
+    left: 0; /* Ensures it's left-aligned */
+    width: 100%; /* Ensures it takes the full width */
+    z-index: 1000; /* To ensure it stays on top of other content */
+}
+
+.menu-panel a {
+    color: #2a702c;
+    text-decoration: none;
+    margin: 0 10px;
+}
+
+.menu-panel .active-page {
+    color: #ffffff;
+    background-color: #45a049;
+}
+
+
+.home-button {
+    margin-top: 10px;
+    margin-right: auto; /* Change from margin-left to margin-right */
+}
+
+.home-button a {
+    color: #f1f1f1;
+    text-decoration: none;
+    padding: 0 10px; /* Add this line for spacing */
+}
+
+.home-button a:hover {
+    text-decoration: underline;
+}
+
+.material-icons {
+    line-height: normal;  /* This value will center the icon */
+    vertical-align: middle;  /* Align the icon vertically in the middle */
+}
+
+.show {
+    display: block;
+}
+
+/********************************************************************/
+
+.remove-button {
+    padding: 5px 10px;
+    background-color: #f44336; /* red */
+    border: none;
+    color: white;
+    text-align: center;
+    display: inline-block;
+    transition: 0.3s;
+    cursor: pointer;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+.remove-button:hover {
+    background-color: #d32f2f; /* dark red */
+}
+
+.group-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 0;
+}
+
+.group-form label {
+    text-align: center;
+    width: 100%;
+}
+
+.group-form select {
+    width: 60%;
+    margin: 0 auto;
+    display: block;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.group-form input[type="submit"] {
+    width: 60%;
+    margin: 1rem auto;
+    display: block;
+}
+
+
+.form-group {
+    margin: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+form {
+    background-color: #f2f7f2;
+    padding: 2rem;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 80%; /* Change this line */
+    max-width: 600px; /* Add this line */
+    margin: 0 auto; /* Add this line */
+}
+
+.rename-input {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;  /* This will vertically center the items */
+    width: 100%;
+    margin-right: 10px;
+}
+
+
+.rename-button {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+    height: 32px;
+    line-height: 13px
+}
+
+.rename-button:hover {
+    background-color: #45a049;  /* A darker shade of green for hover effect */
+    cursor: pointer;
+}
+
+button.rename-button {
+    width: 100px; /* or a specific width you desire e.g. width: 100px; */
+    padding: 5px 10px; /* adjust padding as needed */
+}
+
+#newGroupName {
+    padding: 5px; /* same padding as .rename-button */
+    font-size: 14px; /* same font-size as .rename-button */
+    height: 15px; /* adjusting for the top and bottom padding */
+    vertical-align: middle; /* to align it vertically in line with the button */
+    width: 200px;
+}
+
+.form-inline {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.search-form {
+    margin-bottom: 20px; 
+}
+
+#addFriendInput {
+    padding: 5px; /* same padding as .rename-button */
+    font-size: 14px; /* same font-size as .rename-button */
+    height: 15px; /* adjusting for the top and bottom padding */
+    vertical-align: middle; /* to align it vertically in line with the button */
+    width: 200px;
+}
+
+#email {
+    padding: 5px; /* same padding as .rename-button */
+    font-size: 14px; /* same font-size as .rename-button */
+    height: 15px; /* adjusting for the top and bottom padding */
+    vertical-align: middle; /* to align it vertically in line with the button */
+
+    flex-grow: 1;  /* allows the input to grow and take available space */
+    width: auto;  /* or a specific width if needed, like 70% */
+    margin-right: 10px;  
+}
+
+.search-wrapper {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;  /* adjust as needed */
+    align-items: center;
+}
+
+
+.search-button {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+    height: 32px;
+    line-height: 13px;
+    width: 100px; 
+    margin-left: 13px;
+}
+
+.search-button:hover {
+    background-color: #45a049;  
+    cursor: pointer;
+}
+
+.search-button-cre {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+    height: 32px;
+    line-height: 13px;
+    width: 100px; 
+    margin-left: 13px;
+}
+
+.search-button-cre:hover {
+    background-color: #45a049;  
+    cursor: pointer;
+}
+
+.users-create-group {
+    display: flex;
+    align-items: center;
+  }
+  
+  .users-create-group p {
+    color: #2e8531; /* Change the color to red */
+    margin-right: 10px; /* Add some spacing between the title and the link */
+    font-weight: bold;
+    text-decoration: none;
+  }
+
+  .friend-table {
+    margin-top: auto;
+    width: 100%;
+    max-width: 550px; /* Same as the search form */
+    border-collapse: collapse;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.friend-table th, .friend-table td {
+    padding: 10px;
+    border: 1px solid #dddddd;
+    text-align: center;
+}
+
+.friend-table th {
+    background-color: #f2f7f2;
+}
+
+/* Add position: relative to the email cell so the 'x' is positioned relative to this cell */
+.friend-table th:nth-child(2),
+.friend-table td:nth-child(2) {
+    position: relative;
+}
+
+.actions-col {
+    width: 70px;  /* You can adjust this width to your liking */
+}
+
+.name-col {
+    width: 70px;  /* You can adjust this width to your liking */
+}
+
+
+@media only screen and (max-width: 600px) {
+    .remove-button {
+        padding: 2px;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    main {
+        padding: 15px; /* reduced padding for smaller screens */
+    }
+    /* Adjust header text size for smaller screens */
+    header h1 {
+        font-size: 24px; /* adjust as needed */
+    }
+    /* Adjust other text sizes or styles as needed */
+}
+
+

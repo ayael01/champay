@@ -1,0 +1,91 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #ffffff;  /* Light grayish background, similar to booking.com */
+}
+
+header {
+    background-color: #4CAF50;  /* Dark Blue header similar to booking.com */
+    color: white;
+    padding: 1rem;
+    text-align: center;
+    position: relative;
+}
+
+h1 {
+    margin: 0;
+    font-size: 2.5rem;
+}
+
+h2 {
+    margin-top: 1rem;
+    text-align: center;
+    color: #28882c;  /* Dark Blue header */
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    margin-top: 50px;
+}
+
+section {
+    width: 100%;
+    max-width: 800px;
+}
+
+label {
+    display: block;
+    margin: 0.5rem 0;
+}
+
+input[type="submit"] {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #4CAF50;  /* Dark Blue button */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 1rem;
+}
+
+input[type="submit"]:hover {
+    background-color: #45a049;  /* Slightly darker blue for hover */
+}
+
+.alert {
+    color: red;
+    text-align: center;
+    margin-top: 20px;
+}
+
+#login-form {
+    display: flex;
+    flex-direction: column;
+    background-color: #f2f7f2;  /* White background for contrast */
+    padding: 30px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    width: 80%;  
+    margin: 0 auto;  
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  /* Adding some shadow for depth */
+}
+
+#login-form input[type="email"],
+#login-form input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    background-color: #fff;
+    box-sizing: border-box;
+}
