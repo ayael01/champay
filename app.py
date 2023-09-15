@@ -64,6 +64,11 @@ class Group(db.Model):
     name = db.Column(db.String(100), unique=True)
     group_members = db.relationship('GroupMember', backref='group')  # new line
     tasks = db.relationship('Task', backref='group', lazy=True)
+    start_date = db.Column(db.Date)
+    end_date = db.Column(db.Date)
+    start_time = db.Column(db.Time)
+    end_time = db.Column(db.Time)
+    location = db.Column(db.String(200))
 
 
 class GroupMember(db.Model):
@@ -1315,7 +1320,64 @@ def send_notification():
         log(current_user.username, error_message)  
         return jsonify({"error": str(e)}), 500
 
-    
+
+@app.route('/set_trip_schedule/<int:group_id>', methods=['POST'])
+def set_trip_schedule(group_id):
+    if not request.is_json:
+        return jsonify({"error": "Request content type must be application/json."}), 415
+
+    # Check if user is logged in
+    if 'username' not in session:
+        return jsonify({"error": "You must be logged in to perform this action."}), 401
+
+    current_user = User.query.filter_by(username=session['username']).first()
+    if current_user is None:
+        return jsonify({"error": "User not found."}), 400
+
+    group = Group.query.get(group_id)
+    if group is None:
+        return jsonify({"error": "Group not found."}), 400
+
+    # Verify that the current user is a member of the group
+    current_user_membership = GroupMember.query.filter_by(user_id=current_user.id, group_id=group_id).first()
+    if not current_user_membership:
+        return jsonify({"error": "You must be a member of this group to set its schedule."}), 400
+
+    data = request.get_json()
+    start_date = data.get('startDate').split(' ')[0]
+    start_time = data.get('startDate').split(' ')[1]
+    end_date = data.get('endDate').split(' ')[0]
+    end_time = data.get('endDate').split(' ')[1]
+    location = data.get('location')
+
+    try:
+        group.start_date = start_date
+        group.start_time = start_time
+        group.end_date = end_date
+        group.end_time = end_time
+        group.location = location
+        db.session.commit()
+
+        return jsonify({"message": "Trip schedule updated successfully."}), 200
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/get_trip_schedule/<int:group_id>', methods=['GET'])
+def get_trip_schedule(group_id):
+    group = Group.query.get(group_id)
+    if group is None:
+        return jsonify({"error": "Group not found."}), 400
+
+    # Return group trip schedule details
+    return jsonify({
+        "startDate": str(group.start_date) + ' ' + str(group.start_time),
+        "endDate": str(group.end_date) + ' ' + str(group.end_time),
+        "location": group.location
+    }), 200
+
+
 
 @app.after_request
 def add_header(response):

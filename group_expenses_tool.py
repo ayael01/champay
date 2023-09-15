@@ -41,6 +41,11 @@ class Group(db.Model):
     name = db.Column(db.String(100), unique=True)
     group_members = db.relationship('GroupMember', backref='group')  # new line
     tasks = db.relationship('Task', backref='group', lazy=True)
+    start_date = db.Column(db.Date)
+    end_date = db.Column(db.Date)
+    start_time = db.Column(db.Time)
+    end_time = db.Column(db.Time)
+    location = db.Column(db.String(200))
 
 
 class GroupMember(db.Model):

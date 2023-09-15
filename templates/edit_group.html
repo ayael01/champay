@@ -52,6 +52,37 @@
             </form>
         
         </section>
+
+        <!-- After Rename Trip Section -->
+        <section class="trip-schedule">
+            <h2>Set Trip Schedule</h2>
+            <form id="setScheduleForm" data-group-id="{{ group.id }}">
+                <div class="input-group">
+                    <label for="startDate">Start Date:</label>
+                    <div>
+                        <input type="date" id="startDate" name="startDate" required>
+                        <input type="time" id="startTime" name="startTime" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="endDate">End Date:</label>
+                    <div>
+                        <input type="date" id="endDate" name="endDate" required>
+                        <input type="time" id="endTime" name="endTime" required>
+                    </div>
+                </div>
+                <div>
+                    <label for="location">Location:</label>
+                    <input type="text" id="location" name="location" required>
+                </div>
+                <div>
+                    <button type="submit">Set Schedule</button>
+                </div>
+            </form>
+        </section>
+        
+        
+        
         
         
         <section class="group-form">
@@ -128,6 +159,7 @@
             fetchFriends();
             fetchNonMemberUsersWithTasks();
             renameGroup();
+            fetchTripSchedule();
 
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -436,6 +468,91 @@
                 });
             });
         }
+
+        document.addEventListener("DOMContentLoaded", function() {
+
+            // Capture the form submission
+            document.getElementById("setScheduleForm").addEventListener("submit", function(event) {
+                event.preventDefault(); // Prevent default form submission
+                setTripSchedule();
+            });
+
+            function setTripSchedule() {
+                // Extract data from the form
+                const startDate = document.getElementById("startDate").value;
+                const startTime = document.getElementById("startTime").value;
+                const endDate = document.getElementById("endDate").value;
+                const endTime = document.getElementById("endTime").value;
+                const location = document.getElementById("location").value;
+
+                // Extract the group_id from the form's data-group-id attribute
+                const group_id = document.getElementById("setScheduleForm").dataset.groupId;
+
+                // Combine date and time for better handling on the server side
+                const formattedStartDate = `${startDate} ${startTime}`;
+                const formattedEndDate = `${endDate} ${endTime}`;
+
+                // Send AJAX request
+                fetch(`/set_trip_schedule/${group_id}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        startDate: formattedStartDate,
+                        endDate: formattedEndDate,
+                        location: location
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Handle server response
+                    if (data.error) {
+                        showAlert(data.error, 'error');
+                    } else {
+                        showAlert(data.message, 'success');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('There was an error processing your request.', 'error');
+                });
+            }
+
+            function showAlert(message, type) {
+                // Display an alert (this assumes you have some kind of alert mechanism in place)
+                // If not, you can simply log or display the message to the user in another way
+                console.log(message);
+            }
+        });
+
+        function fetchTripSchedule() {
+            const group_id = document.getElementById("setScheduleForm").dataset.groupId;
+
+            fetch(`/get_trip_schedule/${group_id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.startDate) {
+                        const [startDate, startTime] = data.startDate.split(' ');
+                        document.getElementById("startDate").value = startDate;
+                        document.getElementById("startTime").value = startTime;
+                    }
+
+                    if (data.endDate) {
+                        const [endDate, endTime] = data.endDate.split(' ');
+                        document.getElementById("endDate").value = endDate;
+                        document.getElementById("endTime").value = endTime;
+                    }
+
+                    if (data.location) {
+                        document.getElementById("location").value = data.location;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching trip schedule:', error);
+                });
+        }
+
 
     </script>
     
