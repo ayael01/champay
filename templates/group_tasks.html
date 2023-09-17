@@ -308,7 +308,7 @@
                 payload.user_id = userId;
             }
             
-            fetch("/send_notification", {
+            fetch("/send_task_notification", {
                 method: "POST",
                 body: JSON.stringify(payload),
                 headers: { "Content-Type": "application/json" },

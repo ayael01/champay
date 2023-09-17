@@ -1210,8 +1210,8 @@ def rename_group(group_id):
         return jsonify({"error": str(e)}), 500
 
 
-@app.route('/send_notification', methods=['POST'])
-def send_notification():
+@app.route('/send_task_notification', methods=['POST'])
+def send_task_notification():
     if 'username' not in session:
         return jsonify({"error": "You must be logged in to perform this action."}), 401
 
@@ -1232,8 +1232,10 @@ def send_notification():
         if user is None:
             return jsonify({"error": "Recipient user not found."}), 400
         recipients = [user.email]
+        greeting = f"Hello {user.username},"
     else:
         recipients = [gm.user.email for gm in group.group_members]
+        greeting = "Hello everyone,"
 
     tasks = Task.query.filter_by(group_id=group_id).all()
 
@@ -1251,46 +1253,46 @@ def send_notification():
             tasks_html += f"<li>{t.task}</li>"
         tasks_html += "</ul></div>"
 
-    email_content = f"""
-    <html>
-        <head>
-            <style>
-                body {{
-                    font-family: Arial, sans-serif;
-                }}
-                .header {{
-                    background-color: #4CAF50;
-                    color: white;
-                    padding: 10px 0;
-                    text-align: center;
-                }}
-                .content {{
-                    margin: 20px;
-                }}
-                .user-tasks {{
-                    margin-top: 10px;
-                }}
-                .user-tasks h3 {{
-                    color: #4CAF50;
-                }}
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h2>Tasks Summary for the Trip: {group.name}</h2>
-            </div>
-            <div class="content">
-                <p>Hello there,</p>
-                <p><strong>{current_user.username}</strong> wants to remind you of the following tasks:</p>
-                {tasks_html}
-                <p>Let's ensure everything is ready for our unforgettable adventure! 🚀 Should there be any questions about the tasks, feel free to ask.</p>
-                <p>Cheers to our impending escapade!</p>
-                <p>Warm regards,</p>
-                <p>Safe Travels and Happy Memories!</p>
-            </div>
-        </body>
-    </html>
-    """
+        email_content = f"""
+        <html>
+            <head>
+                <style>
+                    body {{
+                        font-family: Arial, sans-serif;
+                    }}
+                    .header {{
+                        background-color: #4CAF50;
+                        color: white;
+                        padding: 10px 0;
+                        text-align: center;
+                    }}
+                    .content {{
+                        margin: 20px;
+                    }}
+                    .user-tasks {{
+                        margin-top: 10px;
+                    }}
+                    .user-tasks h3 {{
+                        color: #4CAF50;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h2>Tasks Summary for the Trip: {group.name}</h2>
+                </div>
+                <div class="content">
+                    <p>{greeting}</p>
+                    <p><strong>{current_user.username}</strong> wants to remind you of the following tasks:</p>
+                    {tasks_html}
+                    <p>Let's ensure everything is ready for our unforgettable adventure! 🚀 Should there be any questions about the tasks, feel free to ask.</p>
+                    <p>Cheers to our impending escapade!</p>
+                    <p>Warm regards,</p>
+                    <p>Safe Travels and Happy Memories!</p>
+                </div>
+            </body>
+        </html>
+        """
 
     ses = client('ses', region_name='eu-north-1')
 
