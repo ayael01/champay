@@ -194,7 +194,7 @@ def dashboard():
         selected_group_id = int(request.form["group"])
         # Log group selection
         log(user.email, f'Selected group with id {selected_group_id} in {request.path} path')
-        return redirect(url_for("group_tasks", group_id=selected_group_id))
+        return redirect(url_for("edit_group", group_id=selected_group_id))
 
     return render_template("dashboard.html", message=message, groups=groups, username=username)
 
