@@ -133,6 +133,24 @@
             <div id="warning-container" class="warning-container"></div>
         </section>
 
+        <p class="task-table-title">Notify members</p>
+        <section>
+            <form action="javascript:void(0);" onsubmit="handleNotificationSend()">
+                <div class="notification-form-fields">
+                    <div class="form-notifications">
+                        <label for="notification-user" class="select-label">Select</label>
+                        <select id="notification-user" name="notification-user" required>
+                            <option value="all">Notify All</option>
+                            <!-- Option values for members with tasks will be filled in dynamically -->
+                        </select>
+                    </div>
+                    <div class="form-notifications-button">
+                        <button class="notification-button">Notify</button>
+                    </div>
+                </div>
+            </form>
+        </section>
+
         <div id="popup_flash" class="popup">
             <div class="popup-content">
                 <p id="message_flash" class="popup_flash-success"></p>
@@ -147,7 +165,16 @@
                 <button class="popup-button" id="confirm_cancel">Cancel</button>
             </div>
         </div>  
-        <div id="warning-container" style="width:100%;"></div>          
+        <div id="warning-container" style="width:100%;"></div>      
+        
+        <!-- Confirmation Popup -->
+        <div id="popup_confirm" class="popup">
+            <div class="popup-content">
+                <p id="message_flash" class="popup_flash-success">Are you sure you want to send notifications?</p>
+                 <button class="popup-button" onclick="proceedWithNotification()">Yes</button>
+                 <button class="popup-button" onclick="hidePopupConfirm()">No</button>
+            </div>
+        </div>
     </main>
 
     <script type="text/javascript">
@@ -160,6 +187,7 @@
             fetchNonMemberUsersWithTasks();
             renameGroup();
             fetchTripSchedule();
+            populateGroupMembersDropdown();
 
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -554,6 +582,119 @@
                 .catch(error => {
                     console.error('Error fetching trip schedule:', error);
                 });
+        }
+
+
+        function handleNotificationSend() {
+            showPopupConfirm();
+        }
+
+        function showPopupConfirm() {
+            const popup = document.getElementById("popup_confirm");
+            popup.style.display = "flex";
+        }
+
+        function hidePopupConfirm() {
+            const popup = document.getElementById("popup_confirm");
+            popup.style.display = "none";
+        }
+
+        function proceedWithNotification() {
+            const notifyUserSelect = document.getElementById('notification-user');
+            const selectedUser = notifyUserSelect.value;
+
+            if (selectedUser === "all") {
+                sendGroupNotification();
+            } else {
+                sendUserNotification(selectedUser);
+            }
+            
+            hidePopupConfirm();  // Close the confirmation popup after proceeding
+        }
+
+        function sendGroupNotification() {
+            // Show a loading message in a popup
+            document.getElementById('message_flash').innerText = "Sending notifications...";
+            document.getElementById('message_flash').className = "popup_flash-info"; 
+            document.getElementById('popup_flash').style.display = "flex";
+
+            sendNotification(); // no userId means notify all
+        }
+
+        function sendUserNotification(userId) {
+            // Show a loading message in a popup
+            document.getElementById('message_flash').innerText = "Sending notifications...";
+            document.getElementById('message_flash').className = "popup_flash-info"; 
+            document.getElementById('popup_flash').style.display = "flex";
+
+            // Send the notification
+            sendNotification(userId);
+        }
+
+        function sendNotification(userId = null) {
+            let payload = { group_id: '{{ group.id }}' };
+            
+            if (userId) {
+                payload.user_id = userId;
+            }
+            
+            fetch("/send_schedule_notification", {
+                method: "POST",
+                body: JSON.stringify(payload),
+                headers: { "Content-Type": "application/json" },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                document.getElementById('message_flash').innerText = "Notification sent successfully!";
+                document.getElementById('message_flash').className = "popup_flash-success";
+                document.getElementById('popup_flash').style.display = "flex";
+            })
+            .catch(error => {
+                document.getElementById('message_flash').innerText = error.message;
+                document.getElementById('message_flash').className = "popup_flash-error";
+                document.getElementById('popup_flash').style.display = "flex";
+            });
+        }
+
+        function populateGroupMembersDropdown() {
+            const groupId = '{{ group.id }}';  // Extract the group_id from the template context
+
+            fetch("/get_group_users", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    group_id: groupId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Error fetching group users:', data.error);
+                    return;
+                }
+
+                // Extract users from the response
+                const users = data.users;
+
+                // Get the notification select dropdown
+                const selectDropdown = document.getElementById('notification-user');
+
+                // Create and append the options to the dropdown for each user
+                users.forEach(user => {
+                    const optionElem = document.createElement('option');
+                    optionElem.value = user.id;  // assuming the user object has an 'id' field
+                    optionElem.textContent = user.username;  // using the 'username' field as the display text
+                    selectDropdown.appendChild(optionElem);
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
         }
 
 

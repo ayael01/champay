@@ -1378,6 +1378,136 @@ def get_trip_schedule(group_id):
     }), 200
 
 
+@app.route('/send_schedule_notification', methods=['POST'])
+def send_schedule_notification():
+    if 'username' not in session:
+        return jsonify({"error": "You must be logged in to perform this action."}), 401
+
+    current_user = User.query.filter_by(username=session['username']).first()
+    if current_user is None:
+        return jsonify({"error": "User not found."}), 400
+
+    data = request.get_json()
+    group_id = data.get('group_id')
+    recipient_user_id = data.get('user_id')
+
+    group = Group.query.get(group_id)
+    if group is None:
+        return jsonify({"error": "Group not found."}), 400
+
+    if recipient_user_id:
+        user = User.query.get(recipient_user_id)
+        if user is None:
+            return jsonify({"error": "Recipient user not found."}), 400
+        greeting = f"Hello {user.username},"
+        recipients = [user.email]
+    else:
+        greeting = "Hello everyone,"
+        recipients = [gm.user.email for gm in group.group_members]
+
+    # Fetching group details
+    group_name = group.name
+    start_date = group.start_date
+    start_time = group.start_time
+    end_date = group.end_date
+    end_time = group.end_time
+    location = group.location
+
+    # Building the list of group members' names
+    participants_list = [gm.user.username for gm in group.group_members]
+    participants_html = ', '.join(participants_list)
+
+    # Creating the email content based on the template
+    email_content = f"""
+    <html>
+        <head>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                }}
+                .header {{
+                    background-color: #4CAF50;
+                    color: white;
+                    padding: 10px 0;
+                    text-align: center;
+                }}
+                .content {{
+                    margin: 20px;
+                }}
+                .trip-details {{
+                    margin-top: 10px;
+                }}
+                .trip-details h3 {{
+                    color: #4CAF50;
+                }}
+                ul {{
+                    list-style-type: none;
+                    padding: 0;
+                }}
+                li {{
+                    margin-bottom: 10px;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h2>Updated Trip Settings for: {group_name}</h2>
+            </div>
+            <div class="content">
+                <p>{greeting},</p>
+                <p><strong>{current_user.username}</strong> has made some updates to the trip settings on Champay.</p>
+                <div class="trip-details">
+                    <h3>New Trip Details:</h3>
+                    <ul>
+                        <li><strong>Trip Name:</strong> {group_name}</li>
+                        <li><strong>Start Date & Time:</strong> {start_date}, {start_time}</li>
+                        <li><strong>End Date & Time:</strong> {end_date}, {end_time}</li>
+                        <li><strong>Location:</strong> {location}</li>
+                        <li><strong>Participants:</strong> {participants_html}</li>
+                    </ul>
+                </div>
+                <p>Please review these updates and reach out to <strong>{current_user.username}</strong> or any other trip organizer if you have any questions or concerns. If there are any further changes, you will be notified promptly.</p>
+                <p>We look forward to a memorable trip!</p>
+                <p>Warm regards,</p>
+                <p>Champay Team</p>
+            </div>
+        </body>
+    </html>
+    """
+
+    # ...
+
+
+
+    ses = client('ses', region_name='eu-north-1')
+
+    try:
+        response = ses.send_email(
+            Source='no-reply@cham-pay.com',
+            Destination={
+                'ToAddresses': recipients,
+            },
+            Message={
+                'Subject': {
+                    'Data': f'[Champay] Trip Settings Updated for "{group_name}"',
+                    'Charset': 'UTF-8'
+                },
+                'Body': {
+                    'Html': {
+                        'Data': email_content,
+                        'Charset': 'UTF-8'
+                    }
+                }
+            }
+        )
+        return jsonify({"message": "Schedule notification sent successfully."}), 200
+
+    except Exception as e:
+        error_message = f"Error sending schedule notification: {str(e)}"
+        log(current_user.username, error_message)  
+        return jsonify({"error": str(e)}), 500
+
+
 
 @app.after_request
 def add_header(response):

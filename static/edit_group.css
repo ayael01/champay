@@ -641,9 +641,72 @@ button.rename-button {
     width: 45%;  /* or whatever percentage or fixed width you desire */
 }
 
+.task-table-title {
+    text-align: center;
+    color: #2e8531; /* Change the color to red */
+    margin-right: 10px; /* Add some spacing between the title and the link */
+    font-weight: bold;
+    text-decoration: none;
+}
 
+.form-notifications {
+    position: relative; /* Added to set context for absolute positioning */
+    width: 100%;
+    max-width: 150px;
+}
 
+.select-label {
+    position: absolute; /* Absolute positioning */
+    top: -35px; /* Adjust this value to position the label where you desire */
+    left: 50%; /* Start positioning from the center */
+    transform: translateX(-50%); /* Centers the element based on its own width */
+    font-size: 16px; /* Size similar to other text elements, adjust as needed */
+}
 
+.form-notifications select {
+    width: 100%; /* Full width for dropdown */
+    padding: 8px; /* Padding for dropdown */
+    border-radius: 3px; /* Rounded edges for dropdown */      
+    background-color: #fff; /* White background */
+    font-size: 16px; /* Adjusting font size */
+}
+
+.form-notifications-button {
+    width: 100%; /* Ensuring button takes full width of its container */
+}
+
+.form-notifications, .form-notifications-button {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.notification-form-fields {
+    display: flex; /* Using flexbox for alignment */
+    gap: 15px; /* Spacing between flex items */
+    align-items: center; /* Vertically centering the children */
+    justify-content: center;
+    width: 60%; /* or any percentage or fixed width of your choice */
+    margin: 0 auto; /* center the flex container within its parent */
+}
+
+.notification-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 8px 30px;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    transition-duration: 0.4s;
+    border-radius: 8px;
+}
+
+.notification-button:hover:hover {
+    background-color: #45a049;
+}
 
 @media only screen and (max-width: 600px) {
     main {
