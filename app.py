@@ -1484,9 +1484,10 @@ def send_schedule_notification():
                 </div>
                 <p>Please review these updates and reach out to <strong>{current_user.username}</strong> or any other trip organizer if you have any questions or concerns. If there are any further changes, you will be notified promptly.</p>
                 <p>We look forward to a memorable trip!</p>
-                <p><a download="event.ics" href="{data_uri}">Add To Calendar</a></p>
                 <p>Warm regards,</p>
                 <p>Champay Team</p>
+                <p></p>
+                <p><a download="group_{group_id}_trip_{start_date_str}.ics" href="{data_uri}">Add To Calendar</a></p>
             </div>
         </body>
     </html>
