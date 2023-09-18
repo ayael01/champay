@@ -1497,7 +1497,7 @@ def send_schedule_notification():
     ses = client('ses', region_name='eu-north-1')
         
     email_subject = f'[Champay] Trip Settings Updated for "{group_name}"'
-    mime_email = create_mime_email(email_subject, email_content, generate_ics_content(group_name, start_date_str, start_time_str, end_date_str, end_time_str, location))
+    mime_email = create_mime_email(email_subject, email_content, generate_ics_content(group_name, start_date_str, start_time_str, end_date_str, end_time_str, location), group_id, start_date_str)    
 
     try:
         response = ses.send_raw_email(
@@ -1562,7 +1562,7 @@ END:VCALENDAR"""
 
 
 
-def create_mime_email(subject, body_html, ics_content):
+def create_mime_email(subject, body_html, ics_content, group_id, start_date):
     msg = MIMEMultipart()
     msg['Subject'] = subject
 
@@ -1570,12 +1570,16 @@ def create_mime_email(subject, body_html, ics_content):
     body = MIMEText(body_html, 'html')
     msg.attach(body)
 
-    # Attach the ICS content
+    # Generate the custom filename
+    ics_filename = f"group_{group_id}_trip_{start_date}.ics"
+
+    # Attach the ICS content with the custom filename
     calendar_attachment = MIMEText(ics_content, 'calendar;method=REQUEST')
-    calendar_attachment.add_header('Content-Disposition', 'attachment', filename='event.ics')
+    calendar_attachment.add_header('Content-Disposition', 'attachment', filename=ics_filename)
     msg.attach(calendar_attachment)
 
     return msg
+
 
 
 @app.after_request
