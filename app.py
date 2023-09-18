@@ -15,6 +15,11 @@ import datetime
 import group_expenses_tool as get
 import logging
 from boto3 import client
+import base64
+import uuid
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
 
 
 # Configure the logger
@@ -1419,6 +1424,15 @@ def send_schedule_notification():
     participants_list = [gm.user.username for gm in group.group_members]
     participants_html = ', '.join(participants_list)
 
+    # Generating the data URI for the "Add To Calendar" feature
+    start_date_str = start_date.strftime('%Y%m%d')
+    end_date_str = end_date.strftime('%Y%m%d')
+    start_time_str = start_time.strftime('%H%M%S')
+    end_time_str = end_time.strftime('%H%M%S')
+
+    data_uri = generate_ics_data_uri(group_name, start_date_str, start_time_str, end_date_str, end_time_str, location)
+
+
     # Creating the email content based on the template
     email_content = f"""
     <html>
@@ -1470,6 +1484,7 @@ def send_schedule_notification():
                 </div>
                 <p>Please review these updates and reach out to <strong>{current_user.username}</strong> or any other trip organizer if you have any questions or concerns. If there are any further changes, you will be notified promptly.</p>
                 <p>We look forward to a memorable trip!</p>
+                <p><a download="event.ics" href="{data_uri}">Add To Calendar</a></p>
                 <p>Warm regards,</p>
                 <p>Champay Team</p>
             </div>
@@ -1479,36 +1494,88 @@ def send_schedule_notification():
 
     # ...
 
-
-
     ses = client('ses', region_name='eu-north-1')
+        
+    email_subject = f'[Champay] Trip Settings Updated for "{group_name}"'
+    mime_email = create_mime_email(email_subject, email_content, generate_ics_content(group_name, start_date_str, start_time_str, end_date_str, end_time_str, location))
 
     try:
-        response = ses.send_email(
+        response = ses.send_raw_email(
             Source='no-reply@cham-pay.com',
-            Destination={
-                'ToAddresses': recipients,
-            },
-            Message={
-                'Subject': {
-                    'Data': f'[Champay] Trip Settings Updated for "{group_name}"',
-                    'Charset': 'UTF-8'
-                },
-                'Body': {
-                    'Html': {
-                        'Data': email_content,
-                        'Charset': 'UTF-8'
-                    }
-                }
+            Destinations=recipients,
+            RawMessage={
+                'Data': mime_email.as_string(),
             }
         )
         return jsonify({"message": "Schedule notification sent successfully."}), 200
 
     except Exception as e:
         error_message = f"Error sending schedule notification: {str(e)}"
-        log(current_user.username, error_message)  
+        log(current_user.username, error_message)
         return jsonify({"error": str(e)}), 500
 
+
+
+def generate_ics_data_uri(group_name, start_date, start_time, end_date, end_time, location):
+    ics_content = generate_ics_content(group_name, start_date, start_time, end_date, end_time, location)
+    encoded_ics_content = base64.b64encode(ics_content.encode()).decode()
+    return f"data:text/calendar;base64,{encoded_ics_content}"
+
+
+def format_time(time_str):
+    # Ensure we have a string with length 6, like "150000"
+    time_str = str(time_str).zfill(6)
+    
+    # Construct formatted time as "15:00:00"
+    formatted_time = f"{time_str[:2]}:{time_str[2:4]}:{time_str[4:]}"
+    
+    return formatted_time
+
+
+def generate_ics_content(group_name, start_date, start_time, end_date, end_time, location):
+    # Ensure the time strings are in the right format
+    start_time = format_time(start_time)
+    end_time = format_time(end_time)
+    
+    # Combine and format date and time strings
+    start_datetime = datetime.datetime.strptime(f"{start_date} {start_time}", '%Y%m%d %H:%M:%S').strftime('%Y%m%dT%H%M%SZ')
+    end_datetime = datetime.datetime.strptime(f"{end_date} {end_time}", '%Y%m%d %H:%M:%S').strftime('%Y%m%dT%H%M%SZ')
+
+    dtstamp = datetime.datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')
+    
+    ics_content = f"""BEGIN:VCALENDAR\r
+VERSION:2.0\r
+PRODID:-//Champay//EN\r
+METHOD:REQUEST\r
+BEGIN:VEVENT\r
+UID:{uuid.uuid4()}\r
+DTSTART;VALUE=DATE-TIME:{start_datetime}\r
+DTEND;VALUE=DATE-TIME:{end_datetime}\r
+DTSTAMP;VALUE=DATE-TIME:{dtstamp}\r
+SUMMARY:{group_name}\r
+LOCATION:{location}\r
+ORGANIZER;CN="Champay Team":MAILTO:no-reply@cham-pay.com\r
+ATTENDEE;CN="Recipient Name":MAILTO:ayael01@gmail.com\r
+END:VEVENT\r
+END:VCALENDAR"""
+    return ics_content
+
+
+
+def create_mime_email(subject, body_html, ics_content):
+    msg = MIMEMultipart()
+    msg['Subject'] = subject
+
+    # Attach the HTML body
+    body = MIMEText(body_html, 'html')
+    msg.attach(body)
+
+    # Attach the ICS content
+    calendar_attachment = MIMEText(ics_content, 'calendar;method=REQUEST')
+    calendar_attachment.add_header('Content-Disposition', 'attachment', filename='event.ics')
+    msg.attach(calendar_attachment)
+
+    return msg
 
 
 @app.after_request
