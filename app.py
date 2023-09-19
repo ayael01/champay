@@ -69,12 +69,9 @@ class Group(db.Model):
     name = db.Column(db.String(100), unique=True)
     group_members = db.relationship('GroupMember', backref='group')  # new line
     tasks = db.relationship('Task', backref='group', lazy=True)
-    start_date = db.Column(db.Date)
-    end_date = db.Column(db.Date)
-    start_time = db.Column(db.Time)
-    end_time = db.Column(db.Time)
+    start_datetime = db.Column(db.DateTime, default=datetime.datetime.now(tz))
+    end_datetime = db.Column(db.DateTime, default=datetime.datetime.now(tz))
     location = db.Column(db.String(200))
-
 
 class GroupMember(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -1351,17 +1348,34 @@ def set_trip_schedule(group_id):
         return jsonify({"error": "You must be a member of this group to set its schedule."}), 400
 
     data = request.get_json()
-    start_date = data.get('startDate').split(' ')[0]
-    start_time = data.get('startDate').split(' ')[1]
-    end_date = data.get('endDate').split(' ')[0]
-    end_time = data.get('endDate').split(' ')[1]
+    start_date_str = data.get('startDate').split(' ')[0]
+    start_time_str = data.get('startDate').split(' ')[1]
+    end_date_str = data.get('endDate').split(' ')[0]
+    end_time_str = data.get('endDate').split(' ')[1]
     location = data.get('location')
 
+    # Convert string representations into date and time objects
+    start_date = datetime.datetime.strptime(start_date_str, "%Y-%m-%d").date()
+
+    # Adjust for time format
     try:
-        group.start_date = start_date
-        group.start_time = start_time
-        group.end_date = end_date
-        group.end_time = end_time
+        start_time = datetime.datetime.strptime(start_time_str, "%H:%M:%S").time()
+    except ValueError:
+        start_time = datetime.datetime.strptime(start_time_str, "%H:%M").time()
+
+    end_date = datetime.datetime.strptime(end_date_str, "%Y-%m-%d").date()
+
+    # Adjust for time format
+    try:
+        end_time = datetime.datetime.strptime(end_time_str, "%H:%M:%S").time()
+    except ValueError:
+        end_time = datetime.datetime.strptime(end_time_str, "%H:%M").time()
+
+
+    try:
+        # Combine the date and time into datetime objects
+        group.start_datetime = datetime.datetime.combine(start_date, start_time)
+        group.end_datetime = datetime.datetime.combine(end_date, end_time)
         group.location = location
         db.session.commit()
 
@@ -1377,11 +1391,26 @@ def get_trip_schedule(group_id):
     if group is None:
         return jsonify({"error": "Group not found."}), 400
 
+    # Check if start_datetime and end_datetime are not None before accessing them
+    if group.start_datetime:
+        start_date_str = group.start_datetime.date().isoformat()
+        start_time_str = group.start_datetime.time().isoformat()
+    else:
+        start_date_str = "N/A"
+        start_time_str = "N/A"
+
+    if group.end_datetime:
+        end_date_str = group.end_datetime.date().isoformat()
+        end_time_str = group.end_datetime.time().isoformat()
+    else:
+        end_date_str = "N/A"
+        end_time_str = "N/A"
+
     # Return group trip schedule details
     return jsonify({
-        "startDate": str(group.start_date) + ' ' + str(group.start_time),
-        "endDate": str(group.end_date) + ' ' + str(group.end_time),
-        "location": group.location
+        "startDate": start_date_str + ' ' + start_time_str,
+        "endDate": end_date_str + ' ' + end_time_str,
+        "location": group.location if group.location else "N/A"  # Ensuring there's no None for location
     }), 200
 
 
@@ -1414,10 +1443,8 @@ def send_schedule_notification():
 
     # Fetching group details
     group_name = group.name
-    start_date = group.start_date
-    start_time = group.start_time
-    end_date = group.end_date
-    end_time = group.end_time
+    start_datetime = group.start_datetime
+    end_datetime = group.end_datetime
     location = group.location
 
     # Building the list of group members' names
@@ -1425,13 +1452,12 @@ def send_schedule_notification():
     participants_html = ', '.join(participants_list)
 
     # Generating the data URI for the "Add To Calendar" feature
-    start_date_str = start_date.strftime('%Y%m%d')
-    end_date_str = end_date.strftime('%Y%m%d')
-    start_time_str = start_time.strftime('%H%M%S')
-    end_time_str = end_time.strftime('%H%M%S')
+    start_date_str = start_datetime.strftime('%Y%m%d')
+    end_date_str = end_datetime.strftime('%Y%m%d')
+    start_time_str = start_datetime.strftime('%H%M%S')
+    end_time_str = end_datetime.strftime('%H%M%S')
 
     data_uri = generate_ics_data_uri(group_name, start_date_str, start_time_str, end_date_str, end_time_str, location)
-
 
     # Creating the email content based on the template
     email_content = f"""
@@ -1476,8 +1502,8 @@ def send_schedule_notification():
                     <h3>New Trip Details:</h3>
                     <ul>
                         <li><strong>Trip Name:</strong> {group_name}</li>
-                        <li><strong>Start Date & Time:</strong> {start_date}, {start_time}</li>
-                        <li><strong>End Date & Time:</strong> {end_date}, {end_time}</li>
+                        <li><strong>Start Date & Time:</strong> {start_datetime.strftime('%Y-%m-%d, %H:%M:%S')}</li>
+                        <li><strong>End Date & Time:</strong> {end_datetime.strftime('%Y-%m-%d, %H:%M:%S')}</li>
                         <li><strong>Location:</strong> {location}</li>
                         <li><strong>Participants:</strong> {participants_html}</li>
                     </ul>
@@ -1526,7 +1552,7 @@ def generate_ics_data_uri(group_name, start_date, start_time, end_date, end_time
 def format_time(time_str):
     # Ensure we have a string with length 6, like "150000"
     time_str = str(time_str).zfill(6)
-    
+
     # Construct formatted time as "15:00:00"
     formatted_time = f"{time_str[:2]}:{time_str[2:4]}:{time_str[4:]}"
     
@@ -1534,10 +1560,10 @@ def format_time(time_str):
 
 
 def generate_ics_content(group_name, start_date, start_time, end_date, end_time, location):
-    # Ensure the time strings are in the right format
+   # Ensure the time strings are in the right format
     start_time = format_time(start_time)
     end_time = format_time(end_time)
-    
+
     # Combine and format date and time strings
     start_datetime = datetime.datetime.strptime(f"{start_date} {start_time}", '%Y%m%d %H:%M:%S').strftime('%Y%m%dT%H%M%SZ')
     end_datetime = datetime.datetime.strptime(f"{end_date} {end_time}", '%Y%m%d %H:%M:%S').strftime('%Y%m%dT%H%M%SZ')
