@@ -46,6 +46,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 tz = timezone('Israel')  # Set timezone to Israel
+utc = timezone('UTC')
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -1443,19 +1444,22 @@ def send_schedule_notification():
 
     # Fetching group details
     group_name = group.name
-    start_datetime = group.start_datetime
-    end_datetime = group.end_datetime
+    start_datetime_utc = group.start_datetime.astimezone(utc)
+    end_datetime_utc = group.end_datetime.astimezone(utc)
     location = group.location
+
+    sdt_for_mail = start_datetime_utc.astimezone(tz)
+    edt_for_mail = end_datetime_utc.astimezone(tz)
 
     # Building the list of group members' names
     participants_list = [gm.user.username for gm in group.group_members]
     participants_html = ', '.join(participants_list)
 
     # Generating the data URI for the "Add To Calendar" feature
-    start_date_str = start_datetime.strftime('%Y%m%d')
-    end_date_str = end_datetime.strftime('%Y%m%d')
-    start_time_str = start_datetime.strftime('%H%M%S')
-    end_time_str = end_datetime.strftime('%H%M%S')
+    start_date_str = start_datetime_utc.strftime('%Y%m%d')
+    end_date_str = end_datetime_utc.strftime('%Y%m%d')
+    start_time_str = start_datetime_utc.strftime('%H%M%S')
+    end_time_str = end_datetime_utc.strftime('%H%M%S')
 
     data_uri = generate_ics_data_uri(group_name, start_date_str, start_time_str, end_date_str, end_time_str, location)
 
@@ -1502,8 +1506,8 @@ def send_schedule_notification():
                     <h3>New Trip Details:</h3>
                     <ul>
                         <li><strong>Trip Name:</strong> {group_name}</li>
-                        <li><strong>Start Date & Time:</strong> {start_datetime.strftime('%Y-%m-%d, %H:%M:%S')}</li>
-                        <li><strong>End Date & Time:</strong> {end_datetime.strftime('%Y-%m-%d, %H:%M:%S')}</li>
+                        <li><strong>Start Date & Time:</strong> {sdt_for_mail.strftime('%Y-%m-%d, %H:%M:%S')}</li>
+                        <li><strong>End Date & Time:</strong> {edt_for_mail.strftime('%Y-%m-%d, %H:%M:%S')}</li>
                         <li><strong>Location:</strong> {location}</li>
                         <li><strong>Participants:</strong> {participants_html}</li>
                     </ul>
