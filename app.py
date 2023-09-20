@@ -382,12 +382,16 @@ def group_report(group_id):
 
     # Check if all members have the same weight
     weights = [member.weight for member in group_members]
+
+    #for timezone conversion
+    user_timezone = pytz.timezone(user.timezone if user else 'UTC')
+
     if len(set(weights)) == 1:  # The set operation will remove duplicate values
         # All members have the same weight, so generate a regular report
-        report = generate_group_report(group, group_expenses)
+        report = generate_group_report(group, group_expenses, user_timezone)
     else:
         # Not all members have the same weight, so generate a weighted report
-        report = generate_group_report_by_weight(group, group_expenses)
+        report = generate_group_report_by_weight(group, group_expenses, user_timezone)
 
     # Log the successful report generation
     log(user.email, f'Successfully generated report on {request.path} path')
@@ -397,7 +401,8 @@ def group_report(group_id):
 
 
 
-def generate_group_report(group, group_expenses):
+def generate_group_report(group, group_expenses, user_timezone):
+
     # Retrieve the group members
     group_members = GroupMember.query.filter_by(group_id=group.id).all()
     num_members = len(group_members)
@@ -412,7 +417,15 @@ def generate_group_report(group, group_expenses):
 
     for expense in group_expenses:
         expense_owner = User.query.filter_by(id=expense.user_id).first()
-        formatted_last_updated = expense.last_updated.strftime('%Y-%m-%d %H:%M') if expense.last_updated else "Not updated"
+        
+        # Convert the UTC time to user's local timezone
+        if expense.last_updated:
+            utc_time = pytz.utc.localize(expense.last_updated)
+            local_time = utc_time.astimezone(user_timezone)
+            formatted_last_updated = local_time.strftime('%Y-%m-%d %H:%M')
+        else:
+            formatted_last_updated = "Not updated"
+
         group_expenses_list.append({
             "user": expense_owner,
             "description": expense.description,
@@ -473,7 +486,7 @@ def calculate_transfers(group_expenses, share):
     return transfers
 
 
-def generate_group_report_by_weight(group, group_expenses):
+def generate_group_report_by_weight(group, group_expenses, user_timezone):
     # Retrieve the group members
     group_members = GroupMember.query.filter_by(group_id=group.id).all()
     total_weight = sum(member.weight for member in group_members)
@@ -489,7 +502,15 @@ def generate_group_report_by_weight(group, group_expenses):
     for expense in group_expenses:
         expense_owner = User.query.filter_by(id=expense.user_id).first()
         weight = GroupMember.query.filter_by(user_id=expense.user_id, group_id=group.id).first().weight  # Get weight
-        formatted_last_updated = expense.last_updated.strftime('%Y-%m-%d %H:%M') if expense.last_updated else "Not updated"
+
+        # Convert the UTC time to user's local timezone
+        if expense.last_updated:
+            utc_time = pytz.utc.localize(expense.last_updated)
+            local_time = utc_time.astimezone(user_timezone)
+            formatted_last_updated = local_time.strftime('%Y-%m-%d %H:%M')
+        else:
+            formatted_last_updated = "Not updated"
+
         group_expenses_list.append({
             "user": expense_owner.username,
             "description": expense.description,
