@@ -1484,6 +1484,12 @@ def send_schedule_notification():
     start_time_str = start_datetime_utc.strftime('%H%M%S')
     end_time_str = end_datetime_utc.strftime('%H%M%S')
 
+    # Generating html part according to curr user time zone
+    user_timezone = pytz.timezone(current_user.timezone) 
+    start_datetime_local = start_datetime_utc.astimezone(user_timezone)
+    end_datetime_local = end_datetime_utc.astimezone(user_timezone)
+
+
     data_uri = generate_ics_data_uri(group_name, start_date_str, start_time_str, end_date_str, end_time_str, location)
 
     # Creating the email content based on the template
@@ -1529,8 +1535,8 @@ def send_schedule_notification():
                     <h3>New Trip Details:</h3>
                     <ul>
                         <li><strong>Trip Name:</strong> {group_name}</li>
-                        <li><strong>Start Date & Time:</strong> {start_datetime_utc.strftime('%Y-%m-%d, %H:%M:%S')}</li>
-                        <li><strong>End Date & Time:</strong> {end_datetime_utc.strftime('%Y-%m-%d, %H:%M:%S')}</li>
+                        <li><strong>Start Date & Time:</strong> {start_datetime_local.strftime('%Y-%m-%d, %H:%M:%S %Z')}</li>
+                        <li><strong>End Date & Time:</strong> {end_datetime_local.strftime('%Y-%m-%d, %H:%M:%S %Z')}</li>
                         <li><strong>Location:</strong> {location}</li>
                         <li><strong>Participants:</strong> {participants_html}</li>
                     </ul>
