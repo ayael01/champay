@@ -45,9 +45,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-tz = timezone('Israel')  # Set timezone to Israel
-utc = timezone('UTC')
-
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
@@ -70,8 +67,8 @@ class Group(db.Model):
     name = db.Column(db.String(100), unique=True)
     group_members = db.relationship('GroupMember', backref='group')  # new line
     tasks = db.relationship('Task', backref='group', lazy=True)
-    start_datetime = db.Column(db.DateTime, default=datetime.datetime.now(tz))
-    end_datetime = db.Column(db.DateTime, default=datetime.datetime.now(tz))
+    start_datetime = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    end_datetime = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     location = db.Column(db.String(200))
 
 class GroupMember(db.Model):
@@ -79,7 +76,7 @@ class GroupMember(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     group_id = db.Column(db.Integer, db.ForeignKey('group.id'))
     weight = db.Column(db.Integer, default=1.0) 
-    last_updated = db.Column(db.DateTime, default=None, onupdate=datetime.datetime.now(tz))
+    last_updated = db.Column(db.DateTime, default=None, onupdate=datetime.datetime.utcnow)
 
 
 class Expense(db.Model):
@@ -89,7 +86,7 @@ class Expense(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     group_id = db.Column(db.Integer, db.ForeignKey('group.id'))
     approved = db.Column(db.Boolean, default=False)
-    last_updated = db.Column(db.DateTime, default=None, onupdate=datetime.datetime.now(tz))
+    last_updated = db.Column(db.DateTime, default=None, onupdate=datetime.datetime.utcnow)
     user = db.relationship('User', backref='expenses')
 
 class Comment(db.Model):
@@ -97,7 +94,7 @@ class Comment(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     group_id = db.Column(db.Integer, db.ForeignKey('group.id'))
     text = db.Column(db.String(500))  # or use db.Text
-    date = db.Column(db.DateTime, default=datetime.datetime.now(tz))
+    date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     user = db.relationship('User', backref='comments')
     group = db.relationship('Group', backref='comments')
 
@@ -260,7 +257,7 @@ def group_expenses(group_id):
             )
             db.session.add(expense)
 
-        expense.last_updated = datetime.datetime.now(tz)
+        expense.last_updated = datetime.datetime.utcnow()
 
         try:
             db.session.commit()
@@ -573,7 +570,7 @@ def group_settings(group_id):
             return redirect(url_for("group_settings", group_id=group_id))
 
         group_membership.weight = weight
-        group_membership.last_updated = datetime.datetime.now(tz)
+        group_membership.last_updated = datetime.datetime.utcnow()
 
         try:
             db.session.commit()
@@ -1444,12 +1441,9 @@ def send_schedule_notification():
 
     # Fetching group details
     group_name = group.name
-    start_datetime_utc = group.start_datetime.astimezone(utc)
-    end_datetime_utc = group.end_datetime.astimezone(utc)
+    start_datetime_utc = group.start_datetime
+    end_datetime_utc = group.end_datetime
     location = group.location
-
-    sdt_for_mail = start_datetime_utc.astimezone(tz)
-    edt_for_mail = end_datetime_utc.astimezone(tz)
 
     # Building the list of group members' names
     participants_list = [gm.user.username for gm in group.group_members]
@@ -1506,8 +1500,8 @@ def send_schedule_notification():
                     <h3>New Trip Details:</h3>
                     <ul>
                         <li><strong>Trip Name:</strong> {group_name}</li>
-                        <li><strong>Start Date & Time:</strong> {sdt_for_mail.strftime('%Y-%m-%d, %H:%M:%S')}</li>
-                        <li><strong>End Date & Time:</strong> {edt_for_mail.strftime('%Y-%m-%d, %H:%M:%S')}</li>
+                        <li><strong>Start Date & Time:</strong> {start_datetime_utc.strftime('%Y-%m-%d, %H:%M:%S')}</li>
+                        <li><strong>End Date & Time:</strong> {end_datetime_utc.strftime('%Y-%m-%d, %H:%M:%S')}</li>
                         <li><strong>Location:</strong> {location}</li>
                         <li><strong>Participants:</strong> {participants_html}</li>
                     </ul>
