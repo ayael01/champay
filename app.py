@@ -294,16 +294,26 @@ def group_expenses(group_id):
     group_expenses = updated_expenses + not_updated_expenses
 
     group_expenses_list = []
-
+    user_timezone = pytz.timezone(user.timezone)
     for expense in group_expenses:
         expense_owner = User.query.filter_by(id=expense.user_id).first()
         member_weight = GroupMember.query.filter_by(group_id=group_id, user_id=expense.user_id).first().weight
+
+        if expense.last_updated:  # Check if last_updated is not None
+            # Convert the UTC time to user's local timezone
+            utc_time = pytz.utc.localize(expense.last_updated)
+            local_time = utc_time.astimezone(user_timezone)
+        else:
+            local_time = None
+
         group_expenses_list.append({
             "user": f"{expense_owner.username} ({member_weight})",
             "description": expense.description,
             "expenses": expense.amount,
-            "last_updated": expense.last_updated
+            "last_updated": local_time  # This will be either in user's local timezone or None
         })
+
+
 
 
     # Check if all expenses are updated for the group
