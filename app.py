@@ -19,6 +19,7 @@ import base64
 import uuid
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import pytz 
 
 
 
@@ -60,6 +61,7 @@ class User(db.Model):
             # add more fields as needed
         }
     tasks = db.relationship('Task', backref='user', lazy=True)
+    timezone = db.Column(db.String(50), default='UTC')
 
 
 class Group(db.Model):
@@ -117,14 +119,17 @@ def homepage():
     if request.method == "POST":
         email = request.form["email"].lower()
         password = request.form["password"]
+        timezone = request.form.get("timezone", "UTC")  # Default to UTC if not provided
         user = User.query.filter_by(email=email).first()
 
         if user and check_password_hash(user.password, password):
             session["username"] = user.username
             session["email"] = user.email
+            session["timezone"] = timezone  # Store the timezone in the session
 
             # Update the user's login status in the database
             user.is_logged_in = True
+            user.timezone = timezone
             db.session.commit()
 
             log(user.email, f'Attempted to access {request.path} path')
@@ -1352,28 +1357,38 @@ def set_trip_schedule(group_id):
     end_time_str = data.get('endDate').split(' ')[1]
     location = data.get('location')
 
-    # Convert string representations into date and time objects
-    start_date = datetime.datetime.strptime(start_date_str, "%Y-%m-%d").date()
-
-    # Adjust for time format
-    try:
-        start_time = datetime.datetime.strptime(start_time_str, "%H:%M:%S").time()
-    except ValueError:
-        start_time = datetime.datetime.strptime(start_time_str, "%H:%M").time()
-
-    end_date = datetime.datetime.strptime(end_date_str, "%Y-%m-%d").date()
-
-    # Adjust for time format
-    try:
-        end_time = datetime.datetime.strptime(end_time_str, "%H:%M:%S").time()
-    except ValueError:
-        end_time = datetime.datetime.strptime(end_time_str, "%H:%M").time()
-
+    # Fetch user's timezone from database
+    user_timezone = pytz.timezone(current_user.timezone)
 
     try:
+        # Convert string representations into date and time objects
+        start_date = datetime.datetime.strptime(start_date_str, "%Y-%m-%d").date()
+
+        # Adjust for time format
+        try:
+            start_time = datetime.datetime.strptime(start_time_str, "%H:%M:%S").time()
+        except ValueError:
+            start_time = datetime.datetime.strptime(start_time_str, "%H:%M").time()
+
+        end_date = datetime.datetime.strptime(end_date_str, "%Y-%m-%d").date()
+
+        # Adjust for time format
+        try:
+            end_time = datetime.datetime.strptime(end_time_str, "%H:%M:%S").time()
+        except ValueError:
+            end_time = datetime.datetime.strptime(end_time_str, "%H:%M").time()
+
         # Combine the date and time into datetime objects
-        group.start_datetime = datetime.datetime.combine(start_date, start_time)
-        group.end_datetime = datetime.datetime.combine(end_date, end_time)
+        local_start_datetime = user_timezone.localize(datetime.datetime.combine(start_date, start_time))
+        local_end_datetime = user_timezone.localize(datetime.datetime.combine(end_date, end_time))
+
+        # Convert datetime to UTC
+        utc_start_datetime = local_start_datetime.astimezone(pytz.utc)
+        utc_end_datetime = local_end_datetime.astimezone(pytz.utc)
+
+        # Update the database
+        group.start_datetime = utc_start_datetime
+        group.end_datetime = utc_end_datetime
         group.location = location
         db.session.commit()
 
@@ -1389,27 +1404,41 @@ def get_trip_schedule(group_id):
     if group is None:
         return jsonify({"error": "Group not found."}), 400
 
-    # Check if start_datetime and end_datetime are not None before accessing them
+    # Check if user is logged in
+    if 'username' not in session:
+        return jsonify({"error": "You must be logged in to view this information."}), 401
+
+    current_user = User.query.filter_by(username=session['username']).first()
+    if current_user is None:
+        return jsonify({"error": "User not found."}), 400
+    
+    # Get user's timezone from database
+    user_timezone = pytz.timezone(current_user.timezone)
+
+    # Convert UTC datetime to user's timezone
     if group.start_datetime:
-        start_date_str = group.start_datetime.date().isoformat()
-        start_time_str = group.start_datetime.time().isoformat()
+        localized_start_datetime = group.start_datetime.astimezone(user_timezone)
+        start_date_str = localized_start_datetime.date().isoformat()
+        start_time_str = localized_start_datetime.time().isoformat()
     else:
         start_date_str = "N/A"
         start_time_str = "N/A"
 
     if group.end_datetime:
-        end_date_str = group.end_datetime.date().isoformat()
-        end_time_str = group.end_datetime.time().isoformat()
+        localized_end_datetime = group.end_datetime.astimezone(user_timezone)
+        end_date_str = localized_end_datetime.date().isoformat()
+        end_time_str = localized_end_datetime.time().isoformat()
     else:
         end_date_str = "N/A"
         end_time_str = "N/A"
 
-    # Return group trip schedule details
+    # Return group trip schedule details in user's timezone
     return jsonify({
         "startDate": start_date_str + ' ' + start_time_str,
         "endDate": end_date_str + ' ' + end_time_str,
         "location": group.location if group.location else "N/A"  # Ensuring there's no None for location
     }), 200
+
 
 
 @app.route('/send_schedule_notification', methods=['POST'])

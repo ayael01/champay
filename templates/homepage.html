@@ -30,6 +30,7 @@
                 {% endif %}
             {% endwith %}
             <form action="/" method="post" id="login-form">
+                <input type="hidden" name="timezone" id="timezone" value="">
                 <label for="email">Email:</label>
                 <input type="email" name="email" id="email" class="login-input" required>
                 <label for="password">Password:</label>
@@ -38,5 +39,11 @@
             </form>
         </section>
     </main>
+    <script>
+        document.getElementById("login-form").addEventListener("submit", function() {
+            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            document.getElementById("timezone").value = tz;
+        });
+    </script>    
 </body>
 </html>
