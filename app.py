@@ -76,6 +76,8 @@ class Group(db.Model):
     ics_uid = db.Column(db.String(128), unique=True)
     ics_sequence = db.Column(db.Integer, default=0)
     is_scheduled = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
 
 class GroupMember(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -197,7 +199,7 @@ def dashboard():
     # Fetch the groups that the user is a member of
     group_memberships = GroupMember.query.filter_by(user_id=user.id).all()
     group_ids = [gm.group_id for gm in group_memberships]
-    groups = Group.query.filter(Group.id.in_(group_ids)).all()
+    groups = Group.query.filter(Group.id.in_(group_ids)).order_by(Group.created_at.desc()).all()
 
     if request.method == "POST":
         selected_group_id = int(request.form["group"])

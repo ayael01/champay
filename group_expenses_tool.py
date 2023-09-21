@@ -47,6 +47,7 @@ class Group(db.Model):
     ics_uid = db.Column(db.String(128), unique=True)
     ics_sequence = db.Column(db.Integer, default=0)
     is_scheduled = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
 class GroupMember(db.Model):
     id = db.Column(db.Integer, primary_key=True)
