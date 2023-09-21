@@ -19,7 +19,8 @@ import base64
 import uuid
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-import pytz 
+import pytz
+from uuid import uuid4
 
 
 
@@ -72,6 +73,9 @@ class Group(db.Model):
     start_datetime = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     end_datetime = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     location = db.Column(db.String(200))
+    ics_uid = db.Column(db.String(128), unique=True)
+    ics_sequence = db.Column(db.Integer, default=0)
+    is_scheduled = db.Column(db.Boolean, default=False)
 
 class GroupMember(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -703,6 +707,8 @@ def create_group_expenses(group_name, member_ids):
     try:
         # Create the group
         group = Group(name=group_name)
+        group.ics_uid = str(uuid4())
+        group.ics_sequence = 0  # initial sequence
         db.session.add(group)
         db.session.commit()
 
@@ -1417,16 +1423,28 @@ def set_trip_schedule(group_id):
         utc_start_datetime = local_start_datetime.astimezone(pytz.utc)
         utc_end_datetime = local_end_datetime.astimezone(pytz.utc)
 
+         # Additional validation
+        if utc_end_datetime <= utc_start_datetime:
+            return jsonify({"error": "End date-time must be after start date-time."}), 400
+
+        if not location:
+            return jsonify({"error": "Location cannot be empty."}), 400
+
         # Update the database
         group.start_datetime = utc_start_datetime
         group.end_datetime = utc_end_datetime
         group.location = location
+        group.is_scheduled = True
         db.session.commit()
 
         return jsonify({"message": "Trip schedule updated successfully."}), 200
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 400
     except SQLAlchemyError as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+    except Exception as e:
+        return jsonify({"error": "An unexpected error occurred: {}".format(e)}), 500
 
 
 @app.route('/get_trip_schedule/<int:group_id>', methods=['GET'])
@@ -1467,7 +1485,8 @@ def get_trip_schedule(group_id):
     return jsonify({
         "startDate": start_date_str + ' ' + start_time_str,
         "endDate": end_date_str + ' ' + end_time_str,
-        "location": group.location if group.location else "N/A"  # Ensuring there's no None for location
+        "location": group.location if group.location else "N/A",
+        "is_scheduled": group.is_scheduled
     }), 200
 
 
@@ -1504,6 +1523,15 @@ def send_schedule_notification():
     start_datetime_utc = group.start_datetime
     end_datetime_utc = group.end_datetime
     location = group.location
+    
+    # Retrieve UID and Sequence number
+    ics_uid = group.ics_uid
+    ics_sequence = group.ics_sequence
+    is_update = group.is_scheduled
+    if is_update:
+        group.ics_sequence += 1  # Increment the sequence number
+        ics_sequence = group.ics_sequence
+        db.session.commit()  # Commit the sequence number update
 
     # Building the list of group members' names
     participants_list = [gm.user.username for gm in group.group_members]
@@ -1521,7 +1549,8 @@ def send_schedule_notification():
     end_datetime_local = end_datetime_utc.astimezone(user_timezone)
 
 
-    data_uri = generate_ics_data_uri(group_name, start_date_str, start_time_str, end_date_str, end_time_str, location)
+    data_uri = generate_ics_data_uri(group_name, start_date_str, start_time_str, end_date_str, end_time_str, location, ics_uid, ics_sequence)
+
 
     # Creating the email content based on the template
     email_content = f"""
@@ -1588,7 +1617,7 @@ def send_schedule_notification():
     ses = client('ses', region_name='eu-north-1')
         
     email_subject = f'[Champay] Trip Settings Updated for "{group_name}"'
-    mime_email = create_mime_email(email_subject, email_content, generate_ics_content(group_name, start_date_str, start_time_str, end_date_str, end_time_str, location), group_id, start_date_str)    
+    mime_email = create_mime_email(email_subject, email_content, generate_ics_content(group_name, start_date_str, start_time_str, end_date_str, end_time_str, location, ics_uid, ics_sequence), group_id, start_date_str)    
 
     try:
         response = ses.send_raw_email(
@@ -1601,14 +1630,16 @@ def send_schedule_notification():
         return jsonify({"message": "Schedule notification sent successfully."}), 200
 
     except Exception as e:
+        if is_update:
+            db.session.rollback()  # Rollback the sequence increment
         error_message = f"Error sending schedule notification: {str(e)}"
         log(current_user.username, error_message)
         return jsonify({"error": str(e)}), 500
 
 
 
-def generate_ics_data_uri(group_name, start_date, start_time, end_date, end_time, location):
-    ics_content = generate_ics_content(group_name, start_date, start_time, end_date, end_time, location)
+def generate_ics_data_uri(group_name, start_date, start_time, end_date, end_time, location, ics_uid, ics_sequence):
+    ics_content = generate_ics_content(group_name, start_date, start_time, end_date, end_time, location, ics_uid, ics_sequence)
     encoded_ics_content = base64.b64encode(ics_content.encode()).decode()
     return f"data:text/calendar;base64,{encoded_ics_content}"
 
@@ -1623,7 +1654,7 @@ def format_time(time_str):
     return formatted_time
 
 
-def generate_ics_content(group_name, start_date, start_time, end_date, end_time, location):
+def generate_ics_content(group_name, start_date, start_time, end_date, end_time, location, ics_uid, ics_sequence):
    # Ensure the time strings are in the right format
     start_time = format_time(start_time)
     end_time = format_time(end_time)
@@ -1639,7 +1670,8 @@ VERSION:2.0\r
 PRODID:-//Champay//EN\r
 METHOD:REQUEST\r
 BEGIN:VEVENT\r
-UID:{uuid.uuid4()}\r
+UID:{ics_uid}\r
+SEQUENCE:{ics_sequence}\r
 DTSTART;VALUE=DATE-TIME:{start_datetime}\r
 DTEND;VALUE=DATE-TIME:{end_datetime}\r
 DTSTAMP;VALUE=DATE-TIME:{dtstamp}\r

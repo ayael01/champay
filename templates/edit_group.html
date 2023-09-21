@@ -52,39 +52,7 @@
             </form>
         
         </section>
-
-        <!-- After Rename Trip Section -->
-        <section class="trip-schedule">
-            <h2>Set Trip Schedule</h2>
-            <form id="setScheduleForm" data-group-id="{{ group.id }}">
-                <div class="input-group">
-                    <label for="startDate">Start Date:</label>
-                    <div>
-                        <input type="date" id="startDate" name="startDate" required>
-                        <input type="time" id="startTime" name="startTime" required>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label for="endDate">End Date:</label>
-                    <div>
-                        <input type="date" id="endDate" name="endDate" required>
-                        <input type="time" id="endTime" name="endTime" required>
-                    </div>
-                </div>
-                <div>
-                    <label for="location">Location:</label>
-                    <input type="text" id="location" name="location" required>
-                </div>
-                <div>
-                    <button type="submit">Set Schedule</button>
-                </div>
-            </form>
-        </section>
-        
-        
-        
-        
-        
+       
         <section class="group-form">
             <h2>Add or remove trip members</h2>
 
@@ -133,6 +101,34 @@
             <div id="warning-container" class="warning-container"></div>
         </section>
 
+        <!-- After Rename Trip Section -->
+        <section class="trip-schedule">
+            <h2>Set Trip Schedule</h2>
+            <form id="setScheduleForm" data-group-id="{{ group.id }}">
+                <div class="input-group">
+                    <label for="startDate">Start Date:</label>
+                    <div>
+                        <input type="date" id="startDate" name="startDate" required>
+                        <input type="time" id="startTime" name="startTime" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="endDate">End Date:</label>
+                    <div>
+                        <input type="date" id="endDate" name="endDate" required>
+                        <input type="time" id="endTime" name="endTime" required>
+                    </div>
+                </div>
+                <div>
+                    <label for="location">Location:</label>
+                    <input type="text" id="location" name="location" required>
+                </div>
+                <div>
+                    <button type="submit">Set Schedule</button>
+                </div>
+            </form>
+        </section>  
+
         <p class="task-table-title">Notify members</p>
         <section>
             <form action="javascript:void(0);" onsubmit="handleNotificationSend()">
@@ -149,7 +145,7 @@
                     </div>
                 </div>
             </form>
-        </section>
+        </section>              
 
         <div id="popup_flash" class="popup">
             <div class="popup-content">
@@ -541,6 +537,10 @@
                         document.getElementById('message_flash').className = "popup_flash-error"; // Assuming you have an error CSS class
                         document.getElementById('popup_flash').style.display = "flex";
                     } else {
+                        // Update the button text to 'Re-schedule'
+                        const scheduleButton = document.querySelector('button[type="submit"]');
+                        scheduleButton.textContent = 'Re-schedule';
+
                         // Show the success popup
                         document.getElementById('message_flash').innerText = data.message;
                         document.getElementById('message_flash').className = "popup_flash-success";
@@ -577,6 +577,13 @@
 
                     if (data.location) {
                         document.getElementById("location").value = data.location;
+                    }
+                    // Update the button text based on whether the trip has already been scheduled
+                    const scheduleButton = document.querySelector('button[type="submit"]');
+                    if (data.is_scheduled) {
+                        scheduleButton.textContent = 'Re-schedule';
+                    } else {
+                        scheduleButton.textContent = 'Set Schedule';
                     }
                 })
                 .catch(error => {
