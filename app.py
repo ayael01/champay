@@ -217,6 +217,12 @@ def privacy_policy():
     
     return render_template("privacy_policy.html")
 
+@app.route("/terms_of_service")
+def terms_of_service():
+    # Log access to terms_of_service
+    log(session.get("email", "Guest"), f'Accessed {request.path} path')
+
+    return render_template("terms_of_service.html")
 
 @app.route("/group_expenses/<int:group_id>", methods=["GET", "POST"])
 def group_expenses(group_id):
