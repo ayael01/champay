@@ -210,6 +210,13 @@ def dashboard():
     return render_template("dashboard.html", message=message, groups=groups, username=username)
 
 
+@app.route("/privacy_policy", methods=["GET"])
+def privacy_policy():
+    # Log access to privacy policy
+    log(session.get("email", "Guest"), f'Accessed {request.path} path')
+    
+    return render_template("privacy_policy.html")
+
 
 @app.route("/group_expenses/<int:group_id>", methods=["GET", "POST"])
 def group_expenses(group_id):
