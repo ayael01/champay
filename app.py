@@ -63,7 +63,7 @@ class User(db.Model):
         }
     tasks = db.relationship('Task', backref='user', lazy=True)
     timezone = db.Column(db.String(50), default='UTC')
-
+    organized_groups = db.relationship('Group', backref='organizer', lazy='dynamic')
 
 class Group(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -77,6 +77,7 @@ class Group(db.Model):
     ics_sequence = db.Column(db.Integer, default=0)
     is_scheduled = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    organizer_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 
 class GroupMember(db.Model):
@@ -711,17 +712,22 @@ def search_friends():
         return jsonify(error=f"User {email} not found"), 404
     
 
-def create_group_expenses(group_name, member_ids):
+def create_group_expenses(group_name, member_ids, organizer_id):
     # Check if all user IDs are valid and exist in the database
     users = User.query.filter(User.id.in_(member_ids)).all()
+
+    # Ensure the organizer is in the list of members
+    if organizer_id not in member_ids:
+        member_ids.append(organizer_id)
+        users.append(User.query.get(organizer_id))
 
     if len(users) != len(member_ids):
         # Some user IDs are invalid or not found
         return "Invalid user IDs. Please check the user IDs and try again."
 
     try:
-        # Create the group
-        group = Group(name=group_name)
+        # Create the group and set the organizer
+        group = Group(name=group_name, organizer_id=organizer_id)
         group.ics_uid = str(uuid4())
         group.ics_sequence = 0  # initial sequence
         db.session.add(group)
@@ -767,21 +773,25 @@ def finalize_group():
     group_name = data.get('groupName')
     member_ids = data.get('groupMembers')
 
+    # Get the organizer ID from the logged-in user
+    organizer = User.query.filter_by(username=session['username']).first()
+    if not organizer:
+        return jsonify({"error": "Invalid user."}), 401
+
     # Log the group creation attempt
-    log(session['email'], f'Attempted to create group: {group_name} with members: {member_ids}')
+    log(session['email'], f'Attempted to create group: {group_name} with organizer: {organizer.username} and members: {member_ids}')
 
     # Create the group using create_group_expenses function
-    group_id, response_message = create_group_expenses(group_name, member_ids)
+    group_id, response_message = create_group_expenses(group_name, member_ids, organizer.id)
 
     # Check if the group creation was successful
     if "successfully" in response_message.lower():
-        log(session['email'], f'Successfully created group: {group_name}')
-        flash(f"Successfully created trip {group_name}.", "success")
-        return jsonify(success=True, group_id=group_id, message="Group created successfully.")
+        log(session['email'], f'Successfully created group: {group_name} with organizer: {organizer.username}')
+        flash(f"Successfully created trip {group_name} with organizer: {organizer.username}.", "success")
+        return jsonify(success=True, group_id=group_id, message=f"Group created successfully with organizer: {organizer.username}.")
     else:
         log(session['email'], f'Failed to create group: {group_name}. Error: {response_message}')
         return jsonify(success=False, error=response_message)
-
 
 
 @app.route('/edit_group/<int:group_id>', methods=['GET'])
@@ -1522,6 +1532,9 @@ def send_schedule_notification():
     group = Group.query.get(group_id)
     if group is None:
         return jsonify({"error": "Group not found."}), 400
+        
+    if group.organizer_id != current_user.id:
+        return jsonify({"error": "You are not authorized to send notifications for this group. Only the organizer can."}), 403
 
     if recipient_user_id:
         user = User.query.get(recipient_user_id)
@@ -1563,9 +1576,17 @@ def send_schedule_notification():
     start_datetime_local = start_datetime_utc.astimezone(user_timezone)
     end_datetime_local = end_datetime_utc.astimezone(user_timezone)
 
+    # Define the organizer's email
+    organizer_email = current_user.email
 
-    data_uri = generate_ics_data_uri(group_name, start_date_str, start_time_str, end_date_str, end_time_str, location, ics_uid, ics_sequence)
+    # For single user notification
+    if recipient_user_id:
+        attendees_emails = [user.email]
+    else:
+        # For group notification
+        attendees_emails = [gm.user.email for gm in group.group_members]
 
+    data_uri = generate_ics_data_uri(group_name, start_date_str, start_time_str, end_date_str, end_time_str, location, ics_uid, ics_sequence, organizer_email, attendees_emails)
 
     # Creating the email content based on the template
     email_content = f"""
@@ -1627,12 +1648,12 @@ def send_schedule_notification():
     </html>
     """
 
-    # ...
-
     ses = client('ses', region_name='eu-north-1')
         
     email_subject = f'[Champay] Trip Settings Updated for "{group_name}"'
-    mime_email = create_mime_email(email_subject, email_content, generate_ics_content(group_name, start_date_str, start_time_str, end_date_str, end_time_str, location, ics_uid, ics_sequence), group_id, start_date_str)    
+
+    ics_content = generate_ics_content(group_name, start_date_str, start_time_str, end_date_str, end_time_str, location, ics_uid, ics_sequence, organizer_email, attendees_emails)
+    mime_email = create_mime_email(email_subject, email_content, ics_content, group_id, start_date_str)
 
     try:
         response = ses.send_raw_email(
@@ -1653,8 +1674,8 @@ def send_schedule_notification():
 
 
 
-def generate_ics_data_uri(group_name, start_date, start_time, end_date, end_time, location, ics_uid, ics_sequence):
-    ics_content = generate_ics_content(group_name, start_date, start_time, end_date, end_time, location, ics_uid, ics_sequence)
+def generate_ics_data_uri(group_name, start_date, start_time, end_date, end_time, location, ics_uid, ics_sequence, organizer_email, attendees_emails=[]):
+    ics_content = generate_ics_content(group_name, start_date, start_time, end_date, end_time, location, ics_uid, ics_sequence, organizer_email, attendees_emails)
     encoded_ics_content = base64.b64encode(ics_content.encode()).decode()
     return f"data:text/calendar;base64,{encoded_ics_content}"
 
@@ -1669,17 +1690,22 @@ def format_time(time_str):
     return formatted_time
 
 
-def generate_ics_content(group_name, start_date, start_time, end_date, end_time, location, ics_uid, ics_sequence):
-   # Ensure the time strings are in the right format
+def generate_ics_content(group_name, start_date, start_time, end_date, end_time, location, ics_uid, ics_sequence, organizer_email, attendees_emails=[]):
+    # Ensure the time strings are in the right format
     start_time = format_time(start_time)
     end_time = format_time(end_time)
 
     # Combine and format date and time strings
     start_datetime = datetime.datetime.strptime(f"{start_date} {start_time}", '%Y%m%d %H:%M:%S').strftime('%Y%m%dT%H%M%SZ')
     end_datetime = datetime.datetime.strptime(f"{end_date} {end_time}", '%Y%m%d %H:%M:%S').strftime('%Y%m%dT%H%M%SZ')
-
     dtstamp = datetime.datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')
+
+    # Generate the attendees part for the ics content
+    attendees_str = ""
+    for email in attendees_emails:
+        attendees_str += f'ATTENDEE;CN="{email.split("@")[0]}":MAILTO:{email}\r'
     
+    # Build the final ics content
     ics_content = f"""BEGIN:VCALENDAR\r
 VERSION:2.0\r
 PRODID:-//Champay//EN\r
@@ -1692,11 +1718,12 @@ DTEND;VALUE=DATE-TIME:{end_datetime}\r
 DTSTAMP;VALUE=DATE-TIME:{dtstamp}\r
 SUMMARY:{group_name}\r
 LOCATION:{location}\r
-ORGANIZER;CN="Champay Team":MAILTO:no-reply@cham-pay.com\r
-ATTENDEE;CN="Recipient Name":MAILTO:ayael01@gmail.com\r
+ORGANIZER;CN="Champay Team":MAILTO:{organizer_email}\r
+{attendees_str}
 END:VEVENT\r
 END:VCALENDAR"""
     return ics_content
+
 
 
 

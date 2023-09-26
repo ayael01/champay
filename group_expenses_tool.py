@@ -35,6 +35,7 @@ class User(db.Model):
         }
     tasks = db.relationship('Task', backref='user', lazy=True)
     timezone = db.Column(db.String(50), default='UTC')
+    organized_groups = db.relationship('Group', backref='organizer', lazy='dynamic')
 
 class Group(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -48,6 +49,8 @@ class Group(db.Model):
     ics_sequence = db.Column(db.Integer, default=0)
     is_scheduled = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    organizer_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
 
 class GroupMember(db.Model):
     id = db.Column(db.Integer, primary_key=True)
