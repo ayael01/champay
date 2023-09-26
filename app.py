@@ -825,7 +825,11 @@ def edit_group(group_id):
 
     group_members = [member.user.serialize() for member in group.group_members]
     log(current_user_email, f'Accessed edit_group for group {group_id}')
-    return render_template('edit_group.html', group=group, group_id=group_id, group_name=group.name, group_members=group_members, username=session['username'], current_user_email=current_user_email)
+
+    # Fetch the organizer of the group
+    organizer = User.query.get(group.organizer_id)
+    
+    return render_template('edit_group.html', group=group, group_id=group_id, group_name=group.name, group_members=group_members, username=session['username'], current_user_email=current_user_email, organizer=organizer)
 
 
 @app.route("/add_user_to_group", methods=["POST"])

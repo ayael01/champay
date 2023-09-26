@@ -708,6 +708,33 @@ button.rename-button {
     background-color: #45a049;
 }
 
+.organizer-info {
+    background-color: #f2f7f2; /* Consistent background to match forms */
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Gives a subtle shadow for depth */
+    text-align: center; /* Centralizes content */
+    margin: 20px 0; /* Adds spacing above and below for better layout */
+}
+
+.organizer-info h2 {
+    color: black; /* Matches the primary color you've been using */
+    margin-top: 0.5rem; /* Reduced from 1rem; adjust as needed */
+    margin-bottom: 0.5rem; /* Added to reduce the space between the h2 and the paragraph below it */
+    border-bottom: 2px solid #f44336; /* Adds a bottom border for more distinction */
+    display: inline-block; /* Required for the border to wrap around text and not full width */
+    padding-bottom: 5px; /* Adds padding between text and border */
+}
+
+.organizer-info p {
+    font-size: 1.2rem; /* Increases the font size a bit */
+    font-weight: bold; /* Makes the username bold */
+    color: black; /* A subtle color that matches other text styles in your CSS */
+    margin-top: 0.5rem; /* Space between h2 and p */
+    margin-bottom: 0.5rem;
+}
+
+
 @media only screen and (max-width: 600px) {
     main {
         padding: 15px; /* reduced padding for smaller screens */
