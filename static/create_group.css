@@ -489,11 +489,145 @@ form {
     border-color: darkred;
 }
 
+
+/* ---------------- Trip Schedule -------------------*/
+.trip-schedule {
+    padding: 10px;
+}
+
+.trip-schedule h2 {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.trip-schedule form {
+    width: 80%;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Use flex on the input group to center its content */
+.trip-schedule .input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 0.9rem; /* Added this for space between groups */
+}
+
+.trip-schedule input[type="date"],
+.trip-schedule input[type="time"] {
+    padding: 5px;
+    font-size: 14px;
+    width: calc(50% - 5px); /* Adjusted for better responsiveness */
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    margin-bottom: 0.5rem;
+    margin-left: 0; /* Removed fixed margin */
+}
+
+/* This margin can probably be removed if the items are centered correctly */
+.trip-schedule input[type="time"] {
+    margin-left: 0;
+}
+
+.trip-schedule input[type="text"] {
+    padding: 5px;
+    font-size: 14px;
+    width: 60%;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    margin-bottom: 2rem;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+
+.trip-schedule .input-group > div {
+    display: flex;
+    gap: 8px; /* Adjusted gap to provide some space between date and time inputs */
+}
+
+.trip-schedule .input-group label,
+.trip-schedule label[for="location"] {
+    display: block;
+    margin-bottom: 0.5rem;
+    margin-left: 0; /* Removed fixed margin */
+    text-align: center;
+}
+
+
+
+.trip-schedule button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 4px;
+    width: 30%;
+    transition: background-color 0.3s;
+    margin: 0 auto; /* Centering the button */
+    display: block;
+    text-decoration: none;
+    font-size: 16px;
+    height: 32px;
+    line-height: 13px;
+    width: 125px;  /* Example fixed width */
+    height: 32px;  /* Example fixed height */
+}
+
+.trip-schedule button[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+.trip-schedule #endDate,
+.trip-schedule #startDate {
+    width: 60%;  /* or whatever percentage or fixed width you desire */
+}
+
+.trip-schedule #endTime,
+.trip-schedule #startTime {
+    width: 45%;  /* or whatever percentage or fixed width you desire */
+}
+
 @media only screen and (max-width: 600px) {
     .remove-button {
         padding: 2px;
     }
 }
+
+.welcome-section {
+    background-image: linear-gradient(120deg, #f2f7f2, #f3f3cf, #f2f7f2); /* Gradient background */
+    padding: 40px 0;
+    text-align: center;
+    position: relative; /* For potential pseudo-elements or absolute positioned elements */
+}
+
+.welcome-section::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.1);
+    z-index: 1; /* Place above the background but below the content */
+}
+
+.welcome-section h2 {
+    font-size: 30px;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    position: relative; /* To ensure it appears above the pseudo-element */
+    z-index: 2;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.2); /* Text shadow for added depth */
+}
+
+
 
 @media only screen and (max-width: 600px) {
     main {

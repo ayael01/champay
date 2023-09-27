@@ -32,8 +32,34 @@
     </div>
 
     <main>
+        <section class="welcome-section">
+            <h2>Hi {{ username }}, let's set up your next adventure!</h2>
+        </section>
+        <section class="trip-schedule">
+            <h2>Set Trip Schedule</h2>
+            <form id="setScheduleForm">
+                <div class="input-group">
+                    <label for="startDate">Start Date:</label>
+                    <div>
+                        <input type="date" id="startDate" name="startDate" required>
+                        <input type="time" id="startTime" name="startTime" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="endDate">End Date:</label>
+                    <div>
+                        <input type="date" id="endDate" name="endDate" required>
+                        <input type="time" id="endTime" name="endTime" required>
+                    </div>
+                </div>
+                <div>
+                    <label for="location">Location:</label>
+                    <input type="text" id="location" name="location" required>
+                </div>
+            </form>
+        </section>  
         <section class="group-form">
-            <h2>Hi {{ username }}, please add your friends</h2>
+            <h2>Add your friends</h2>
 
             <!-- Gray panel with search input and button -->
             <form action="{{ url_for('search_friends') }}" method="post" class="form-inline search-form" onsubmit="event.preventDefault(); searchFriends();">
@@ -91,12 +117,35 @@
     </main>
 <script>
     window.onload = function() {
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                let messageType = "{{ messages[0][0] }}";
+                let messageContent = "{{ messages[0][1] }}";
+
+                showPopupMessage(messageType, messageContent);
+            {% endif %}
+        {% endwith %}
+
         var user = {
             username: "{{ username }}",
             email: "{{ email }}",
             id: parseInt("{{ user_id }}", 10)
         };
         addUserToTable(user);
+    };
+
+    function showPopupMessage(type, content) {
+        const messageElement = document.getElementById('message_flash');
+        const popupElement = document.getElementById('popup_flash');
+
+        // Set the message content
+        messageElement.innerText = content;
+
+        // Set the appropriate CSS class based on the message type
+        messageElement.className = "popup_flash-" + type;
+
+        // Display the popup
+        popupElement.style.display = "flex";
     }
 
 
@@ -132,13 +181,12 @@
             if (data.user) {
                 addUserToTable(data.user);
                 document.getElementById('addFriendInput').value = '';
+            } else if (data.error) {
+                showPopupMessage('error', data.error);
             }
         })
         .catch(error => {
-            // Display error message in a popup
-            document.getElementById('message_flash').innerText = error.message;
-            document.getElementById('message_flash').className = "popup_flash-error";
-            document.getElementById('popup_flash').style.display = "flex";
+            showPopupMessage('error', error.message);
         });
     }
 
@@ -187,30 +235,63 @@
         // Get the event name (group name) from the form
         var groupName = document.querySelector("header .header-content h1").innerText.replace('Begin Your Trip: ', '');
         if (!groupName) {
-            alert("Group name is required");
+            displayPopup("Group name is required", "error");
             return;
         }
             
         // Prepare ids for sending to the server
         var memberIds = groupMembers.map(member => member.id);
 
+        // Get schedule details from the form
+        var startDate = document.getElementById("startDate").value;
+        var startTime = document.getElementById("startTime").value;
+        var endDate = document.getElementById("endDate").value;
+        var endTime = document.getElementById("endTime").value;
+        var location = document.getElementById("location").value;
+
         fetch("/finalize_group", {
             method: "POST",
-            body: JSON.stringify({ groupMembers: memberIds, groupName: groupName }),
+            body: JSON.stringify({
+                groupMembers: memberIds,
+                groupName: groupName,
+                startDate: startDate + ' ' + startTime,
+                endDate: endDate + ' ' + endTime,
+                location: location
+            }),
             headers: { "Content-Type": "application/json" },
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-            // Redirect to the group_expenses page for the new group
-            window.location.href = "/edit_group/" + data.group_id + "?new_group=true";
+                // Redirect to the group_expenses page for the new group
+                window.location.href = "/edit_group/" + data.group_id + "?new_group=true";
             } else {
-                alert("Failed to create group: " + data.error);
+                displayPopup("Failed to create group: " + data.error, "error");
             }
         });
     }
 
-
+    function displayPopup(message, type) {
+        var popup = document.getElementById('popup_flash');
+        var messageElem = document.getElementById('message_flash');
+        
+        // Set the message and styling based on type
+        messageElem.innerText = message;
+        
+        switch (type) {
+            case "success":
+                messageElem.className = "popup_flash-success";
+                break;
+            case "error":
+                messageElem.className = "popup_flash-error";
+                break;
+            default:
+                messageElem.className = ""; // No specific styling
+        }
+        
+        // Display the popup
+        popup.style.display = "flex";
+    }
 
     function hidePopupFlash() {
         const popup = document.getElementById("popup_flash");

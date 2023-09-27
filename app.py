@@ -712,7 +712,8 @@ def search_friends():
         return jsonify(error=f"User {email} not found"), 404
     
 
-def create_group_expenses(group_name, member_ids, organizer_id):
+def create_group_expenses(group_name, member_ids, organizer_id, start_datetime=None, end_datetime=None, location=None):
+
     # Check if all user IDs are valid and exist in the database
     users = User.query.filter(User.id.in_(member_ids)).all()
 
@@ -728,6 +729,14 @@ def create_group_expenses(group_name, member_ids, organizer_id):
     try:
         # Create the group and set the organizer
         group = Group(name=group_name, organizer_id=organizer_id)
+
+        # Check if we have trip schedule data, and if so, update the group
+        if start_datetime and end_datetime and location:
+            group.start_datetime = start_datetime
+            group.end_datetime = end_datetime
+            group.location = location
+            group.is_scheduled = True
+
         group.ics_uid = str(uuid4())
         group.ics_sequence = 0  # initial sequence
         db.session.add(group)
@@ -769,29 +778,55 @@ def finalize_group():
     # Extracting data from the request body
     data = request.get_json()
 
-    # Collecting required parameters
-    group_name = data.get('groupName')
-    member_ids = data.get('groupMembers')
-
     # Get the organizer ID from the logged-in user
     organizer = User.query.filter_by(username=session['username']).first()
     if not organizer:
         return jsonify({"error": "Invalid user."}), 401
 
-    # Log the group creation attempt
-    log(session['email'], f'Attempted to create group: {group_name} with organizer: {organizer.username} and members: {member_ids}')
+    # Collect and validate required parameters
+    group_name = data.get('groupName')
+    member_ids = data.get('groupMembers')
+    start_datetime_str = data.get('startDate')
+    end_datetime_str = data.get('endDate')
+    location = data.get('location')
 
-    # Create the group using create_group_expenses function
-    group_id, response_message = create_group_expenses(group_name, member_ids, organizer.id)
+    if not all([group_name, member_ids, start_datetime_str, end_datetime_str, location]):
+        return jsonify(success=False, error="All parameters must be provided for group creation."), 400
 
-    # Check if the group creation was successful
-    if "successfully" in response_message.lower():
-        log(session['email'], f'Successfully created group: {group_name} with organizer: {organizer.username}')
-        flash(f"Successfully created trip {group_name} with organizer: {organizer.username}.", "success")
-        return jsonify(success=True, group_id=group_id, message=f"Group created successfully with organizer: {organizer.username}.")
-    else:
+    user_timezone = pytz.timezone(organizer.timezone)
+
+    try:
+        # Convert date-times
+        start_date_str, start_time_str = start_datetime_str.split(' ')
+        end_date_str, end_time_str = end_datetime_str.split(' ')
+
+        start_date = datetime.datetime.strptime(start_date_str, "%Y-%m-%d").date()
+        end_date = datetime.datetime.strptime(end_date_str, "%Y-%m-%d").date()
+
+        start_time = datetime.datetime.strptime(start_time_str, "%H:%M").time()
+        end_time = datetime.datetime.strptime(end_time_str, "%H:%M").time()
+
+        local_start_datetime = user_timezone.localize(datetime.datetime.combine(start_date, start_time))
+        local_end_datetime = user_timezone.localize(datetime.datetime.combine(end_date, end_time))
+        utc_start_datetime = local_start_datetime.astimezone(pytz.utc)
+        utc_end_datetime = local_end_datetime.astimezone(pytz.utc)
+
+        if utc_end_datetime <= utc_start_datetime:
+            return jsonify(success=False, error="End date-time must be after start date-time."), 400
+
+    except ValueError as ve:
+        return jsonify(success=False, error=f"Invalid date-time format: {ve}"), 400
+
+    # Proceed with group creation now that all parameters are validated
+    group_id, response_message = create_group_expenses(group_name, member_ids, organizer.id, utc_start_datetime, utc_end_datetime, location)
+
+    if "successfully" not in response_message.lower():
         log(session['email'], f'Failed to create group: {group_name}. Error: {response_message}')
         return jsonify(success=False, error=response_message)
+
+    log(session['email'], f'Successfully created and scheduled group: {group_name} with organizer: {organizer.username}')
+    flash(f"Successfully created and scheduled trip {group_name} with organizer: {organizer.username}.", "success")
+    return jsonify(success=True, group_id=group_id, message=f"Group created and scheduled successfully with organizer: {organizer.username}.")
 
 
 @app.route('/edit_group/<int:group_id>', methods=['GET'])
