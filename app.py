@@ -1742,7 +1742,7 @@ def generate_ics_content(group_name, start_date, start_time, end_date, end_time,
     # Generate the attendees part for the ics content
     attendees_str = ""
     for email in attendees_emails:
-        attendees_str += f'ATTENDEE;CN="{email.split("@")[0]}":MAILTO:{email}\r'
+        attendees_str += f'ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN={email}:mailto:{email}\r'
     
     # Build the final ics content
     ics_content = f"""BEGIN:VCALENDAR\r
