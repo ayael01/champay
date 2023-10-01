@@ -40,8 +40,10 @@ app.secret_key = 'your_secret_key'
 
 if os.environ.get('CHAMPAY_ENV') == 'production':
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres123456@champay-rds.crlez4n4tsbc.eu-north-1.rds.amazonaws.com/champay_db'
+    champay_domain = 'https://cham-pay.com'
 else:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://aya_el01:ccaa00@localhost/champay_db'
+    champay_domain = 'https://localhost'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
@@ -1626,6 +1628,7 @@ def send_schedule_notification():
         attendees_emails = [gm.user.email for gm in group.group_members]
 
     data_uri = generate_ics_data_uri(group_name, start_date_str, start_time_str, end_date_str, end_time_str, location, ics_uid, ics_sequence, organizer_email, attendees_emails)
+    champay_link = f"{champay_domain}/edit_group/{group_id}"
 
     # Creating the email content based on the template
     email_content = f"""
@@ -1676,6 +1679,7 @@ def send_schedule_notification():
                         <li><strong>Participants:</strong> {participants_html}</li>
                     </ul>
                 </div>
+                <p>View the updated trip settings here: {champay_link}</p>
                 <p>Please review these updates and reach out to <strong>{current_user.username}</strong> or any other trip organizer if you have any questions or concerns. If there are any further changes, you will be notified promptly.</p>
                 <p>We look forward to a memorable trip!</p>
                 <p>Warm regards,</p>
