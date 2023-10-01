@@ -1616,7 +1616,7 @@ def send_schedule_notification():
     end_datetime_local = end_datetime_utc.astimezone(user_timezone)
 
     # Define the organizer's email
-    organizer_email = current_user.email
+    organizer_email = 'invitations@cham-pay.com'
 
     # For single user notification
     if recipient_user_id:
@@ -1696,7 +1696,7 @@ def send_schedule_notification():
 
     try:
         response = ses.send_raw_email(
-            Source='no-reply@cham-pay.com',
+            Source=organizer_email,
             Destinations=recipients,
             RawMessage={
                 'Data': mime_email.as_string(),
@@ -1757,7 +1757,7 @@ DTEND;VALUE=DATE-TIME:{end_datetime}\r
 DTSTAMP;VALUE=DATE-TIME:{dtstamp}\r
 SUMMARY:{group_name}\r
 LOCATION:{location}\r
-ORGANIZER;CN="Champay Team":MAILTO:{organizer_email}\r
+ORGANIZER;CN="Champay Team":mailto:{organizer_email}\r
 {attendees_str}
 END:VEVENT\r
 END:VCALENDAR"""
