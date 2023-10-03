@@ -937,7 +937,8 @@ def remove_user_from_group():
 
     log(current_user_email, f'Attempting to remove user with email {email} from group {group_id}')
 
-    group = Group.query.get(group_id)  # Retrieve the group data by id
+    group = Group.query.get(group_id)  # Retrieve the group data by id 
+    is_organizer = group.organizer_id == User.query.filter_by(email=current_user_email).first().id
     users_in_group = group.group_members  # Get all users in the group
 
     if len(users_in_group) <= 1:
@@ -956,6 +957,16 @@ def remove_user_from_group():
     if existing_group_member is None:
         log(current_user_email, f'User with email {email} is not part of group {group_id}')
         return jsonify({"error": "User is not part of the group."}), 400
+    
+    # Check if the current user is the organizer and is trying to remove himself
+    if is_organizer and user.email == current_user_email:
+        log(current_user_email, 'Organizer attempted to remove himself')
+        return jsonify({'error': 'As an organizer, you cannot remove yourself from the group.'}), 400
+
+    # Check if the user is not the organizer and is trying to remove someone else
+    if not is_organizer and user.email != current_user_email:
+        log(current_user_email, 'Non-organizer attempted to remove another user')
+        return jsonify({'error': 'You can only remove yourself from the group.'}), 400
 
     try:
         # Remove the user from the group
@@ -1302,6 +1313,10 @@ def rename_group(group_id):
     group = Group.query.get(group_id)
     if group is None:
         return jsonify({"error": "Group not found."}), 400
+    
+    # Verify that the current user is the organizer of the group
+    if current_user.id != group.organizer_id:
+        return jsonify({"error": "Group settings changes are reserved for the Organizer only."}), 403
 
     # Verify that the current user is a member of the group
     current_user_membership = GroupMember.query.filter_by(user_id=current_user.id, group_id=group_id).first()
@@ -1447,6 +1462,10 @@ def set_trip_schedule(group_id):
     group = Group.query.get(group_id)
     if group is None:
         return jsonify({"error": "Group not found."}), 400
+    
+    # Verify that the current user is the organizer of the group
+    if current_user.id != group.organizer_id:
+        return jsonify({"error": "Group settings changes are reserved for the Organizer only."}), 403
 
     # Verify that the current user is a member of the group
     current_user_membership = GroupMember.query.filter_by(user_id=current_user.id, group_id=group_id).first()

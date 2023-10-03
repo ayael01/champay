@@ -486,8 +486,12 @@
                         // Update group name on the page
                         document.querySelector("h1").textContent = data.new_name + " Settings";
                     } else if (data.error) {
-                        // Handle the error (e.g., show a different popup or an alert)
-                        alert(data.error);
+                        // Handle the error and display it in the popup
+                        document.getElementById('message_flash').innerText = data.error;
+                        document.getElementById('message_flash').className = "popup_flash-error"; 
+                        document.getElementById('popup_flash').style.display = "flex";
+                        // Reset the input field to show the original group name
+                        document.getElementById("newGroupName").value = "{{ group_name }}";
                     }
                 })
                 .catch(error => {
@@ -541,6 +545,7 @@
                         document.getElementById('message_flash').innerText = data.error;
                         document.getElementById('message_flash').className = "popup_flash-error"; // Assuming you have an error CSS class
                         document.getElementById('popup_flash').style.display = "flex";
+                        fetchTripSchedule();
                     } else {
                         // Update the button text to 'Re-schedule'
                         const scheduleButton = document.querySelector('button[type="submit"]');
@@ -558,6 +563,7 @@
                     document.getElementById('message_flash').innerText = "There was an error processing your request.";
                     document.getElementById('message_flash').className = "popup_flash-error";
                     document.getElementById('popup_flash').style.display = "flex";
+                    fetchTripSchedule();
                 });
             }
         });
