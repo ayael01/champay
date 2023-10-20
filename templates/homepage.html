@@ -8,8 +8,11 @@
 </head>
 <body>
     <header>
-        <h1>Welcome to Champay!</h1>
-    </header>
+        <div class="header-content">
+            <h1>Welcome to Champay!</h1>
+            <img src="{{ url_for('static', filename='champay_logo.jpg') }}" alt="Champay Logo" id="app-logo">
+        </div>
+    </header>    
     <main>
         <section>
             <h2>Your Ultimate Trip Manager</h2>

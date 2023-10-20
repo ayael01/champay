@@ -1,5 +1,5 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Open Sans', sans-serif;
     line-height: 1.6;
     margin: 0;
     padding: 0;
@@ -7,8 +7,7 @@ body {
 }
 
 header {
-    background-color: #4CAF50;  /* Dark Blue header similar to booking.com */
-    color: white;
+    background-color: #1c5334;  
     padding: 1rem;
     text-align: center;
     position: relative;
@@ -17,12 +16,16 @@ header {
 h1 {
     margin: 0;
     font-size: 2.5rem;
+    background: linear-gradient(to right, #be9e44, #d8c690);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
 }
 
 h2 {
     margin-top: 1rem;
     text-align: center;
-    color: #28882c;  /* Dark Blue header */
+    color: #005a24;
 }
 
 main {
@@ -47,7 +50,7 @@ input[type="submit"] {
     display: block;
     width: 100%;
     padding: 0.75rem;
-    background-color: #4CAF50;  /* Dark Blue button */
+    background-color: #005a24;  /* Dark Blue button */
     color: white;
     border: none;
     border-radius: 5px;
@@ -56,11 +59,11 @@ input[type="submit"] {
 }
 
 input[type="submit"]:hover {
-    background-color: #45a049;  /* Slightly darker blue for hover */
+    background-color: #003f17;  /* Slightly darker green for hover */
 }
 
 .alert {
-    color: red;
+    color: #d9534f;  /* A universal color for alerts */
     text-align: center;
     margin-top: 20px;
 }
@@ -98,10 +101,62 @@ footer {
 }
 
 footer a {
-    color: #4CAF50;  /* Color to match your theme, you can adjust as needed */
+    color: #005a24;  /* Green color to match the header */
     text-decoration: none;
 }
 
 footer a:hover {
     text-decoration: underline;
 }
+
+/* Existing CSS */
+
+.header-content {
+    position: relative;
+    text-align: center;
+    padding: 1rem 0; /* Giving some spacing for better layout */
+}
+
+#app-logo {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    max-width: 300px;  /* Making logo slightly smaller */
+    margin-left: 20px;
+    border-radius: 5px;
+    border-color: #be9e44;
+    border-width: 1px;
+    border-style: solid;
+}
+
+/* Updated CSS for responsive layout */
+
+@media (max-width: 768px) {
+    
+    header {
+        padding: 1rem 0.5rem; /* Reducing padding for mobile screens */
+    }
+
+    #app-logo {
+        position: static;     /* Removes absolute positioning */
+        display: block;       /* Makes the logo take up the full width */
+        margin: 0 auto 20px;  /* Adds margin to the bottom and auto margins on the sides to center the logo */
+        transform: none;      /* Removes the vertical transform */
+        order: -1;            /* Moves the logo before the title */
+        max-width: 120px;  /* Reducing logo size on smaller screens */
+    }
+
+    .header-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .header-content h1 {
+        margin-top: 0;       /* Removes potential top margin from the title */
+    }
+}
+
+
+
+
